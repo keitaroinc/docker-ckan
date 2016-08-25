@@ -3,9 +3,9 @@ FROM keitaro/base:0.1
 MAINTAINER Keitaro Inc <info@keitaro.info>
 
 ENV APP_DIR=/srv/app
-ENV GIT_URL=https://github.com/ckan/ckan.git
-ENV GIT_BRANCH=release-v2.5.2
-ENV CKAN_SITE_URL=http://localhost
+ENV GIT_URL=https://github.com/keitaroinc/ckan.git
+ENV GIT_BRANCH=ckan-2.5-map-fix3
+ENV CKAN_SITE_URL=http://localhost:5000
 ENV CKAN__PLUGINS image_view text_view recline_view datastore datapusher envvars
 
 WORKDIR ${APP_DIR}
