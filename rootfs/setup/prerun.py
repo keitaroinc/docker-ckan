@@ -3,7 +3,7 @@ import sys
 import subprocess
 
 
-ckan_ini = os.environ.get('CKAN_INI', '')
+ckan_ini = os.environ.get('CKAN_INI', '/srv/app/production.ini')
 
 
 def init_db():
