@@ -45,6 +45,6 @@ RUN pip install --no-cache-dir git+https://github.com/okfn/ckanext-envvars.git#e
 
 COPY setup ${APP_DIR}
 
-EXPOSE 8000
+EXPOSE 5000
 
 CMD ["/srv/app/start_ckan.sh"]
