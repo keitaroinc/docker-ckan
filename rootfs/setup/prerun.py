@@ -10,17 +10,17 @@ ckan_ini = os.environ.get('CKAN_INI', '/srv/app/production.ini')
 RETRY = 5
 
 def check_db_connection(retry=None):
-    
+
     if retry is None:
         retry = RETRY
     elif retry == 0:
         print '[prerun] Giving up after 5 tries...'
         sys.exit(1)
-    
+
     conn_str = os.environ.get('CKAN_SQLALCHEMY_URL', '')
     try:
         connection = psycopg2.connect(conn_str)
-        
+
     except psycopg2.Error as e:
         print str(e)
         print '[prerun] Unable to connect to the database...try again in a while.'
@@ -29,18 +29,18 @@ def check_db_connection(retry=None):
         check_db_connection(retry = retry - 1)
     else:
         connection.close()
-        
+
 def check_solr_connection(retry=None):
-    
+
     if retry is None:
         retry = RETRY
     elif retry == 0:
         print '[prerun] Giving up after 5 tries...'
         sys.exit(1)
-    
+
     url = os.environ.get('CKAN_SOLR_URL', '')
     search_url = '{url}/select/?q=*&wt=json'.format(url=url)
-    
+
     try:
         connection = urllib2.urlopen(search_url)
     except urllib2.URLError as e:
