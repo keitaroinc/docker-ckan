@@ -1,9 +1,56 @@
 import os
 import sys
 import subprocess
+import psycopg2
+import urllib2
 
 
 ckan_ini = os.environ.get('CKAN_INI', '/srv/app/production.ini')
+
+RETRY = 5
+
+def check_db_connection(retry=None):
+    
+    if retry is None:
+        retry = RETRY
+    elif retry == 0:
+        print '[prerun] Giving up after 5 tries...'
+        sys.exit(1)
+    
+    conn_str = os.environ.get('CKAN_SQLALCHEMY_URL', '')
+    try:
+        connection = psycopg2.connect(conn_str)
+        
+    except psycopg2.Error as e:
+        print str(e)
+        print '[prerun] Unable to connect to the database...try again in a while.'
+        import time
+        time.sleep(10)
+        check_db_connection(retry = retry - 1)
+    else:
+        connection.close()
+        
+def check_solr_connection(retry=None):
+    
+    if retry is None:
+        retry = RETRY
+    elif retry == 0:
+        print '[prerun] Giving up after 5 tries...'
+        sys.exit(1)
+    
+    url = os.environ.get('CKAN_SOLR_URL', '')
+    search_url = '{url}/select/?q=*&wt=json'.format(url=url)
+    
+    try:
+        connection = urllib2.urlopen(search_url)
+    except urllib2.URLError as e:
+        print str(e)
+        print '[prerun] Unable to connect to solr...try again in a while.'
+        import time
+        time.sleep(10)
+        check_solr_connection(retry = retry - 1)
+    else:
+        eval(connection.read())
 
 
 def init_db():
@@ -68,5 +115,7 @@ if __name__ == '__main__':
     if maintenance:
         print '[prerun] Maintenance mode, skipping setup...'
     else:
+        check_db_connection()
+        check_solr_connection()
         init_db()
         create_sysadmin()
