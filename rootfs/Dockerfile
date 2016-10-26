@@ -49,14 +49,15 @@ RUN apk add --no-cache git \
     apk del .build-deps && \
     rm -rf ${SRC_DIR}
 
+# CKAN plugins to enable
+ENV CKAN__PLUGINS image_view text_view recline_view datastore datapusher pages envvars
+
 # Default Extensions
 RUN pip install --no-cache-dir git+https://github.com/okfn/ckanext-envvars.git#egg=ckanext-envvars && \
+    pip install --no-cache-dir git+https://github.com/ckan/ckanext-pages.git#egg=ckanext-pages && \
     # Create and update CKAN config
     paster --plugin=ckan make-config ckan ${APP_DIR}/production.ini && \
     paster --plugin=ckan config-tool ${APP_DIR}/production.ini "ckan.plugins = ${CKAN__PLUGINS}"
-
-# CKAN plugins to enable
-ENV CKAN__PLUGINS image_view text_view recline_view datastore datapusher envvars
 
 COPY setup ${APP_DIR}
 
