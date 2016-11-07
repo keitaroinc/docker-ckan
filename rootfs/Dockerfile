@@ -4,8 +4,8 @@ MAINTAINER Keitaro Inc <info@keitaro.info>
 
 ENV APP_DIR=/srv/app
 ENV SRC_DIR=/srv/app/src
-ENV GIT_URL=https://github.com/keitaroinc/ckan.git
-ENV GIT_BRANCH=ckan-2.5-map-fix3
+ENV GIT_URL=https://github.com/ckan/ckan.git
+ENV GIT_BRANCH=ckan-2.5.3
 ENV CKAN_SITE_URL=http://localhost:5000
 ENV CKAN__PLUGINS image_view text_view recline_view datastore datapusher envvars
 
@@ -33,7 +33,7 @@ RUN apk add --no-cache git \
     git clone -b 3.6.0 --depth=1 --single-branch https://git.osgeo.org/gogs/geos/geos.git ${SRC_DIR}/geos && \
     cd ${SRC_DIR}/geos && \
     ./autogen.sh && \
-    ./configure && \
+    ./configure --prefix /usr && \
     make -j2 && \
     make install && \
     # Fetch CKAN and install
@@ -43,8 +43,6 @@ RUN apk add --no-cache git \
     python setup.py install && \
     pip install --no-cache-dir testrepository && \
     pip install --no-cache-dir --upgrade -r requirements.txt && \
-    # Fix issue with html5lib in 2.5.2
-    pip install --no-cache-dir html5lib==0.9999999 && \
     # Remove temporary packages and files
     apk del .build-deps && \
     rm -rf ${SRC_DIR}
