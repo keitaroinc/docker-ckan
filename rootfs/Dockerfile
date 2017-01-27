@@ -5,7 +5,7 @@ MAINTAINER Keitaro Inc <info@keitaro.info>
 ENV APP_DIR=/srv/app
 ENV SRC_DIR=/srv/app/src
 ENV GIT_URL=https://github.com/ckan/ckan.git
-ENV GIT_BRANCH=ckan-2.5.3
+ENV GIT_BRANCH=ckan-2.6.0
 ENV CKAN_SITE_URL=http://localhost:5000
 ENV CKAN__PLUGINS image_view text_view recline_view datastore datapusher envvars
 
@@ -17,7 +17,7 @@ RUN apk add --no-cache git \
         postgresql-client \
         python \
         py-pip \
-        py-gunicorn && \ 
+        py-gunicorn && \
     # Temporary packages to build CKAN requirements
     apk add --no-cache --virtual .build-deps \
         postgresql-dev \
@@ -48,11 +48,10 @@ RUN apk add --no-cache git \
     rm -rf ${SRC_DIR}
 
 # CKAN plugins to enable
-ENV CKAN__PLUGINS image_view text_view recline_view datastore datapusher pages envvars
+ENV CKAN__PLUGINS image_view text_view recline_view datastore datapusher envvars
 
 # Default Extensions
 RUN pip install --no-cache-dir git+https://github.com/okfn/ckanext-envvars.git#egg=ckanext-envvars && \
-    pip install --no-cache-dir git+https://github.com/ckan/ckanext-pages.git#egg=ckanext-pages && \
     # Create and update CKAN config
     paster --plugin=ckan make-config ckan ${APP_DIR}/production.ini && \
     paster --plugin=ckan config-tool ${APP_DIR}/production.ini "ckan.plugins = ${CKAN__PLUGINS}"
