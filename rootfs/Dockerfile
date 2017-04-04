@@ -17,6 +17,7 @@ RUN apk add --no-cache git \
         postgresql-client \
         python \
         py-pip \
+        py-gevent \
         py-gunicorn && \
     # Temporary packages to build CKAN requirements
     apk add --no-cache --virtual .build-deps \
@@ -43,6 +44,7 @@ RUN apk add --no-cache git \
     python setup.py install && \
     pip install --no-cache-dir testrepository && \
     pip install --no-cache-dir --upgrade -r requirements.txt && \
+    pip install --no-cache-dir gevent && \
     # Remove temporary packages and files
     apk del .build-deps && \
     rm -rf ${SRC_DIR}
