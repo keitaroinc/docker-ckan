@@ -17,7 +17,6 @@ RUN apk add --no-cache git \
         postgresql-client \
         python \
         py-pip \
-        py-gevent \
         py-gunicorn && \
     # Temporary packages to build CKAN requirements
     apk add --no-cache --virtual .build-deps \
