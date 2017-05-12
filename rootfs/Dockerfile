@@ -8,7 +8,7 @@ ENV PIP_SRC=${SRC_DIR}
 ENV GIT_URL=https://github.com/ckan/ckan.git
 ENV GIT_BRANCH=ckan-2.6.2
 ENV CKAN_SITE_URL=http://localhost:5000
-ENV CKAN__PLUGINS image_view text_view recline_view datastore datapusher envvars
+ENV CKAN__PLUGINS image_view text_view recline_view datastore datapusher harvest ckan_harvester envvars
 
 WORKDIR ${APP_DIR}
 
@@ -41,6 +41,7 @@ RUN apk add --no-cache git \
     curl -o ${SRC_DIR}/get-pip.py https://bootstrap.pypa.io/get-pip.py && \
     python ${SRC_DIR}/get-pip.py && \
     pip install gunicorn gevent && \
+    pip install supervisor && \
     rm -rf ${SRC_DIR}/get-pip.py
 
 ############################
@@ -65,11 +66,14 @@ RUN pip install -e git+${GIT_URL}@${GIT_BRANCH}#egg=ckan && \
     pip install -r requirements.txt && \
     # Install CKAN envvars to support loading config from environment variables
     pip install -e git+https://github.com/okfn/ckanext-envvars.git#egg=ckanext-envvars && \
+    pip install -e git+https://github.com/ckan/ckanext-harvest.git@v1.0.0#egg=ckanext-harvest && \
+    pip install -r https://raw.githubusercontent.com/ckan/ckanext-harvest/v1.0.0/pip-requirements.txt
     # Create and update CKAN config
     paster --plugin=ckan make-config ckan ${APP_DIR}/production.ini && \
     paster --plugin=ckan config-tool ${APP_DIR}/production.ini "ckan.plugins = ${CKAN__PLUGINS}"
 
 COPY setup ${APP_DIR}
+COPY ${SETUP}/harvest.conf /etc/supervisor/conf.d/harvest.conf
 
 EXPOSE 5000
 
