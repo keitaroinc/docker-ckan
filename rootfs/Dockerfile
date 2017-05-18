@@ -77,10 +77,10 @@ RUN pip install -e git+${GIT_URL}@${GIT_BRANCH}#egg=ckan && \
 
 RUN echo "*/2 * * * * root . /srv/app/.env; /usr/local/bin/paster --plugin=ckanext-harvest harvester run -c /srv/app/production.ini >> /var/log/cron.log 2>&1" >> /etc/crontab
 
-COPY setup/cron.conf /etc/supervisor/conf.d/cron.conf
+COPY setup/cron.conf /etc/supervisord.d/cron.conf
 
 COPY setup ${APP_DIR}
-COPY setup/harvest.conf /etc/supervisor/conf.d/harvest.conf
+COPY setup/harvest.conf /etc/supervisord.d/harvest.conf
 COPY setup/prerun_harvest.py ${APP_DIR}/prerun_harvest.py
 
 
