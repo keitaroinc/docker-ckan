@@ -42,7 +42,10 @@ RUN apk add --no-cache git \
     python ${SRC_DIR}/get-pip.py && \
     pip install gunicorn gevent && \
     pip install supervisor && \
+    mkdir /etc/supervisord.d && \
     rm -rf ${SRC_DIR}/get-pip.py
+
+COPY setup/supervisord.conf /etc
 
 ############################
 ### libgeos docker layer ###
@@ -67,13 +70,13 @@ RUN pip install -e git+${GIT_URL}@${GIT_BRANCH}#egg=ckan && \
     # Install CKAN envvars to support loading config from environment variables
     pip install -e git+https://github.com/okfn/ckanext-envvars.git#egg=ckanext-envvars && \
     pip install -e git+https://github.com/ckan/ckanext-harvest.git@v1.0.0#egg=ckanext-harvest && \
-    pip install -r https://raw.githubusercontent.com/ckan/ckanext-harvest/v1.0.0/pip-requirements.txt
+    pip install -r https://raw.githubusercontent.com/ckan/ckanext-harvest/v1.0.0/pip-requirements.txt && \
     # Create and update CKAN config
     paster --plugin=ckan make-config ckan ${APP_DIR}/production.ini && \
     paster --plugin=ckan config-tool ${APP_DIR}/production.ini "ckan.plugins = ${CKAN__PLUGINS}"
 
 COPY setup ${APP_DIR}
-COPY ${SETUP}/harvest.conf /etc/supervisor/conf.d/harvest.conf
+COPY setup/harvest.conf /etc/supervisor/conf.d/harvest.conf
 
 EXPOSE 5000
 
