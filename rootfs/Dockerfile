@@ -47,6 +47,11 @@ RUN apk add --no-cache git \
 
 COPY setup/supervisord.conf /etc
 
+RUN mkdir -p /var/log && \
+    mkdir -m 0644 -p /var/spool/cron/crontabs && \
+    touch /var/log/cron.log && \
+    mkdir -m 0644 -p /etc/cron.d
+
 ############################
 ### libgeos docker layer ###
 ############################
