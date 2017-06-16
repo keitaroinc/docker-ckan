@@ -80,7 +80,12 @@ RUN pip install -e git+${GIT_URL}@${GIT_BRANCH}#egg=ckan && \
     paster --plugin=ckan make-config ckan ${APP_DIR}/production.ini && \
     paster --plugin=ckan config-tool ${APP_DIR}/production.ini "ckan.plugins = ${CKAN__PLUGINS}"
 
-RUN echo "*/2 * * * * root . /srv/app/.env; /usr/local/bin/paster --plugin=ckanext-harvest harvester run -c /srv/app/production.ini >> /var/log/cron.log 2>&1" >> /etc/crontab
+RUN touch crontab.tmp \
+    && echo '*/2 * * * * paster --plugin=ckanext-harvest harvester run -c /srv/app/production.ini >> /var/log/cron.log 2>&1' > crontab.tmp \
+    && crontab crontab.tmp \
+    && rm -rf crontab.tmp
+
+CMD [/usr/sbin/crond, -f, -d, 0]
 
 COPY setup/cron.conf /etc/supervisord.d/cron.conf
 
