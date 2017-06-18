@@ -21,7 +21,9 @@ RUN apk add --no-cache git \
         postgresql-client \
         python \
         nginx \
-        apache2-utils && \
+        apache2-utils \
+        libxml2 \
+        libxslt && \
     # Packages to build CKAN requirements and plugins
     apk add --no-cache --virtual .build-deps \
         postgresql-dev \
@@ -32,7 +34,9 @@ RUN apk add --no-cache git \
         automake \
 	libtool \
         musl-dev \
-        python-dev && \
+        python-dev \
+        libxml2-dev \
+        libxslt-dev && \
     # Create SRC_DIR
     mkdir -p ${SRC_DIR} && \
     # Create nginx run dir
