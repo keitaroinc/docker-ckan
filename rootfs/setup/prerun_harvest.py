@@ -40,7 +40,7 @@ def check_db():
 def start_harvest_process(name):
 
     print '[prerun-harvest] Starting {0} consumer'.format(name)
-    command = ['paster', '--plugin=ckanext-harvest', 'harvester', 
+    command = ['paster', '--plugin=ckanext-harvest', 'harvester',
     '{0}_consumer'.format(name), '-c', ckan_ini]
 
     subprocess.call(command)

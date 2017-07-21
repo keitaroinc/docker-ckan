@@ -5,11 +5,12 @@ MAINTAINER Keitaro Inc <info@keitaro.info>
 ENV APP_DIR=/srv/app
 ENV SRC_DIR=/srv/app/src
 ENV PIP_SRC=${SRC_DIR}
+ENV GIT_BRANCH=dev-v2.7
 ENV GIT_URL=https://github.com/ckan/ckan.git
-ENV GIT_BRANCH=ckan-2.6.2
 ENV CKAN_SITE_URL=http://localhost:5000
-ENV CKAN__PLUGINS image_view text_view recline_view datastore datapusher harvest ckan_harvester envvars
-
+# These plugins should always be added to cloud instances
+# (you can add more needed by your instance)
+ENV CKAN__PLUGINS envvars image_view text_view recline_view datastore datapusher sentry s3filestore repo_info harvest ckan_harvester
 WORKDIR ${APP_DIR}
 
 #########################
@@ -23,6 +24,7 @@ RUN apk add --no-cache git \
         nginx \
         apache2-utils \
         libxml2 \
+        libmagic \
         libxslt && \
     # Packages to build CKAN requirements and plugins
     apk add --no-cache --virtual .build-deps \
@@ -33,10 +35,15 @@ RUN apk add --no-cache git \
         autoconf \
         automake \
 	libtool \
-        musl-dev \
         python-dev \
         libxml2-dev \
         libxslt-dev && \
+
+    apk add --no-cache --virtual .build-deps-testing \
+        --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing \
+        gdal-dev \
+        geos-dev && \
+
     # Create SRC_DIR
     mkdir -p ${SRC_DIR} && \
     # Create nginx run dir
@@ -47,7 +54,9 @@ RUN apk add --no-cache git \
     pip install gunicorn gevent && \
     pip install supervisor && \
     mkdir /etc/supervisord.d && \
-    rm -rf ${SRC_DIR}/get-pip.py
+    rm -rf ${SRC_DIR}/get-pip.py && \
+    pip install pygdal==2.1.3.3
+
 
 COPY setup/supervisord.conf /etc
 
@@ -67,6 +76,7 @@ RUN git clone -b 3.6.0 --depth=1 --single-branch https://git.osgeo.org/gogs/geos
     make -j2 && \
     make install && \
     rm -rf ${SRC_DIR}/geos
+
 
 ###########################
 ### redis docker layers ###
@@ -103,6 +113,18 @@ RUN pip install -e git+${GIT_URL}@${GIT_BRANCH}#egg=ckan && \
     paster --plugin=ckan make-config ckan ${APP_DIR}/production.ini && \
     paster --plugin=ckan config-tool ${APP_DIR}/production.ini "ckan.plugins = ${CKAN__PLUGINS}"
 
+
+# Install additional extensions here
+RUN pip install -e git+https://github.com/ckan/ckanext-googleanalytics.git@v0.0.2#egg=ckanext-googleanalytics && \
+    pip install -e git+https://github.com/ckan/ckanext-pages.git#egg=ckanext-pages && \
+    pip install -e git+https://github.com/okfn/ckanext-envvars.git#egg=ckanext-envvars && \
+    pip install -e git+https://github.com/okfn/ckanext-sentry.git#egg=ckanext-sentry && \
+    pip install -r ${APP_DIR}/src/ckanext-sentry/requirements.txt && \
+    pip install --no-cache-dir git+https://github.com/keitaroinc/ckanext-s3filestore.git@v0.0.6-minio#egg=ckanext-s3filestore &&  \
+    pip install --no-cache-dir -r https://raw.githubusercontent.com/keitaroinc/ckanext-s3filestore/minio-to-s3/requirements.txt && \
+    pip install -e git+https://github.com/ckan/ckanext-repo.git#egg=ckanext-repo
+
+
 RUN touch crontab.tmp \
     && echo '*/2 * * * * paster --plugin=ckanext-harvest harvester run -c /srv/app/production.ini >> /var/log/cron.log 2>&1' > crontab.tmp \
     && crontab crontab.tmp \
@@ -117,8 +139,21 @@ COPY setup/harvest.conf /etc/supervisord.d/harvest.conf
 COPY setup/prerun_harvest.py ${APP_DIR}/prerun_harvest.py
 COPY setup/redis.conf /etc/supervisord.d/redis.conf
 
+# Dirty fix for https://github.com/ckan/ckan/issues/3539
+RUN sed -i "s/i18n.set_lang(lang, config=fake_config, class_=Translations)/i18n.set_lang(lang, pylons_config=fake_config, class_=Translations)/g" /srv/app/src/ckan/ckan/lib/i18n.py
+
+
+# Load envvars plugin on ini file
+RUN paster --plugin=ckan config-tool ${APP_DIR}/production.ini "ckan.plugins = ${CKAN__PLUGINS}"
+
 EXPOSE 5000
 
 HEALTHCHECK --interval=10s --timeout=5s --retries=5 CMD curl --fail http://localhost:5000/api/3/action/status_show || exit 1
 
 CMD ["/srv/app/start_ckan.sh"]
+
+# For the indexing to create correct resource URLs, the site url
+# must be in the ini file
+ENV CKAN_SITE_URL http://beta.ckan.org
+RUN paster --plugin=ckan config-tool ${APP_DIR}/production.ini "ckan.site_url = ${CKAN_SITE_URL}"
+
