@@ -113,6 +113,12 @@ RUN pip install -e git+${GIT_URL}@${GIT_BRANCH}#egg=ckan && \
     paster --plugin=ckan make-config ckan ${APP_DIR}/production.ini && \
     paster --plugin=ckan config-tool ${APP_DIR}/production.ini "ckan.plugins = ${CKAN__PLUGINS}"
 
+#########################
+### Celery docker layer ###
+#########################
+# Install Celery
+RUN pip install kombu==3.0.30 && \
+    pip install celery==3.1.0
 
 # Install additional extensions here
 RUN pip install -e git+https://github.com/ckan/ckanext-googleanalytics.git@v0.0.2#egg=ckanext-googleanalytics && \
@@ -123,7 +129,6 @@ RUN pip install -e git+https://github.com/ckan/ckanext-googleanalytics.git@v0.0.
     pip install --no-cache-dir git+https://github.com/keitaroinc/ckanext-s3filestore.git@v0.0.6-minio#egg=ckanext-s3filestore &&  \
     pip install --no-cache-dir -r https://raw.githubusercontent.com/keitaroinc/ckanext-s3filestore/minio-to-s3/requirements.txt && \
     pip install -e git+https://github.com/ckan/ckanext-repo.git#egg=ckanext-repo
-
 
 RUN touch crontab.tmp \
     && echo '*/2 * * * * paster --plugin=ckanext-harvest harvester run -c /srv/app/production.ini >> /var/log/cron.log 2>&1' > crontab.tmp \
@@ -138,6 +143,7 @@ COPY setup ${APP_DIR}
 COPY setup/harvest.conf /etc/supervisord.d/harvest.conf
 COPY setup/prerun_harvest.py ${APP_DIR}/prerun_harvest.py
 COPY setup/redis.conf /etc/supervisord.d/redis.conf
+COPY setup/celery.conf /etc/supervisord.d/celery.conf
 
 # Dirty fix for https://github.com/ckan/ckan/issues/3539
 RUN sed -i "s/i18n.set_lang(lang, config=fake_config, class_=Translations)/i18n.set_lang(lang, pylons_config=fake_config, class_=Translations)/g" /srv/app/src/ckan/ckan/lib/i18n.py
