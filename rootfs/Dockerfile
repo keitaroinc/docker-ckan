@@ -5,7 +5,7 @@ MAINTAINER Keitaro Inc <info@keitaro.info>
 ENV APP_DIR=/srv/app
 ENV SRC_DIR=/srv/app/src
 ENV PIP_SRC=${SRC_DIR}
-ENV GIT_BRANCH=ckan-2.7.0
+ENV GIT_BRANCH=ckan-2.7.1
 ENV GIT_URL=https://github.com/ckan/ckan.git
 ENV CKAN_SITE_URL=http://localhost:5000
 # These plugins should always be added to cloud instances
