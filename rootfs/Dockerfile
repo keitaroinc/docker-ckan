@@ -1,31 +1,23 @@
-FROM keitaro/base:0.2
+##################
+### Build CKAN ###
+##################
+FROM alpine:3.6 as ckanbuild
 
-MAINTAINER Keitaro Inc <info@keitaro.com>
+# Set CKAN version to build
+ENV GIT_URL=https://github.com/ckan/ckan.git
+ENV GIT_BRANCH=ckan-2.7.2
 
-ENV APP_DIR=/srv/app
+# Set src dirs
 ENV SRC_DIR=/srv/app/src
 ENV PIP_SRC=${SRC_DIR}
-ENV GIT_URL=https://github.com/ckan/ckan.git
-ENV GIT_BRANCH=ckan-2.6.2
-ENV CKAN_SITE_URL=http://localhost:5000
-ENV CKAN__PLUGINS image_view text_view recline_view datastore datapusher envvars
 
-WORKDIR ${APP_DIR}
+WORKDIR ${SRC_DIR}
 
-#########################
-### Base docker layer ###
-#########################
-# Create a local user and group to run the app
-RUN addgroup -g 92 -S ckan && \
-    adduser -u 92 -h /srv/app -H -D -S -G ckan ckan
-# Install necessary packages to run CKAN
-RUN apk add --no-cache git \
-        gettext \
-        postgresql-client \
+# Packages to build CKAN requirements and plugins
+RUN apk add --no-cache \
+        git \
+        curl \
         python \
-        apache2-utils && \
-    # Packages to build CKAN requirements and plugins
-    apk add --no-cache --virtual .build-deps \
         postgresql-dev \
         linux-headers \
         gcc \
@@ -33,38 +25,72 @@ RUN apk add --no-cache git \
         g++ \
         autoconf \
         automake \
-	libtool \
+        libtool \
         musl-dev \
         pcre-dev \
-        python-dev && \
+        python-dev
+
+# Create the src directory
+RUN mkdir -p ${SRC_DIR}
+
+# Install pip
+RUN curl -o ${SRC_DIR}/get-pip.py https://bootstrap.pypa.io/get-pip.py && \
+    python ${SRC_DIR}/get-pip.py
+
+# Fetch and build CKAN and requirements
+RUN pip install -e git+${GIT_URL}@${GIT_BRANCH}#egg=ckan
+RUN rm -rf /srv/app/src/ckan/.git
+RUN pip wheel --wheel-dir=/wheels -r ckan/requirements.txt
+RUN pip wheel --wheel-dir=/wheels uwsgi gevent
+
+############
+### MAIN ###
+############
+FROM alpine:3.6
+
+MAINTAINER Keitaro Inc <info@keitaro.com>
+
+ENV APP_DIR=/srv/app
+ENV SRC_DIR=/srv/app/src
+ENV PIP_SRC=${SRC_DIR}
+ENV CKAN_SITE_URL=http://localhost:5000
+ENV CKAN__PLUGINS image_view text_view recline_view datastore datapusher envvars
+
+WORKDIR ${APP_DIR}
+
+# Install necessary packages to run CKAN
+RUN apk add --no-cache git \
+        gettext \
+        curl \
+        postgresql-client \
+        python \
+        apache2-utils && \
     # Create SRC_DIR
-    mkdir -p ${SRC_DIR} && \
-    # Install pip and uwsgi
-    curl -o ${SRC_DIR}/get-pip.py https://bootstrap.pypa.io/get-pip.py && \
-    python ${SRC_DIR}/get-pip.py && \
-    pip install --no-cache-dir uwsgi gevent && \
-    rm -rf ${SRC_DIR}/get-pip.py
+    mkdir -p ${SRC_DIR}
 
-############################
-### libgeos docker layer ###
-############################
-# Build and install libgeos to support geospatial
-RUN git clone -b 3.6.0 --depth=1 --single-branch https://git.osgeo.org/gogs/geos/geos.git ${SRC_DIR}/geos && \
-    cd ${SRC_DIR}/geos && \
-    ./autogen.sh && \
-    ./configure --prefix /usr && \
-    make -j2 && \
-    make install && \
-    rm -rf ${SRC_DIR}/geos
+# Install pip
+RUN curl -o ${SRC_DIR}/get-pip.py https://bootstrap.pypa.io/get-pip.py && \
+    python ${SRC_DIR}/get-pip.py
 
-#########################
-### CKAN docker layer ###
-#########################
+# Get artifacts from build stages
+COPY --from=ckanbuild /wheels /srv/app/wheels
+COPY --from=ckanbuild /srv/app/src/ckan /srv/app/src/ckan
+
+# Copy necessary scripts
+COPY setup/app ${APP_DIR}
+
+# Additional install steps for build stages artifacts
+RUN pip install --no-index --find-links=/srv/app/wheels uwsgi gevent
+
+# Create a local user and group to run the app
+RUN addgroup -g 92 -S ckan && \
+    adduser -u 92 -h /srv/app -H -D -S -G ckan ckan
+
 # Install CKAN
-RUN pip install -e git+${GIT_URL}@${GIT_BRANCH}#egg=ckan && \
+RUN pip install -e /srv/app/src/ckan && \
     cd ${SRC_DIR}/ckan && \
     cp who.ini ${APP_DIR} && \
-    pip install -r requirements.txt && \
+    pip install --no-index --find-links=/srv/app/wheels -r requirements.txt && \
     # Install CKAN envvars to support loading config from environment variables
     pip install -e git+https://github.com/okfn/ckanext-envvars.git@0.0.1#egg=ckanext-envvars && \
     # Create and update CKAN config
@@ -72,10 +98,8 @@ RUN pip install -e git+${GIT_URL}@${GIT_BRANCH}#egg=ckan && \
     paster --plugin=ckan config-tool ${APP_DIR}/production.ini "ckan.plugins = ${CKAN__PLUGINS}" && \
     # Change ownership to app user
     chown -R ckan:ckan /srv/app && \
-    # Clear the .git directory
-    rm -rf /srv/app/src/ckan/.git
-
-COPY setup/app ${APP_DIR}
+    # Remove wheels
+    rm -rf /srv/app/wheels
 
 EXPOSE 5000
 
