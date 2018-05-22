@@ -1,11 +1,11 @@
 ##################
 ### Build CKAN ###
 ##################
-FROM alpine:3.6 as ckanbuild
+FROM alpine:3.7 as ckanbuild
 
 # Set CKAN version to build
 ENV GIT_URL=https://github.com/ckan/ckan.git
-ENV GIT_BRANCH=ckan-2.7.2
+ENV GIT_BRANCH=ckan-2.8.0
 
 # Set src dirs
 ENV SRC_DIR=/srv/app/src
@@ -46,7 +46,7 @@ RUN pip wheel --wheel-dir=/wheels uwsgi gevent
 ############
 ### MAIN ###
 ############
-FROM alpine:3.6
+FROM alpine:3.7
 
 MAINTAINER Keitaro Inc <info@keitaro.com>
 
@@ -64,6 +64,7 @@ RUN apk add --no-cache git \
         curl \
         postgresql-client \
         python \
+	libmagic \
         apache2-utils && \
     # Create SRC_DIR
     mkdir -p ${SRC_DIR}
