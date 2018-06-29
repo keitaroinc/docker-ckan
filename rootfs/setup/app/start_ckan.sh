@@ -8,6 +8,7 @@ UWSGI_OPTS="--plugins http,python,gevent --socket /tmp/uwsgi.sock --uid 92 --gid
 # Check whether http basic auth password protection is enabled and enable basicauth routing on uwsgi respecfully
 if [ $? -eq 0 ]
 then
+  extra_scripts.sh
   if [ "$PASSWORD_PROTECT" = true ]
   then
     if [ "$HTPASSWD_USER" ] || [ "$HTPASSWD_PASSWORD" ]
