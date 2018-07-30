@@ -1,11 +1,11 @@
 ##################
 ### Build CKAN ###
 ##################
-FROM alpine:3.7 as ckanbuild
+FROM alpine:3.8 as ckanbuild
 
 # Set CKAN version to build
 ENV GIT_URL=https://github.com/ckan/ckan.git
-ENV GIT_BRANCH=ckan-2.8.0
+ENV GIT_BRANCH=ckan-2.8.1
 
 # Set src dirs
 ENV SRC_DIR=/srv/app/src
@@ -46,7 +46,7 @@ RUN pip wheel --wheel-dir=/wheels uwsgi gevent
 ############
 ### MAIN ###
 ############
-FROM alpine:3.7
+FROM alpine:3.8
 
 MAINTAINER Keitaro Inc <info@keitaro.com>
 
@@ -98,9 +98,10 @@ RUN pip install -e /srv/app/src/ckan && \
     paster --plugin=ckan make-config ckan ${APP_DIR}/production.ini && \
     paster --plugin=ckan config-tool ${APP_DIR}/production.ini "ckan.plugins = ${CKAN__PLUGINS}" && \
     # Change ownership to app user
-    chown -R ckan:ckan /srv/app && \
-    # Remove wheels
-    rm -rf /srv/app/wheels
+    chown -R ckan:ckan /srv/app
+
+# Remove wheels
+RUN rm -rf /srv/app/wheels
 
 EXPOSE 5000
 
