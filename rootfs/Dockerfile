@@ -60,11 +60,12 @@ WORKDIR ${APP_DIR}
 
 # Install necessary packages to run CKAN
 RUN apk add --no-cache git \
+        bash \
         gettext \
         curl \
         postgresql-client \
         python \
-	libmagic \
+        libmagic \
         apache2-utils && \
     # Create SRC_DIR
     mkdir -p ${SRC_DIR}
