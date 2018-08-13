@@ -3,7 +3,7 @@
 python prerun.py
 
 # Set the common uwsgi options
-UWSGI_OPTS="--plugins http,python,gevent --socket /tmp/uwsgi.sock --uid 92 --gid 92 --http :5000 --master --enable-threads --paste config:/srv/app/production.ini --lazy-apps --gevent 2000 -p 2 -L"
+UWSGI_OPTS="--socket /tmp/uwsgi.sock --uid 92 --gid 92 --http :5000 --master --enable-threads --paste config:/srv/app/production.ini --lazy-apps --gevent 2000 -p 2 -L"
 
 # Check whether http basic auth password protection is enabled and enable basicauth routing on uwsgi respecfully
 if [ $? -eq 0 ]
