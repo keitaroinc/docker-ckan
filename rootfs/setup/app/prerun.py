@@ -3,6 +3,7 @@ import sys
 import subprocess
 import psycopg2
 import urllib2
+import re
 
 
 ckan_ini = os.environ.get('CKAN_INI', '/srv/app/production.ini')
@@ -85,7 +86,7 @@ def create_sysadmin():
         command = ['paster', '--plugin=ckan', 'user', name, '-c', ckan_ini]
 
         out = subprocess.check_output(command)
-        if 'User: \nNone\n' not in out:
+        if 'User:None' not in re.sub(r'\s', '', out):
             print '[prerun] Sysadmin user exists, skipping creation'
             return
 
