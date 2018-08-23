@@ -103,6 +103,9 @@ RUN pip install -e /srv/app/src/ckan && \
 # Remove wheels
 RUN rm -rf /srv/app/wheels
 
+# Create entrypoint directory for children image scripts
+ONBUILD RUN mkdir /docker-entrypoint.d
+
 EXPOSE 5000
 
 HEALTHCHECK --interval=10s --timeout=5s --retries=5 CMD curl --fail http://localhost:5000/api/3/action/status_show || exit 1
