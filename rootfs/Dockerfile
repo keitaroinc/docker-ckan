@@ -28,6 +28,7 @@ RUN apk add --no-cache \
         libtool \
         musl-dev \
         pcre-dev \
+        pcre \
         python-dev
 
 # Create the src directory
@@ -54,7 +55,7 @@ ENV APP_DIR=/srv/app
 ENV SRC_DIR=/srv/app/src
 ENV PIP_SRC=${SRC_DIR}
 ENV CKAN_SITE_URL=http://localhost:5000
-ENV CKAN__PLUGINS image_view text_view recline_view datastore datapusher envvars
+ENV CKAN__PLUGINS envvars image_view text_view recline_view datastore datapusher
 
 WORKDIR ${APP_DIR}
 
@@ -66,6 +67,7 @@ RUN apk add --no-cache git \
         postgresql-client \
         python \
         libmagic \
+        pcre \
         apache2-utils && \
     # Create SRC_DIR
     mkdir -p ${SRC_DIR}
