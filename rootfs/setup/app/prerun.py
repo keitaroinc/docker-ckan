@@ -5,12 +5,15 @@ import psycopg2
 import urllib2
 import re
 
+import time
 
 ckan_ini = os.environ.get('CKAN_INI', '/srv/app/production.ini')
 
 RETRY = 5
 
 def check_db_connection(retry=None):
+
+    print '[prerun] Start check_db_connection...'
 
     if retry is None:
         retry = RETRY
@@ -33,6 +36,8 @@ def check_db_connection(retry=None):
 
 def check_solr_connection(retry=None):
 
+    print '[prerun] Start check_solr_connection...'
+
     if retry is None:
         retry = RETRY
     elif retry == 0:
@@ -51,16 +56,22 @@ def check_solr_connection(retry=None):
         time.sleep(10)
         check_solr_connection(retry = retry - 1)
     else:
-        eval(connection.read())
-
+        import re
+        conn_info = connection.read()
+        conn_info = re.sub(r'"zkConnected":true', '"zkConnected":True', conn_info)
+        eval(conn_info)
 
 def init_db():
 
-    db_command = ['paster', '--plugin=ckan', 'db',
-                  'init', '-c', ckan_ini]
-    print '[prerun] Initializing or upgrading db - start'
+    print '[prerun] Start init_db...'
+
+    db_command = ['paster', '--plugin=ckan', 'db', 'init', '-c', ckan_ini]
+    
+    print '[prerun] Initializing or upgrading db - start using paster db init'
     try:
+        # run init scripts
         subprocess.check_output(db_command, stderr=subprocess.STDOUT)
+    
         print '[prerun] Initializing or upgrading db - end'
     except subprocess.CalledProcessError, e:
         if 'OperationalError' in e.output:
@@ -72,9 +83,11 @@ def init_db():
         else:
             print e.output
             raise e
-
+    print '[prerun] Initializing or upgrading db - finish'
 
 def create_sysadmin():
+
+    print '[prerun] Start create_sysadmin...'
 
     name = os.environ.get('CKAN_SYSADMIN_NAME')
     password = os.environ.get('CKAN_SYSADMIN_PASSWORD')
@@ -108,7 +121,6 @@ def create_sysadmin():
         subprocess.call(command)
         print '[prerun] Made user {0} a sysadmin'.format(name)
 
-
 if __name__ == '__main__':
 
     maintenance = os.environ.get('MAINTENANCE_MODE', '').lower() == 'true'
@@ -120,3 +132,4 @@ if __name__ == '__main__':
         check_solr_connection()
         init_db()
         create_sysadmin()
+        #time.sleep(60000)   # don't end the prerun script to allow container dock and debug
