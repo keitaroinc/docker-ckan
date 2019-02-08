@@ -55,7 +55,7 @@ ENV APP_DIR=/srv/app
 ENV SRC_DIR=/srv/app/src
 ENV PIP_SRC=${SRC_DIR}
 ENV CKAN_SITE_URL=http://localhost:5000
-ENV CKAN__PLUGINS envvars image_view text_view recline_view datastore datapusher
+ENV CKAN__PLUGINS envvars image_view text_view recline_view datastore datapusher filestore
 
 WORKDIR ${APP_DIR}
 
