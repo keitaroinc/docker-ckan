@@ -66,12 +66,12 @@ def init_db():
     print '[prerun] Start init_db...'
 
     db_command = ['paster', '--plugin=ckan', 'db', 'init', '-c', ckan_ini]
-    
+
     print '[prerun] Initializing or upgrading db - start using paster db init'
     try:
         # run init scripts
         subprocess.check_output(db_command, stderr=subprocess.STDOUT)
-    
+
         print '[prerun] Initializing or upgrading db - end'
     except subprocess.CalledProcessError, e:
         if 'OperationalError' in e.output:
@@ -84,6 +84,55 @@ def init_db():
             print e.output
             raise e
     print '[prerun] Initializing or upgrading db - finish'
+
+
+def init_datastore():
+
+    conn_str = os.environ.get('CKAN_DATASTORE_WRITE_URL')
+    if not conn_str:
+        print '[prerun] Skipping datastore initialization'
+        return
+
+    datastore_perms_command = ['paster', '--plugin=ckan', 'datastore',
+                               'set-permissions', '-c', ckan_ini]
+
+    connection = psycopg2.connect(conn_str)
+    cursor = connection.cursor()
+
+    print '[prerun] Initializing datastore db - start'
+    try:
+        datastore_perms = subprocess.Popen(
+            datastore_perms_command,
+            stdout=subprocess.PIPE)
+
+        perms_sql = datastore_perms.stdout.read()
+        # Remove internal pg command as psycopg2 does not like it
+        perms_sql = re.sub('\\\\connect \"(.*)\"', '', perms_sql)
+        cursor.execute(perms_sql)
+        for notice in connection.notices:
+            print notice
+
+        connection.commit()
+
+        print '[prerun] Initializing datastore db - end'
+        print datastore_perms.stdout.read()
+    except psycopg2.Error as e:
+        print '[prerun] Could not initialize datastore'
+        print str(e)
+
+    except subprocess.CalledProcessError, e:
+        if 'OperationalError' in e.output:
+            print e.output
+            print '[prerun] Database not ready, waiting a bit before exit...'
+            time.sleep(5)
+            sys.exit(1)
+        else:
+            print e.output
+            raise e
+    finally:
+        cursor.close()
+        connection.close()
+
 
 def create_sysadmin():
 
@@ -131,5 +180,7 @@ if __name__ == '__main__':
         check_db_connection()
         check_solr_connection()
         init_db()
+        if os.environ.get('CKAN_DATASTORE_WRITE_URL'):
+            init_datastore()
         create_sysadmin()
         #time.sleep(60000)   # don't end the prerun script to allow container dock and debug
