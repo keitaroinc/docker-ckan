@@ -107,7 +107,7 @@ RUN pip install -e /srv/app/src/ckan && \
 RUN rm -rf /srv/app/wheels
 
 # Create entrypoint directory for children image scripts
-ONBUILD RUN mkdir /docker-entrypoint.d
+ONBUILD RUN mkdir docker-entrypoint.d
 
 EXPOSE 5000
 
