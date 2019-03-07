@@ -1,6 +1,22 @@
-# docker-ckan
-CKAN docker image
+# Base docker ckan image 
 
-Command to create image 
+## Overview
 
-``` docker build -t ckan-2.8.2 . ``` 
+This repository contains base docker image used to build CKAN instance images. 
+
+## Build
+To create the image 
+
+```sh 
+docker build -t ckan-2.8.2 . 
+``` 
+
+## Upload to DockerHub
+
+>*It's recommended to upload built images to DockerHub* 
+
+To upload the image to DockerHub
+
+```sh 
+docker push [options] ehealthafrica/ckan:<image-tag> 
+```
