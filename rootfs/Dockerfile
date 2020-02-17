@@ -1,11 +1,11 @@
 ##################
 ### Build CKAN ###
 ##################
-FROM alpine:3.8 as ckanbuild
+FROM alpine:3.11 as ckanbuild
 
 # Set CKAN version to build
 ENV GIT_URL=https://github.com/ckan/ckan.git
-ENV GIT_BRANCH=ckan-2.8.2
+ENV GIT_BRANCH=master
 
 # Set src dirs
 ENV SRC_DIR=/srv/app/src
@@ -17,7 +17,7 @@ WORKDIR ${SRC_DIR}
 RUN apk add --no-cache \
         git \
         curl \
-        python \
+        python3 \
         postgresql-dev \
         linux-headers \
         gcc \
@@ -29,7 +29,12 @@ RUN apk add --no-cache \
         musl-dev \
         pcre-dev \
         pcre \
-        python-dev
+        python3-dev \
+        libxml2-dev \
+        libxslt-dev
+
+# Link python to python3
+RUN ln -s /usr/bin/python3 /usr/bin/python
 
 # Create the src directory
 RUN mkdir -p ${SRC_DIR}
@@ -47,7 +52,7 @@ RUN pip wheel --wheel-dir=/wheels uwsgi gevent
 ############
 ### MAIN ###
 ############
-FROM alpine:3.8
+FROM alpine:3.11
 
 MAINTAINER Keitaro Inc <info@keitaro.com>
 
@@ -65,12 +70,17 @@ RUN apk add --no-cache git \
         gettext \
         curl \
         postgresql-client \
-        python \
+        python3 \
         libmagic \
         pcre \
+        libxslt \
+        libxml2 \
+        tzdata \
         apache2-utils && \
     # Create SRC_DIR
-    mkdir -p ${SRC_DIR}
+    mkdir -p ${SRC_DIR} && \
+    # Link python to python3
+    ln -s /usr/bin/python3 /usr/bin/python
 
 # Install pip
 RUN curl -o ${SRC_DIR}/get-pip.py https://bootstrap.pypa.io/get-pip.py && \
@@ -79,9 +89,6 @@ RUN curl -o ${SRC_DIR}/get-pip.py https://bootstrap.pypa.io/get-pip.py && \
 # Get artifacts from build stages
 COPY --from=ckanbuild /wheels /srv/app/wheels
 COPY --from=ckanbuild /srv/app/src/ckan /srv/app/src/ckan
-
-# Copy necessary scripts
-COPY setup/app ${APP_DIR}
 
 # Additional install steps for build stages artifacts
 RUN pip install --no-index --find-links=/srv/app/wheels uwsgi gevent
@@ -98,13 +105,22 @@ RUN pip install -e /srv/app/src/ckan && \
     # Install CKAN envvars to support loading config from environment variables
     pip install -e git+https://github.com/okfn/ckanext-envvars.git@0.0.1#egg=ckanext-envvars && \
     # Create and update CKAN config
-    paster --plugin=ckan make-config ckan ${APP_DIR}/production.ini && \
-    paster --plugin=ckan config-tool ${APP_DIR}/production.ini "ckan.plugins = ${CKAN__PLUGINS}" && \
+    # ckan generate config requires cookiecutter which is in the dev-requirements, temp workaround
+    pip install cookiecutter==1.6.0 && \
+    # Set timezone
+    echo "Europe/Stockholm" >  /etc/timezone && \
+    ckan generate config ${APP_DIR}/production.ini && \
+    # Not working atm since ckan config tool tries to load config before executing config-tool, workaround
+    #ckan -c ${APP_DIR}/production.ini config-tool "ckan.plugins = ${CKAN__PLUGINS}" && \
+    sed -i "/ckan.plugins = stats/c ckan.plugins = ${CKAN__PLUGINS}" ${APP_DIR}/production.ini && \
     # Change ownership to app user
     chown -R ckan:ckan /srv/app
 
 # Remove wheels
 RUN rm -rf /srv/app/wheels
+
+# Copy necessary scripts
+COPY setup/app ${APP_DIR}
 
 # Create entrypoint directory for children image scripts
 ONBUILD RUN mkdir docker-entrypoint.d
