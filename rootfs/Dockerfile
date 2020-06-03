@@ -1,11 +1,11 @@
 ##################
 ### Build CKAN ###
 ##################
-FROM alpine:3.11 as ckanbuild
+FROM alpine:3.12 as ckanbuild
 
 # Set CKAN version to build
 ENV GIT_URL=https://github.com/ckan/ckan.git
-ENV GIT_BRANCH=master
+ENV GIT_BRANCH=ckan-2.8.4
 
 # Set src dirs
 ENV SRC_DIR=/srv/app/src
@@ -17,7 +17,7 @@ WORKDIR ${SRC_DIR}
 RUN apk add --no-cache \
         git \
         curl \
-        python3 \
+        python2 \
         postgresql-dev \
         linux-headers \
         gcc \
@@ -29,12 +29,10 @@ RUN apk add --no-cache \
         musl-dev \
         pcre-dev \
         pcre \
-        python3-dev \
+        python2-dev \
+        libffi-dev \
         libxml2-dev \
         libxslt-dev
-
-# Link python to python3
-RUN ln -s /usr/bin/python3 /usr/bin/python
 
 # Create the src directory
 RUN mkdir -p ${SRC_DIR}
@@ -49,10 +47,47 @@ RUN rm -rf /srv/app/src/ckan/.git
 RUN pip wheel --wheel-dir=/wheels -r ckan/requirements.txt
 RUN pip wheel --wheel-dir=/wheels uwsgi gevent
 
+
+###########################
+### Default-Extensions ####
+###########################
+FROM alpine:3.12 as extbuild
+
+# Set src dirs
+ENV SRC_DIR=/srv/app/src
+ENV PIP_SRC=${SRC_DIR}
+
+# List of default extensions
+ENV DEFAULT_EXTENSIONS envvars s3filestore
+
+# Locations and tags, please use specific tags or revisions
+ENV ENVVARS_GIT_URL=https://github.com/okfn/ckanext-envvars
+ENV ENVVARS_GIT_BRANCH=0.0.1
+ENV S3FILESTORE_GIT_URL=https://github.com/okfn/ckanext-s3filestore
+ENV S3FILESTORE_GIT_BRANCH=33d4b60
+
+RUN apk add --no-cache \
+        git \
+        curl \
+        python2 \
+        python2-dev
+
+# Create the src directory
+RUN mkdir -p ${SRC_DIR}
+
+# Install pip
+RUN curl -o ${SRC_DIR}/get-pip.py https://bootstrap.pypa.io/get-pip.py && \
+    python ${SRC_DIR}/get-pip.py
+
+# Fetch and build the default CKAN extensions
+RUN pip wheel --wheel-dir=/wheels git+${ENVVARS_GIT_URL}@${ENVVARS_GIT_BRANCH}#egg=ckanext-envvars
+RUN pip wheel --wheel-dir=/wheels git+${S3FILESTORE_GIT_URL}@${S3FILESTORE_GIT_BRANCH}#egg=ckanext-s3filestore
+ 
+
 ############
 ### MAIN ###
 ############
-FROM alpine:3.11
+FROM alpine:3.12
 
 MAINTAINER Keitaro Inc <info@keitaro.com>
 
@@ -60,7 +95,7 @@ ENV APP_DIR=/srv/app
 ENV SRC_DIR=/srv/app/src
 ENV PIP_SRC=${SRC_DIR}
 ENV CKAN_SITE_URL=http://localhost:5000
-ENV CKAN__PLUGINS envvars image_view text_view recline_view datastore datapusher
+ENV CKAN__PLUGINS envvars s3filestore image_view text_view recline_view datastore datapusher
 
 WORKDIR ${APP_DIR}
 
@@ -70,7 +105,7 @@ RUN apk add --no-cache git \
         gettext \
         curl \
         postgresql-client \
-        python3 \
+        python2 \
         libmagic \
         pcre \
         libxslt \
@@ -78,9 +113,7 @@ RUN apk add --no-cache git \
         tzdata \
         apache2-utils && \
     # Create SRC_DIR
-    mkdir -p ${SRC_DIR} && \
-    # Link python to python3
-    ln -s /usr/bin/python3 /usr/bin/python
+    mkdir -p ${SRC_DIR}
 
 # Install pip
 RUN curl -o ${SRC_DIR}/get-pip.py https://bootstrap.pypa.io/get-pip.py && \
@@ -88,6 +121,7 @@ RUN curl -o ${SRC_DIR}/get-pip.py https://bootstrap.pypa.io/get-pip.py && \
 
 # Get artifacts from build stages
 COPY --from=ckanbuild /wheels /srv/app/wheels
+COPY --from=extbuild /wheels /srv/app/ext_wheels
 COPY --from=ckanbuild /srv/app/src/ckan /srv/app/src/ckan
 
 # Additional install steps for build stages artifacts
@@ -102,22 +136,19 @@ RUN pip install -e /srv/app/src/ckan && \
     cd ${SRC_DIR}/ckan && \
     cp who.ini ${APP_DIR} && \
     pip install --no-index --find-links=/srv/app/wheels -r requirements.txt && \
-    # Install CKAN envvars to support loading config from environment variables
-    pip install -e git+https://github.com/okfn/ckanext-envvars.git@0.0.1#egg=ckanext-envvars && \
+    # Install default CKAN extensions
+    pip install --no-index --find-links=/srv/app/ext_wheels ckanext-envvars ckanext-s3filestore && \
     # Create and update CKAN config
-    # ckan generate config requires cookiecutter which is in the dev-requirements, temp workaround
-    pip install cookiecutter==1.6.0 && \
     # Set timezone
-    echo "Europe/Stockholm" >  /etc/timezone && \
-    ckan generate config ${APP_DIR}/production.ini && \
-    # Not working atm since ckan config tool tries to load config before executing config-tool, workaround
-    #ckan -c ${APP_DIR}/production.ini config-tool "ckan.plugins = ${CKAN__PLUGINS}" && \
-    sed -i "/ckan.plugins = stats/c ckan.plugins = ${CKAN__PLUGINS}" ${APP_DIR}/production.ini && \
+    echo "UTC" >  /etc/timezone && \
+    # Generate CKAN config
+    paster --plugin=ckan make-config ckan ${APP_DIR}/production.ini && \
+    paster --plugin=ckan config-tool ${APP_DIR}/production.ini "ckan.plugins = ${CKAN__PLUGINS}" && \
     # Change ownership to app user
     chown -R ckan:ckan /srv/app
 
 # Remove wheels
-RUN rm -rf /srv/app/wheels
+RUN rm -rf /srv/app/wheels /srv/app/ext_wheels
 
 # Copy necessary scripts
 COPY setup/app ${APP_DIR}
