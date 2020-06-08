@@ -1,7 +1,4 @@
 #!/bin/bash
-# Run the prerun script to init CKAN and create the default admin user
-python prerun.py
-
 # Run any startup scripts provided by images extending this one
 if [[ -d "/docker-entrypoint.d" ]]
 then
@@ -14,6 +11,9 @@ then
         echo
     done
 fi
+
+# Run the prerun script to init CKAN and create the default admin user
+python prerun.py
 
 # Set the common uwsgi options
 UWSGI_OPTS="--socket /tmp/uwsgi.sock --uid 92 --gid 92 --http :5000 --master --enable-threads --paste config:/srv/app/production.ini --lazy-apps --gevent 2000 -p 2 -L"
