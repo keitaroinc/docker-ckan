@@ -2,7 +2,7 @@ import os
 import sys
 import subprocess
 import psycopg2
-import urllib.request, urllib.error, urllib.parse
+import urllib2
 import re
 
 import time
@@ -48,8 +48,8 @@ def check_solr_connection(retry=None):
     search_url = '{url}/select/?q=*&wt=json'.format(url=url)
 
     try:
-        connection = urllib.request.urlopen(search_url)
-    except urllib.error.URLError as e:
+        connection = urllib2.urlopen(search_url)
+    except urllib2.URLError as e:
         print((str(e)))
         print('[prerun] Unable to connect to solr...try again in a while.')
         import time
@@ -58,15 +58,16 @@ def check_solr_connection(retry=None):
     else:
         import re
         conn_info = connection.read()
+        conn_info = re.sub(r'"zkConnected":true', '"zkConnected":True', conn_info)
         eval(conn_info)
 
 def init_db():
 
     print('[prerun] Start init_db...')
 
-    db_command = ['ckan', '-c', ckan_ini, 'db', 'init']
+    db_command = ['paster', '--plugin=ckan', 'db', 'init', '-c', ckan_ini]
 
-    print('[prerun] Initializing or upgrading db - start using ckan db init')
+    print('[prerun] Initializing or upgrading db - start using paster db init')
     try:
         # run init scripts
         subprocess.check_output(db_command, stderr=subprocess.STDOUT)
@@ -92,8 +93,8 @@ def init_datastore():
         print('[prerun] Skipping datastore initialization')
         return
 
-    datastore_perms_command = ['ckan', '-c', ckan_ini, 'datastore',
-                               'set-permissions']
+    datastore_perms_command = ['paster', '--plugin=ckan', 'datastore',
+                               'set-permissions', '-c', ckan_ini]
 
     connection = psycopg2.connect(conn_str)
     cursor = connection.cursor()
@@ -144,7 +145,7 @@ def create_sysadmin():
     if name and password and email:
 
         # Check if user exists
-        command = ['ckan', '-c', ckan_ini, 'user', 'show', name]
+        command = ['paster', '--plugin=ckan', 'user', name, '-c', ckan_ini]
 
         out = subprocess.check_output(command)
         if 'User:None' not in re.sub(r'\s', '', out.decode('utf-8')):
@@ -152,17 +153,19 @@ def create_sysadmin():
             return
 
         # Create user
-        command = ['ckan', '-c', ckan_ini, 'user', 'add',
+        command = ['paster', '--plugin=ckan', 'user', 'add',
                    name,
                    'password=' + password,
-                   'email=' + email]
+                   'email=' + email,
+                   '-c', ckan_ini]
 
         subprocess.call(command)
         print(('[prerun] Created user {0}'.format(name)))
 
         # Make it sysadmin
-        command = ['ckan', '-c', ckan_ini, 'sysadmin', 'add',
-                   name]
+        command = ['paster', '--plugin=ckan', 'sysadmin', 'add',
+                   name,
+                   '-c', ckan_ini]
 
         subprocess.call(command)
         print(('[prerun] Made user {0} a sysadmin'.format(name)))
