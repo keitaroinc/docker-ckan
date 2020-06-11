@@ -82,7 +82,8 @@ RUN curl -o ${SRC_DIR}/get-pip.py https://bootstrap.pypa.io/get-pip.py && \
 # Fetch and build the default CKAN extensions
 RUN pip wheel --wheel-dir=/wheels git+${ENVVARS_GIT_URL}@${ENVVARS_GIT_BRANCH}#egg=ckanext-envvars
 RUN pip wheel --wheel-dir=/wheels git+${S3FILESTORE_GIT_URL}@${S3FILESTORE_GIT_BRANCH}#egg=ckanext-s3filestore
- 
+RUN pip wheel --wheel-dir=/wheels -r https://raw.githubusercontent.com/okfn/ckanext-s3filestore/${S3FILESTORE_GIT_BRANCH}/requirements.txt
+RUN curl -o /wheels/s3filestore.txt https://raw.githubusercontent.com/okfn/ckanext-s3filestore/${S3FILESTORE_GIT_BRANCH}/requirements.txt
 
 ############
 ### MAIN ###
@@ -138,6 +139,7 @@ RUN pip install -e /srv/app/src/ckan && \
     pip install --no-index --find-links=/srv/app/wheels -r requirements.txt && \
     # Install default CKAN extensions
     pip install --no-index --find-links=/srv/app/ext_wheels ckanext-envvars ckanext-s3filestore && \
+    pip install --no-index --find-links=/srv/app/ext_wheels -r /srv/app/ext_wheels/s3filestore.txt && \
     # Create and update CKAN config
     # Set timezone
     echo "UTC" >  /etc/timezone && \
