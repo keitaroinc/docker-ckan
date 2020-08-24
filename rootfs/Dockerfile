@@ -63,8 +63,8 @@ ENV DEFAULT_EXTENSIONS envvars s3filestore
 # Locations and tags, please use specific tags or revisions
 ENV ENVVARS_GIT_URL=https://github.com/okfn/ckanext-envvars
 ENV ENVVARS_GIT_BRANCH=0.0.1
-ENV S3FILESTORE_GIT_URL=https://github.com/okfn/ckanext-s3filestore
-ENV S3FILESTORE_GIT_BRANCH=33d4b60
+ENV S3FILESTORE_GIT_URL=https://github.com/keitaroinc/ckanext-s3filestore
+ENV S3FILESTORE_GIT_BRANCH=efd5711
 
 RUN apk add --no-cache \
         git \
@@ -82,8 +82,8 @@ RUN curl -o ${SRC_DIR}/get-pip.py https://bootstrap.pypa.io/get-pip.py && \
 # Fetch and build the default CKAN extensions
 RUN pip wheel --wheel-dir=/wheels git+${ENVVARS_GIT_URL}@${ENVVARS_GIT_BRANCH}#egg=ckanext-envvars
 RUN pip wheel --wheel-dir=/wheels git+${S3FILESTORE_GIT_URL}@${S3FILESTORE_GIT_BRANCH}#egg=ckanext-s3filestore
-RUN pip wheel --wheel-dir=/wheels -r https://raw.githubusercontent.com/okfn/ckanext-s3filestore/${S3FILESTORE_GIT_BRANCH}/requirements.txt
-RUN curl -o /wheels/s3filestore.txt https://raw.githubusercontent.com/okfn/ckanext-s3filestore/${S3FILESTORE_GIT_BRANCH}/requirements.txt
+RUN pip wheel --wheel-dir=/wheels -r https://raw.githubusercontent.com/keitaroinc/ckanext-s3filestore/${S3FILESTORE_GIT_BRANCH}/requirements.txt
+RUN curl -o /wheels/s3filestore.txt https://raw.githubusercontent.com/keitaroinc/ckanext-s3filestore/${S3FILESTORE_GIT_BRANCH}/requirements.txt
 
 ############
 ### MAIN ###
