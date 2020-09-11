@@ -62,13 +62,11 @@ ENV SRC_DIR=/srv/app/src
 ENV PIP_SRC=${SRC_DIR}
 
 # List of default extensions
-ENV DEFAULT_EXTENSIONS envvars s3filestore
+ENV DEFAULT_EXTENSIONS envvars
 
 # Locations and tags, please use specific tags or revisions
 ENV ENVVARS_GIT_URL=https://github.com/okfn/ckanext-envvars
 ENV ENVVARS_GIT_BRANCH=0.0.1
-ENV S3FILESTORE_GIT_URL=https://github.com/keitaroinc/ckanext-s3filestore
-ENV S3FILESTORE_GIT_BRANCH=master
 
 RUN apk add --no-cache \
         git \
@@ -85,9 +83,6 @@ RUN curl -o ${SRC_DIR}/get-pip.py https://bootstrap.pypa.io/get-pip.py && \
 
 # Fetch and build the default CKAN extensions
 RUN pip wheel --wheel-dir=/wheels git+${ENVVARS_GIT_URL}@${ENVVARS_GIT_BRANCH}#egg=ckanext-envvars
-RUN pip wheel --wheel-dir=/wheels git+${S3FILESTORE_GIT_URL}@${S3FILESTORE_GIT_BRANCH}#egg=ckanext-s3filestore
-RUN pip wheel --wheel-dir=/wheels -r https://raw.githubusercontent.com/keitaroinc/ckanext-s3filestore/${S3FILESTORE_GIT_BRANCH}/requirements.txt
-RUN curl -o /wheels/s3filestore.txt https://raw.githubusercontent.com/keitaroinc/ckanext-s3filestore/${S3FILESTORE_GIT_BRANCH}/requirements.txt
 
 ############
 ### MAIN ###
@@ -101,7 +96,7 @@ ENV SRC_DIR=/srv/app/src
 ENV DATA_DIR=/srv/app/data
 ENV PIP_SRC=${SRC_DIR}
 ENV CKAN_SITE_URL=http://localhost:5000
-ENV CKAN__PLUGINS envvars s3filestore image_view text_view recline_view datastore datapusher
+ENV CKAN__PLUGINS envvars image_view text_view recline_view datastore datapusher
 
 WORKDIR ${APP_DIR}
 
@@ -145,8 +140,7 @@ RUN pip install -e /srv/app/src/ckan && \
     cp who.ini ${APP_DIR} && \
     pip install --no-index --find-links=/srv/app/wheels -r requirements.txt && \
     # Install default CKAN extensions
-    pip install --no-index --find-links=/srv/app/ext_wheels ckanext-envvars ckanext-s3filestore && \
-    pip install --no-index --find-links=/srv/app/ext_wheels -r /srv/app/ext_wheels/s3filestore.txt && \
+    pip install --no-index --find-links=/srv/app/ext_wheels ckanext-envvars && \
     # Create and update CKAN config
     # Set timezone
     echo "UTC" >  /etc/timezone && \
