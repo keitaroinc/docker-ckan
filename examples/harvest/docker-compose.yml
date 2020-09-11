@@ -90,7 +90,7 @@ services:
     container_name: ckan-harvest-run
     build:
       context: .
-    command: /bin/sh -c "while true; do sleep 90; ckan -c /srv/app/production.ini harvester run; done"
+    command: /bin/sh -c "while true; do sleep 900; ckan -c /srv/app/production.ini harvester run; done"
     networks:
       - frontend
       - backend
@@ -115,7 +115,7 @@ services:
     container_name: ckan-harvest-cleanlog
     build:
       context: .
-    command: /bin/sh -c "while true; do sleep 150; ckan -c /srv/app/production.ini harvester clean_harvest_log; done"
+    command: /bin/sh -c "while true; do sleep 86400; ckan -c /srv/app/production.ini harvester clean_harvest_log; done"
     networks:
       - frontend
       - backend
