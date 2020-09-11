@@ -5,7 +5,7 @@ FROM alpine:3.12 as ckanbuild
 
 # Set CKAN version to build
 ENV GIT_URL=https://github.com/ckan/ckan.git
-ENV GIT_BRANCH=ckan-2.8.4
+ENV GIT_BRANCH=ckan-2.7.8
 
 # Set src dirs
 ENV SRC_DIR=/srv/app/src
@@ -34,6 +34,10 @@ RUN apk add --no-cache \
         libxml2-dev \
         libxslt-dev
 
+# Install version 9.x of postgresql-dev so that CKAN requirements can be built
+RUN apk add --repository http://dl-cdn.alpinelinux.org/alpine/v3.6/main \
+        postgresql-dev~=9.6
+
 # Create the src directory
 RUN mkdir -p ${SRC_DIR}
 
@@ -45,7 +49,7 @@ RUN curl -o ${SRC_DIR}/get-pip.py https://bootstrap.pypa.io/get-pip.py && \
 RUN pip install -e git+${GIT_URL}@${GIT_BRANCH}#egg=ckan
 RUN rm -rf /srv/app/src/ckan/.git
 RUN pip wheel --wheel-dir=/wheels -r ckan/requirements.txt
-RUN pip wheel --wheel-dir=/wheels uwsgi gevent
+RUN pip wheel --wheel-dir=/wheels uwsgi==2.0.19.1 gevent==20.6.2
 
 
 ###########################
@@ -64,7 +68,7 @@ ENV DEFAULT_EXTENSIONS envvars s3filestore
 ENV ENVVARS_GIT_URL=https://github.com/okfn/ckanext-envvars
 ENV ENVVARS_GIT_BRANCH=0.0.1
 ENV S3FILESTORE_GIT_URL=https://github.com/keitaroinc/ckanext-s3filestore
-ENV S3FILESTORE_GIT_BRANCH=efd5711
+ENV S3FILESTORE_GIT_BRANCH=master
 
 RUN apk add --no-cache \
         git \
@@ -94,6 +98,7 @@ MAINTAINER Keitaro Inc <info@keitaro.com>
 
 ENV APP_DIR=/srv/app
 ENV SRC_DIR=/srv/app/src
+ENV DATA_DIR=/srv/app/data
 ENV PIP_SRC=${SRC_DIR}
 ENV CKAN_SITE_URL=http://localhost:5000
 ENV CKAN__PLUGINS envvars s3filestore image_view text_view recline_view datastore datapusher
@@ -105,7 +110,6 @@ RUN apk add --no-cache git \
         bash \
         gettext \
         curl \
-        postgresql-client \
         python2 \
         libmagic \
         pcre \
@@ -113,6 +117,9 @@ RUN apk add --no-cache git \
         libxml2 \
         tzdata \
         apache2-utils && \
+    # Install version 9.x of postgresql-client so that CKAN can run
+    apk add --repository http://dl-cdn.alpinelinux.org/alpine/v3.6/main \
+        postgresql-client~=9.6 && \
     # Create SRC_DIR
     mkdir -p ${SRC_DIR}
 
@@ -146,6 +153,8 @@ RUN pip install -e /srv/app/src/ckan && \
     # Generate CKAN config
     paster --plugin=ckan make-config ckan ${APP_DIR}/production.ini && \
     paster --plugin=ckan config-tool ${APP_DIR}/production.ini "ckan.plugins = ${CKAN__PLUGINS}" && \
+    # Create the data directory
+    mkdir ${DATA_DIR} && \
     # Change ownership to app user
     chown -R ckan:ckan /srv/app
 
