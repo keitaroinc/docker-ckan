@@ -57,7 +57,8 @@ def check_solr_connection(retry=None):
     else:
         import re
         conn_info = connection.read()
-        print(conn_info)
+        # SolrCloud
+        conn_info = re.sub(r'"zkConnected":true', '"zkConnected":True', conn_info)
         eval(conn_info)
 
 def init_db():
