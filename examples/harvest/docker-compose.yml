@@ -26,7 +26,6 @@ services:
       - CKAN_DATASTORE_READ_URL=postgresql://datastore_ro:${DATASTORE_READONLY_PASSWORD}@db/datastore
       - CKAN_SOLR_URL=http://solr:8983/solr/ckan
       - CKAN_REDIS_URL=redis://redis:6379/1
-      - CKAN_DATAPUSHER_URL=http://datapusher:8000
       - CKAN_SITE_URL=${CKAN_SITE_URL}
       - CKAN_MAX_UPLOAD_SIZE_MB=${CKAN_MAX_UPLOAD_SIZE_MB}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
@@ -54,7 +53,6 @@ services:
       - CKAN_DATASTORE_READ_URL=postgresql://datastore_ro:${DATASTORE_READONLY_PASSWORD}@db/datastore
       - CKAN_SOLR_URL=http://solr:8983/solr/ckan
       - CKAN_REDIS_URL=redis://redis:6379/1
-      - CKAN_DATAPUSHER_URL=http://datapusher:8000
       - CKAN_SITE_URL=${CKAN_SITE_URL}
       - CKAN_MAX_UPLOAD_SIZE_MB=${CKAN_MAX_UPLOAD_SIZE_MB}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
@@ -80,7 +78,6 @@ services:
       - CKAN_DATASTORE_READ_URL=postgresql://datastore_ro:${DATASTORE_READONLY_PASSWORD}@db/datastore
       - CKAN_SOLR_URL=http://solr:8983/solr/ckan
       - CKAN_REDIS_URL=redis://redis:6379/1
-      - CKAN_DATAPUSHER_URL=http://datapusher:8000
       - CKAN_SITE_URL=${CKAN_SITE_URL}
       - CKAN_MAX_UPLOAD_SIZE_MB=${CKAN_MAX_UPLOAD_SIZE_MB}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
@@ -105,7 +102,6 @@ services:
       - CKAN_DATASTORE_READ_URL=postgresql://datastore_ro:${DATASTORE_READONLY_PASSWORD}@db/datastore
       - CKAN_SOLR_URL=http://solr:8983/solr/ckan
       - CKAN_REDIS_URL=redis://redis:6379/1
-      - CKAN_DATAPUSHER_URL=http://datapusher:8000
       - CKAN_SITE_URL=${CKAN_SITE_URL}
       - CKAN_MAX_UPLOAD_SIZE_MB=${CKAN_MAX_UPLOAD_SIZE_MB}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
@@ -130,7 +126,6 @@ services:
       - CKAN_DATASTORE_READ_URL=postgresql://datastore_ro:${DATASTORE_READONLY_PASSWORD}@db/datastore
       - CKAN_SOLR_URL=http://solr:8983/solr/ckan
       - CKAN_REDIS_URL=redis://redis:6379/1
-      - CKAN_DATAPUSHER_URL=http://datapusher:8000
       - CKAN_SITE_URL=${CKAN_SITE_URL}
       - CKAN_MAX_UPLOAD_SIZE_MB=${CKAN_MAX_UPLOAD_SIZE_MB}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
@@ -149,6 +144,9 @@ services:
       - DATAPUSHER_CHUNK_SIZE=${DATAPUSHER_CHUNK_SIZE}
       - DATAPUSHER_CHUNK_INSERT_ROWS=${DATAPUSHER_CHUNK_INSERT_ROWS}
       - DATAPUSHER_DOWNLOAD_TIMEOUT=${DATAPUSHER_DOWNLOAD_TIMEOUT}
+      - DATAPUSHER_SSL_VERIFY=${DATAPUSHER_SSL_VERIFY}
+      - DATAPUSHER_REWRITE_RESOURCES=${DATAPUSHER_REWRITE_RESOURCES}
+      - DATAPUSHER_REWRITE_URL=${DATAPUSHER_REWRITE_URL}
 
   db:
     container_name: db
