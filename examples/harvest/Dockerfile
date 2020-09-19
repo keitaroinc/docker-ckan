@@ -48,8 +48,8 @@ RUN pip install --no-index --find-links=/srv/app/ext_wheels ckanext-harvest && \
 # Remove wheels
 RUN rm -rf /srv/app/ext_wheels
 
-# Add harvest entrypoint script
-COPY ./scripts/00_harvest.sh ${APP_DIR}/docker-entrypoint.d/00_harvest.sh
+# Add harvest afterinit script
+COPY ./afterinit.d/00_harvest.sh ${APP_DIR}/docker-afterinit.d/00_harvest.sh
 
 # Switch to the ckan user
 USER ckan

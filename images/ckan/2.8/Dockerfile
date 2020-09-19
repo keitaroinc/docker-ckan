@@ -161,6 +161,9 @@ COPY setup/app ${APP_DIR}
 # Create entrypoint directory for children image scripts
 ONBUILD RUN mkdir docker-entrypoint.d
 
+# Create afterinit directory for children image scripts
+ONBUILD RUN mkdir docker-afterinit.d
+
 EXPOSE 5000
 
 HEALTHCHECK --interval=10s --timeout=5s --retries=5 CMD curl --fail http://localhost:5000/api/3/action/status_show || exit 1
