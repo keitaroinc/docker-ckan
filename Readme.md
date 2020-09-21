@@ -73,8 +73,10 @@ RUN rm -rf /srv/app/ext_wheels
 USER ckan
 ```
 
-### Adding prerun scripts
-You can add scripts to CKAN custom images and copy them to the *docker-entrypoint.d* directory. Any *.sh or *.py file in that directory will be executed after the main initialization script (prerun.py) is executed.
+### Adding init and afterinit scripts
+You can add scripts to CKAN custom images and copy them to the *docker-entrypoint.d* directory. Any *.sh or *.py file in that directory will be executed before the main initialization script (prerun.py) is executed.
+
+You can add scripts to CKAN custom images and copy them to the *docker-afterinit.d* directory. Any *.sh or *.py file in that directory will be executed after the main initialization script (prerun.py) is executed.
 
 ## Build
 To build a CKAN image run:
