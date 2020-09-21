@@ -25,6 +25,7 @@ RUN apk add --no-cache \
         g++ \
         autoconf \
         automake \
+        patch \
         libtool \
         musl-dev \
         pcre-dev \
@@ -43,6 +44,11 @@ RUN curl -o ${SRC_DIR}/get-pip.py https://bootstrap.pypa.io/get-pip.py && \
 
 # Fetch and build CKAN and requirements
 RUN pip install -e git+${GIT_URL}@${GIT_BRANCH}#egg=ckan
+# Copy patches and apply patches script
+COPY ./patches ${SRC_DIR}/patches
+COPY ./scripts/apply_ckan_patches.sh ${SRC_DIR}/apply_ckan_patches.sh
+# Apply patches
+RUN ${SRC_DIR}/apply_ckan_patches.sh
 RUN rm -rf /srv/app/src/ckan/.git
 RUN pip wheel --wheel-dir=/wheels -r ckan/requirements.txt
 RUN pip wheel --wheel-dir=/wheels uwsgi==2.0.19.1 gevent==20.6.2
@@ -154,6 +160,9 @@ COPY setup/app ${APP_DIR}
 
 # Create entrypoint directory for children image scripts
 ONBUILD RUN mkdir docker-entrypoint.d
+
+# Create afterinit directory for children image scripts
+ONBUILD RUN mkdir docker-afterinit.d
 
 EXPOSE 5000
 

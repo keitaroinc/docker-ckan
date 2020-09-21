@@ -23,3 +23,7 @@ CKAN_SMTP_STARTTLS=True
 CKAN_SMTP_USER=user
 CKAN_SMTP_PASSWORD=pass
 CKAN_SMTP_MAIL_FROM=ckan@localhost
+
+# Datapusher configuration
+CKAN__DATAPUSHER__URL=http://datapusher:8000
+CKAN__DATAPUSHER__CALLBACK_URL_BASE=http://ckan:5000/

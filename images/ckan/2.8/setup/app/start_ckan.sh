@@ -18,6 +18,19 @@ UWSGI_OPTS="--socket /tmp/uwsgi.sock --uid 92 --gid 92 --http :5000 --master --e
 # Run the prerun script to init CKAN and create the default admin user
 python prerun.py
 
+# Run any after prerun/init scripts provided by images extending this one
+if [[ -d "${APP_DIR}/docker-afterinit.d" ]]
+then
+    for f in ${APP_DIR}/docker-afterinit.d/*; do
+        case "$f" in
+            *.sh)     echo "$0: Running after prerun init file $f"; . "$f" ;;
+            *.py)     echo "$0: Running after prerun init file $f"; python "$f"; echo ;;
+            *)        echo "$0: Ignoring $f (not an sh or py file)" ;;
+        esac
+        echo
+    done
+fi
+
 # Check whether http basic auth password protection is enabled and enable basicauth routing on uwsgi respecfully
 if [ $? -eq 0 ]
 then

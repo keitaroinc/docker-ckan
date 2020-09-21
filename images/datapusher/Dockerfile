@@ -5,7 +5,7 @@ FROM alpine:3.12 as build
 
 # Set datapusher version to build
 ENV GIT_URL https://github.com/keitaroinc/datapusher.git
-ENV GIT_BRANCH parametrize-job-config
+ENV GIT_BRANCH master
 ENV REQUIREMENTS_URL https://raw.githubusercontent.com/keitaroinc/datapusher/${GIT_BRANCH}/requirements.txt
 
 # Set src dirs
