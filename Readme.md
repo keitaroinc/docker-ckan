@@ -1,4 +1,7 @@
-# Dockerized CKAN ![Docker Pulls](https://img.shields.io/docker/pulls/keitaro/ckan.svg)
+# Dockerized CKAN 
+
+[![License][]][1] [![Docker Pulls][]][2] [![Chat on Gitter][]][3]
+    
 This repository contains base docker images, examples and docker-compose used to build and run CKAN. 
 
 We build and publish docker images built using this repository to Dockerhub:
@@ -93,3 +96,10 @@ To upload the image to DockerHub run:
 ```sh 
 docker push [options] <docker-hub-namespace>/ckan:<image-tag> 
 ```
+
+  [License]: https://img.shields.io/badge/license-Apache--2.0-blue.svg?style=flat
+  [1]: https://opensource.org/licenses/Apache-2.0
+  [Docker Pulls]: https://img.shields.io/docker/pulls/keitaro/ckan.svg?style=flat
+  [2]: https://hub.docker.com/r/keitaro/ckan
+  [Chat on Gitter]: https://badges.gitter.im/gitterHQ/gitter.svg
+  [3]: https://gitter.im/keitaroinc/docker-ckan
