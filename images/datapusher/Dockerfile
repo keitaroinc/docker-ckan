@@ -45,7 +45,7 @@ RUN pip wheel --wheel-dir=/wheels -r ${REQUIREMENTS_URL}
 RUN curl -o /wheels/requirements.txt ${REQUIREMENTS_URL}
 
 # Get uwsgi and gevent from pip
-RUN pip wheel --wheel-dir=/wheels uwsgi==2.0.19.1 gevent==20.6.2
+RUN pip wheel --wheel-dir=/wheels uwsgi==2.0.19.1 gevent==20.6.2 greenlet==0.4.16
 
 
 ############
