@@ -57,7 +57,7 @@ COPY ./scripts/apply_ckan_patches.sh ${SRC_DIR}/apply_ckan_patches.sh
 RUN ${SRC_DIR}/apply_ckan_patches.sh
 RUN rm -rf /srv/app/src/ckan/.git
 RUN pip wheel --wheel-dir=/wheels -r ckan/requirements.txt
-RUN pip wheel --wheel-dir=/wheels uwsgi==2.0.19.1 gevent==20.6.2
+RUN pip wheel --wheel-dir=/wheels uwsgi==2.0.19.1 gevent==20.6.2 greenlet==0.4.16
 
 
 ###########################
@@ -157,13 +157,12 @@ RUN pip install -e /srv/app/src/ckan && \
     echo "UTC" >  /etc/timezone && \
     # Generate CKAN config
     ckan generate config ${APP_DIR}/production.ini && \
-    # Not working atm since ckan config tool tries to load config before executing config-tool, workaround
-    # ckan -c ${APP_DIR}/production.ini config-tool "ckan.plugins = ${CKAN__PLUGINS}" && \
-    sed -i "/ckan.plugins = stats/c ckan.plugins = ${CKAN__PLUGINS}" ${APP_DIR}/production.ini && \
+    # Configure plugins
+    ckan config-tool ${APP_DIR}/production.ini "ckan.plugins = ${CKAN__PLUGINS}" && \
     # Create the data directory
     mkdir ${DATA_DIR} && \
     # Webassets can't be loaded from env variables at runtime, it needs to be in the config so that it is created
-    sed -i "/ckan.webassets.path = /c ckan.webassets.path = ${DATA_DIR}/webassets" ${APP_DIR}/production.ini && \
+    ckan config-tool ${APP_DIR}/production.ini "ckan.webassets.path = ${DATA_DIR}/webassets" && \
     # Change ownership to app user
     chown -R ckan:ckan /srv/app
 

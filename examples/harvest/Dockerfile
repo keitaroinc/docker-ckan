@@ -40,9 +40,8 @@ COPY --from=extbuild /wheels /srv/app/ext_wheels
 # Install and enable the custom extensions
 RUN pip install --no-index --find-links=/srv/app/ext_wheels ckanext-harvest && \
     pip install --no-index --find-links=/srv/app/ext_wheels -r /srv/app/ext_wheels/harvest.txt && \
-    # Not working atm since ckan config tool tries to load config before executing config-tool, workaround
-    # ckan -c ${APP_DIR}/production.ini config-tool "ckan.plugins = ${CKAN__PLUGINS}" && \
-    sed -i "/ckan.plugins = envvars/c ckan.plugins = ${CKAN__PLUGINS}" ${APP_DIR}/production.ini && \
+    # Configure plugins
+    ckan config-tool ${APP_DIR}/production.ini "ckan.plugins = ${CKAN__PLUGINS}" && \
     chown -R ckan:ckan /srv/app
 
 # Remove wheels
