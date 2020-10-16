@@ -147,6 +147,8 @@ RUN pip install -e /srv/app/src/ckan && \
     # Generate CKAN config
     paster --plugin=ckan make-config ckan ${APP_DIR}/production.ini && \
     paster --plugin=ckan config-tool ${APP_DIR}/production.ini "ckan.plugins = ${CKAN__PLUGINS}" && \
+    # Set the default level for extensions to INFO
+    paster --plugin=ckan config-tool ${APP_DIR}/production.ini -s logger_ckanext -e level=INFO && \
     # Create the data directory
     mkdir ${DATA_DIR} && \
     # Change ownership to app user

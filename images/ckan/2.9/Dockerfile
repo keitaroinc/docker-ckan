@@ -163,6 +163,8 @@ RUN pip install -e /srv/app/src/ckan && \
     mkdir ${DATA_DIR} && \
     # Webassets can't be loaded from env variables at runtime, it needs to be in the config so that it is created
     ckan config-tool ${APP_DIR}/production.ini "ckan.webassets.path = ${DATA_DIR}/webassets" && \
+    # Set the default level for extensions to INFO
+    ckan config-tool ${APP_DIR}/production.ini -s logger_ckanext -e level=INFO && \
     # Change ownership to app user
     chown -R ckan:ckan /srv/app
 
