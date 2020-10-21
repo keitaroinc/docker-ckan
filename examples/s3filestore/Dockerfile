@@ -1,7 +1,7 @@
 ###################
 ### Extensions ####
 ###################
-FROM keitaro/ckan:2.8.5 as extbuild
+FROM keitaro/ckan:2.8.6 as extbuild
 
 MAINTAINER Keitaro Inc <info@keitaro.com>
 
@@ -20,7 +20,7 @@ RUN curl -o /wheels/s3filestore.txt https://raw.githubusercontent.com/keitaroinc
 ############
 ### MAIN ###
 ############
-FROM keitaro/ckan:2.8.5
+FROM keitaro/ckan:2.8.6
 
 MAINTAINER Keitaro Inc <info@keitaro.com>
 
