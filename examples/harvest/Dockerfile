@@ -1,7 +1,7 @@
 ###################
 ### Extensions ####
 ###################
-FROM keitaro/ckan:2.9.0 as extbuild
+FROM keitaro/ckan:2.9.1 as extbuild
 
 MAINTAINER Keitaro Inc <info@keitaro.com>
 
@@ -28,7 +28,7 @@ RUN curl -o /wheels/harvest.txt https://raw.githubusercontent.com/ckan/ckanext-h
 ############
 ### MAIN ###
 ############
-FROM keitaro/ckan:2.9.0
+FROM keitaro/ckan:2.9.1
 
 ENV CKAN__PLUGINS envvars image_view text_view recline_view datastore datapusher harvest ckan_harvester
 
