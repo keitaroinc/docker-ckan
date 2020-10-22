@@ -18,6 +18,9 @@ UWSGI_OPTS="--socket /tmp/uwsgi.sock --uid 92 --gid 92 --http :5000 --master --e
 # Run the prerun script to init CKAN and create the default admin user
 python prerun.py
 
+# Check if we are in maintenance mode and if yes serve the maintenance pages
+if [ "$MAINTENANCE_MODE" = true ]; then PYTHONUNBUFFERED=1 python maintenance/serve.py; fi
+
 # Run any after prerun/init scripts provided by images extending this one
 if [[ -d "${APP_DIR}/docker-afterinit.d" ]]
 then
