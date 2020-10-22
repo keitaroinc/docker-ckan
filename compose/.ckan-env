@@ -2,6 +2,9 @@
 # Information about how it works: https://github.com/okfn/ckanext-envvars
 # Note that variables here take presedence over build/up time variables in .env
 
+# Set to true to disable CKAN from starting and serve a maintenance page
+MAINTENANCE_MODE=false
+
 # General Settings
 CKAN_SITE_ID=default
 CKAN_SITE_URL=http://localhost:5000
