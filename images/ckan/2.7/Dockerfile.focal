@@ -1,0 +1,228 @@
+##################
+### Build CKAN ###
+##################
+FROM ubuntu:focal-20201106 as ckanbuild
+
+# Set CKAN version to build
+ENV GIT_URL=https://github.com/ckan/ckan.git
+ENV GIT_BRANCH=ckan-2.7.9
+
+# Set timezone
+ENV TZ=UTC
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+# Set Locale
+ENV LC_ALL=en_US.UTF-8
+
+# Set src dirs
+ENV SRC_DIR=/srv/app/src
+ENV PIP_SRC=${SRC_DIR}
+
+WORKDIR ${SRC_DIR}
+
+# Set the locale          
+RUN apt-get update
+RUN apt-get install -y locales
+RUN sed -i "/$LC_ALL/s/^# //g" /etc/locale.gen
+RUN dpkg-reconfigure --frontend=noninteractive locales 
+RUN update-locale LANG=${LC_ALL}
+
+# Instal apt-utils
+RUN apt-get install -y \
+        apt-utils
+
+# Packages to build CKAN requirements and plugins
+RUN apt-get install -y \
+        git \
+	    wget \
+	    gnupg \
+        curl \
+        python \
+        linux-headers-generic \
+        gcc-10 \
+        make \
+        g++-10 \
+        autoconf \
+        automake \
+        libtool \
+        patch \
+        libpcre3-dev \
+        libpcre3 \
+        python-dev \
+        libffi-dev \
+        libxml2-dev \
+        libxslt-dev
+
+# Install version 9.x of postgresql-dev so that CKAN requirements can be built
+RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
+RUN sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ focal-pgdg main" >> /etc/apt/sources.list.d/postgresql.list'
+RUN apt-get update
+RUN apt-get install -y \
+        postgresql-server-dev-9.6
+
+# Use gcc 10
+RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 100 --slave /usr/bin/g++ g++ /usr/bin/g++-10 --slave /usr/bin/gcov gcov /usr/bin/gcov-10 --slave /usr/bin/x86_64-linux-gnu-gcc x86_64-linux-gnu-gcc /usr/bin/x86_64-linux-gnu-gcc-10
+
+#postgresql-server-dev-9.6 Create the src directory
+RUN mkdir -p ${SRC_DIR}
+
+# Install pip
+RUN curl -o ${SRC_DIR}/get-pip.py https://bootstrap.pypa.io/get-pip.py && \
+    python ${SRC_DIR}/get-pip.py
+
+# Fetch and build CKAN and requirements
+RUN pip install -e git+${GIT_URL}@${GIT_BRANCH}#egg=ckan
+# Copy patches and apply patches script
+COPY ./patches ${SRC_DIR}/patches
+COPY ./scripts/apply_ckan_patches.sh ${SRC_DIR}/apply_ckan_patches.sh
+# Apply patches
+RUN ${SRC_DIR}/apply_ckan_patches.sh
+RUN rm -rf /srv/app/src/ckan/.git
+RUN pip wheel --wheel-dir=/wheels -r ckan/requirements.txt
+RUN pip wheel --wheel-dir=/wheels uwsgi==2.0.19.1 gevent==20.6.2 greenlet==0.4.16
+
+
+###########################
+### Default-Extensions ####
+###########################
+FROM ubuntu:focal-20201106 as extbuild
+
+# Set src dirs
+ENV SRC_DIR=/srv/app/src
+ENV PIP_SRC=${SRC_DIR}
+
+# List of default extensions
+ENV DEFAULT_EXTENSIONS envvars
+
+# Locations and tags, please use specific tags or revisions
+ENV ENVVARS_GIT_URL=https://github.com/okfn/ckanext-envvars
+ENV ENVVARS_GIT_BRANCH=0.0.1
+
+RUN apt-get update && \
+    apt-get install -y \
+        git \
+        curl \
+        python \
+        python-dev
+
+# Create the src directory
+RUN mkdir -p ${SRC_DIR}
+
+# Install pip
+RUN curl -o ${SRC_DIR}/get-pip.py https://bootstrap.pypa.io/get-pip.py && \
+    python ${SRC_DIR}/get-pip.py
+
+# Fetch and build the default CKAN extensions
+RUN pip wheel --wheel-dir=/wheels git+${ENVVARS_GIT_URL}@${ENVVARS_GIT_BRANCH}#egg=ckanext-envvars
+
+############
+### MAIN ###
+############
+FROM ubuntu:focal-20201106
+
+MAINTAINER Keitaro Inc <info@keitaro.com>
+
+# Set timezone
+ENV TZ=UTC
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+# Set Locale
+ENV LC_ALL=en_US.UTF-8
+
+# Set the locale          
+RUN apt-get update && \
+    apt-get install -y locales && \
+    sed -i "/$LC_ALL/s/^# //g" /etc/locale.gen && \
+    dpkg-reconfigure --frontend=noninteractive locales && \
+    update-locale LANG=${LC_ALL} && \
+    rm -rf /var/lib/apt/lists/*
+
+ENV APP_DIR=/srv/app
+ENV SRC_DIR=/srv/app/src
+ENV DATA_DIR=/srv/app/data
+ENV PIP_SRC=${SRC_DIR}
+ENV CKAN_SITE_URL=http://localhost:5000
+ENV CKAN__PLUGINS envvars image_view text_view recline_view datastore datapusher
+
+WORKDIR ${APP_DIR}
+
+# Install necessary packages to run CKAN
+RUN apt-get update && \
+    apt-get install -y \
+        gettext \
+        curl \
+        git \
+	    wget \
+	    gnupg \
+        python \
+        libpython2.7 \
+        libmagic1 \
+        libpcre3 \
+        libxslt1.1 \
+        libxml2 \
+        tzdata \
+        apache2-utils && \
+    rm -rf /var/lib/apt/lists/* && \
+    # Install version 9.x of postgresql-client so that CKAN can run
+    wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - && \
+    sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ focal-pgdg main" >> /etc/apt/sources.list.d/postgresql.list' && \
+    apt-get update && \
+    apt-get install -y \
+        postgresql-client-9.6 && \
+    rm -rf /var/lib/apt/lists/* && \
+    # Create SRC_DIR
+    mkdir -p ${SRC_DIR}
+
+# Install pip
+RUN curl -o ${SRC_DIR}/get-pip.py https://bootstrap.pypa.io/get-pip.py && \
+    python ${SRC_DIR}/get-pip.py
+
+# Get artifacts from build stages
+COPY --from=ckanbuild /wheels /srv/app/wheels
+COPY --from=extbuild /wheels /srv/app/ext_wheels
+COPY --from=ckanbuild /srv/app/src/ckan /srv/app/src/ckan
+
+# Additional install steps for build stages artifacts
+RUN pip install --no-index --find-links=/srv/app/wheels uwsgi gevent
+
+# Create a local user and group to run the app
+RUN groupadd -g 92 ckan && \
+    useradd -rm -d /srv/app -s /bin/bash -g ckan -u 92 ckan
+
+# Install CKAN
+RUN pip install -e /srv/app/src/ckan && \
+    cd ${SRC_DIR}/ckan && \
+    cp who.ini ${APP_DIR} && \
+    pip install --no-index --find-links=/srv/app/wheels -r requirements.txt && \
+    # Install default CKAN extensions
+    pip install --no-index --find-links=/srv/app/ext_wheels ckanext-envvars && \
+    # Create and update CKAN config
+    # Generate CKAN config
+    paster --plugin=ckan make-config ckan ${APP_DIR}/production.ini && \
+    paster --plugin=ckan config-tool ${APP_DIR}/production.ini "ckan.plugins = ${CKAN__PLUGINS}" && \
+    # Set the default level for extensions to INFO
+    paster --plugin=ckan config-tool ${APP_DIR}/production.ini -s logger_ckanext -e level=INFO && \
+    # Create the data directory
+    mkdir ${DATA_DIR} && \
+    # Change ownership to app user
+    chown -R ckan:ckan /srv/app
+
+# Remove wheels
+RUN rm -rf /srv/app/wheels /srv/app/ext_wheels
+
+# Copy necessary scripts
+COPY setup/app ${APP_DIR}
+
+# Create entrypoint directory for children image scripts
+ONBUILD RUN mkdir docker-entrypoint.d
+
+# Create afterinit directory for children image scripts
+ONBUILD RUN mkdir docker-afterinit.d
+
+EXPOSE 5000
+
+HEALTHCHECK --interval=10s --timeout=5s --retries=5 CMD curl --fail http://localhost:5000/api/3/action/status_show || exit 1
+
+USER ckan
+
+CMD ["/srv/app/start_ckan.sh"]
