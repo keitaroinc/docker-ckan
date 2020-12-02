@@ -38,12 +38,12 @@ RUN apt-get install -y \
         python3 \
         libpq-dev \
         linux-headers-generic \
-	gcc-10 \
-	make \
-	g++-10 \
-	autoconf \
-	automake \
-	libtool \
+	    gcc-10 \
+	    make \
+	    g++-10 \
+	    autoconf \
+	    automake \
+	    libtool \
         patch \
         libpcre3-dev \
         libpcre3 \
@@ -151,12 +151,13 @@ WORKDIR ${APP_DIR}
 RUN apt-get update && \
     apt-get install -y \
         gettext \
-	curl \
+	    curl \
         libpq5 \
-	postgresql-client \
+        git \
+	    postgresql-client \
         python3 \
-	python3-distutils \
-	libpython3.8 \
+	    python3-distutils \
+	    libpython3.8 \
         libmagic1 \
         libpcre3 \
         libxslt1.1 \
@@ -193,8 +194,6 @@ RUN pip install -e /srv/app/src/ckan && \
     # Install default CKAN extensions
     pip install --no-index --find-links=/srv/app/ext_wheels ckanext-envvars && \
     # Create and update CKAN config
-    # Set timezone
-    echo "UTC" >  /etc/timezone && \
     # Generate CKAN config
     ckan generate config ${APP_DIR}/production.ini && \
     # Configure plugins

@@ -143,6 +143,7 @@ RUN apt-get update && \
     apt-get install -y \
         gettext \
         curl \
+        git \
         libpq5 \
         postgresql-client \
         python \
@@ -181,8 +182,6 @@ RUN pip install -e /srv/app/src/ckan && \
     # Install default CKAN extensions
     pip install --no-index --find-links=/srv/app/ext_wheels ckanext-envvars && \
     # Create and update CKAN config
-    # Set timezone
-    echo "UTC" >  /etc/timezone && \
     # Generate CKAN config
     paster --plugin=ckan make-config ckan ${APP_DIR}/production.ini && \
     paster --plugin=ckan config-tool ${APP_DIR}/production.ini "ckan.plugins = ${CKAN__PLUGINS}" && \

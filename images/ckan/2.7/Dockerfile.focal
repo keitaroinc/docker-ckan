@@ -34,8 +34,8 @@ RUN apt-get install -y \
 # Packages to build CKAN requirements and plugins
 RUN apt-get install -y \
         git \
-	wget \
-	gnupg \
+	    wget \
+	    gnupg \
         curl \
         python \
         linux-headers-generic \
@@ -122,6 +122,10 @@ FROM ubuntu:focal-20201106
 
 MAINTAINER Keitaro Inc <info@keitaro.com>
 
+# Set timezone
+ENV TZ=UTC
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
 # Set Locale
 ENV LC_ALL=en_US.UTF-8
 
@@ -147,8 +151,9 @@ RUN apt-get update && \
     apt-get install -y \
         gettext \
         curl \
-	wget \
-	gnupg \
+        git \
+	    wget \
+	    gnupg \
         python \
         libpython2.7 \
         libmagic1 \
@@ -192,8 +197,6 @@ RUN pip install -e /srv/app/src/ckan && \
     # Install default CKAN extensions
     pip install --no-index --find-links=/srv/app/ext_wheels ckanext-envvars && \
     # Create and update CKAN config
-    # Set timezone
-    echo "UTC" >  /etc/timezone && \
     # Generate CKAN config
     paster --plugin=ckan make-config ckan ${APP_DIR}/production.ini && \
     paster --plugin=ckan config-tool ${APP_DIR}/production.ini "ckan.plugins = ${CKAN__PLUGINS}" && \
