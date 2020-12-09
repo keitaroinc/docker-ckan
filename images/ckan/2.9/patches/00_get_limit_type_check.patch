@@ -7,7 +7,7 @@
 -    if limit is None or limit > max_limit:
 -        limit = max_limit
 +    if limit is None or int(limit) > max_limit:
-+        limit = string(max_limit)
++        limit = str(max_limit)
  
      # order_by deprecated in ckan 1.8
      # if it is supplied and sort isn't use order_by and raise a warning
