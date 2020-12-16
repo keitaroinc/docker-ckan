@@ -4,11 +4,12 @@
 # CKAN >2.9 ckan CLI command expects the configuration option as the second and third parameter
 # Example: ckan -c /srv/app/production.ini datastore set-permissions
 # 
-# Shift the two arguments so that we can move them to the end of the argument list
+# Shift three arguments so that we can reorder the argument list
 # ckan -c /srv/app/production.ini datastore set-permissions
 # becomes
-# paster --plugin datastore set-permissions -c /srv/app/production.ini
+# paster --plugin datastore -c /srv/app/production.ini set-permissions
 config_switch=$1
 config_file=$2
-shift 2
-paster --plugin=ckan "$@" "$config_switch" "$config_file"
+subcommand=$3
+shift 3
+paster --plugin=ckan "$subcommand" "$config_switch" "$config_file" "$@"
