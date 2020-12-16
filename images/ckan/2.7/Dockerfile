@@ -166,6 +166,9 @@ RUN rm -rf /srv/app/wheels /srv/app/ext_wheels
 # Copy necessary scripts
 COPY setup/app ${APP_DIR}
 
+# Copy the alias script for paster to be ckan so it's compatible with 2.9
+COPY setup/bin/ckan /usr/bin/ckan
+
 # Create entrypoint directory for children image scripts
 ONBUILD RUN mkdir docker-entrypoint.d
 
