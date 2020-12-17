@@ -1,0 +1,15 @@
+#!/bin/bash
+# CKAN <2.9 uses paster and the ckan plugin for paster which expects the configuration to be passed
+# to a subcommand, example: paster --plugin=ckan datastore -c /srv/app/production.ini set-permissions
+# CKAN >2.9 ckan CLI command expects the configuration option as the second and third parameter
+# Example: ckan -c /srv/app/production.ini datastore set-permissions
+# 
+# Shift three arguments so that we can reorder the argument list
+# ckan -c /srv/app/production.ini datastore set-permissions
+# becomes
+# paster --plugin=ckan datastore -c /srv/app/production.ini set-permissions
+config_switch=$1
+config_file=$2
+subcommand=$3
+shift 3
+paster --plugin=ckan "$subcommand" "$config_switch" "$config_file" "$@"
