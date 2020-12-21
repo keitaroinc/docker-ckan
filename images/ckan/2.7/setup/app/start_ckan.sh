@@ -16,7 +16,7 @@ fi
 UWSGI_OPTS="--socket /tmp/uwsgi.sock --uid 92 --gid 92 --http :5000 --master --enable-threads --paste config:/srv/app/production.ini --paste-logger /srv/app/production.ini --lazy-apps --gevent 2000 -p 2 -L --gevent-early-monkey-patch"
 
 # Run the prerun script to init CKAN and create the default admin user
-python prerun.py
+python prerun.py || { echo '[CKAN prerun] FAILED. Exiting...' ; exit 1; }
 
 # Check if we are in maintenance mode and if yes serve the maintenance pages
 if [ "$MAINTENANCE_MODE" = true ]; then PYTHONUNBUFFERED=1 python maintenance/serve.py; fi
