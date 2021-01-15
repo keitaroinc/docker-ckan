@@ -3,8 +3,6 @@
 ###################
 FROM keitaro/ckan:2.8.6 as extbuild
 
-MAINTAINER Keitaro Inc <info@keitaro.com>
-
 # Locations and tags, please use specific tags or revisions
 ENV S3FILESTORE_GIT_URL=https://github.com/keitaroinc/ckanext-s3filestore
 ENV S3FILESTORE_GIT_BRANCH=master
@@ -17,12 +15,14 @@ RUN pip wheel --wheel-dir=/wheels git+${S3FILESTORE_GIT_URL}@${S3FILESTORE_GIT_B
 RUN pip wheel --wheel-dir=/wheels -r https://raw.githubusercontent.com/keitaroinc/ckanext-s3filestore/${S3FILESTORE_GIT_BRANCH}/requirements.txt
 RUN curl -o /wheels/s3filestore.txt https://raw.githubusercontent.com/keitaroinc/ckanext-s3filestore/${S3FILESTORE_GIT_BRANCH}/requirements.txt
 
+USER ckan
+
 ############
 ### MAIN ###
 ############
 FROM keitaro/ckan:2.8.6
 
-MAINTAINER Keitaro Inc <info@keitaro.com>
+LABEL maintainer="Keitaro Inc <info@keitaro.com>"
 
 ENV CKAN__PLUGINS envvars s3filestore image_view text_view recline_view datastore datapusher
 
@@ -34,7 +34,7 @@ COPY --from=extbuild /wheels /srv/app/ext_wheels
 # Install and enable the custom extensions
 RUN pip install --no-index --find-links=/srv/app/ext_wheels ckanext-s3filestore && \
     pip install --no-index --find-links=/srv/app/ext_wheels -r /srv/app/ext_wheels/s3filestore.txt && \
-    paster --plugin=ckan config-tool ${APP_DIR}/production.ini "ckan.plugins = ${CKAN__PLUGINS}" && \
+    paster --plugin=ckan config-tool "${APP_DIR}/production.ini" "ckan.plugins = ${CKAN__PLUGINS}" && \
     chown -R ckan:ckan /srv/app
 
 # Remove wheels

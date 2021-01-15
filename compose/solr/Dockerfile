@@ -12,8 +12,8 @@ RUN mkdir -p /opt/solr/server/solr/$SOLR_CORE/conf
 RUN mkdir -p /opt/solr/server/solr/$SOLR_CORE/data
 
 # Adding Files
-ADD ./solr/solrconfig-$CKAN_VERSION.xml \
-https://raw.githubusercontent.com/ckan/ckan/ckan-$CKAN_VERSION/ckan/config/solr/schema.xml \
+COPY ./solr/solrconfig-$CKAN_VERSION.xml /opt/solr/server/solr/$SOLR_CORE/conf/
+ADD https://raw.githubusercontent.com/ckan/ckan/ckan-$CKAN_VERSION/ckan/config/solr/schema.xml \
 https://raw.githubusercontent.com/apache/lucene-solr/releases/lucene-solr/$SOLR_VERSION/solr/server/solr/configsets/basic_configs/conf/currency.xml \
 https://raw.githubusercontent.com/apache/lucene-solr/releases/lucene-solr/$SOLR_VERSION/solr/server/solr/configsets/basic_configs/conf/synonyms.txt \
 https://raw.githubusercontent.com/apache/lucene-solr/releases/lucene-solr/$SOLR_VERSION/solr/server/solr/configsets/basic_configs/conf/stopwords.txt \
@@ -28,7 +28,8 @@ RUN mv /opt/solr/server/solr/$SOLR_CORE/conf/solrconfig-$CKAN_VERSION.xml /opt/s
 # Giving ownership to Solr
 
 USER root
-RUN chown -R $SOLR_USER:$SOLR_USER /opt/solr/server/solr/$SOLR_CORE
+
+RUN chown -R "$SOLR_USER:$SOLR_USER" /opt/solr/server/solr/$SOLR_CORE
 
 # User
 USER $SOLR_USER:$SOLR_USER

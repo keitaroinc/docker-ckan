@@ -22,21 +22,21 @@ WORKDIR ${SRC_DIR}
 
 # Set the locale          
 RUN apt-get update
-RUN apt-get install -y locales
+RUN apt-get install --no-install-recommends -y locales
 RUN sed -i "/$LC_ALL/s/^# //g" /etc/locale.gen
 RUN dpkg-reconfigure --frontend=noninteractive locales 
 RUN update-locale LANG=${LC_ALL}
 
 # Instal apt-utils
-RUN apt-get install -y \
+RUN apt-get install --no-install-recommends -y \
         apt-utils
 
 # Packages to build CKAN requirements and plugins
-RUN apt-get install -y \
+RUN apt-get install --no-install-recommends -y \
         git \
-	    wget \
-	    gnupg \
+	gnupg \
         curl \
+        ca-certificates \
         python \
         linux-headers-generic \
         gcc-10 \
@@ -54,10 +54,11 @@ RUN apt-get install -y \
         libxslt-dev
 
 # Install version 9.x of postgresql-dev so that CKAN requirements can be built
-RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+RUN curl -s -o - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
 RUN sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ focal-pgdg main" >> /etc/apt/sources.list.d/postgresql.list'
 RUN apt-get update
-RUN apt-get install -y \
+RUN apt-get install --no-install-recommends -y \
         postgresql-server-dev-9.6
 
 # Use gcc 10
@@ -99,9 +100,10 @@ ENV ENVVARS_GIT_URL=https://github.com/okfn/ckanext-envvars
 ENV ENVVARS_GIT_BRANCH=0.0.1
 
 RUN apt-get update && \
-    apt-get install -y \
+    apt-get install --no-install-recommends -y \
         git \
         curl \
+        ca-certificates \
         python \
         python-dev
 
@@ -120,7 +122,8 @@ RUN pip wheel --wheel-dir=/wheels git+${ENVVARS_GIT_URL}@${ENVVARS_GIT_BRANCH}#e
 ############
 FROM ubuntu:focal-20201106
 
-MAINTAINER Keitaro Inc <info@keitaro.com>
+LABEL maintainer="Keitaro Inc <info@keitaro.com>"
+LABEL org.opencontainers.image.source https://github.com/keitaroinc/docker-ckan
 
 # Set timezone
 ENV TZ=UTC
@@ -131,7 +134,7 @@ ENV LC_ALL=en_US.UTF-8
 
 # Set the locale          
 RUN apt-get update && \
-    apt-get install -y locales && \
+    apt-get install --no-install-recommends -y locales && \
     sed -i "/$LC_ALL/s/^# //g" /etc/locale.gen && \
     dpkg-reconfigure --frontend=noninteractive locales && \
     update-locale LANG=${LC_ALL} && \
@@ -139,21 +142,21 @@ RUN apt-get update && \
 
 ENV APP_DIR=/srv/app
 ENV SRC_DIR=/srv/app/src
+ENV CKAN_DIR=${SRC_DIR}/ckan
 ENV DATA_DIR=/srv/app/data
 ENV PIP_SRC=${SRC_DIR}
 ENV CKAN_SITE_URL=http://localhost:5000
 ENV CKAN__PLUGINS envvars image_view text_view recline_view datastore datapusher
 
-WORKDIR ${APP_DIR}
-
 # Install necessary packages to run CKAN
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN apt-get update && \
-    apt-get install -y \
+    apt-get install --no-install-recommends -y \
         gettext \
         curl \
+        ca-certificates \
         git \
-	    wget \
-	    gnupg \
+	gnupg \
         python \
         libpython2.7 \
         libmagic1 \
@@ -164,10 +167,10 @@ RUN apt-get update && \
         apache2-utils && \
     rm -rf /var/lib/apt/lists/* && \
     # Install version 9.x of postgresql-client so that CKAN can run
-    wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - && \
+    curl -s -o - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - && \
     sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ focal-pgdg main" >> /etc/apt/sources.list.d/postgresql.list' && \
     apt-get update && \
-    apt-get install -y \
+    apt-get install --no-install-recommends -y \
         postgresql-client-9.6 && \
     rm -rf /var/lib/apt/lists/* && \
     # Create SRC_DIR
@@ -180,18 +183,19 @@ RUN curl -o ${SRC_DIR}/get-pip.py https://bootstrap.pypa.io/get-pip.py && \
 # Get artifacts from build stages
 COPY --from=ckanbuild /wheels /srv/app/wheels
 COPY --from=extbuild /wheels /srv/app/ext_wheels
-COPY --from=ckanbuild /srv/app/src/ckan /srv/app/src/ckan
+COPY --from=ckanbuild /srv/app/src/ckan ${CKAN_DIR}
 
 # Additional install steps for build stages artifacts
-RUN pip install --no-index --find-links=/srv/app/wheels uwsgi gevent
+RUN pip install --no-index --find-links=/srv/app/wheels uwsgi==2.0.19.1 gevent==20.6.2
 
 # Create a local user and group to run the app
 RUN groupadd -g 92 ckan && \
     useradd -rm -d /srv/app -s /bin/bash -g ckan -u 92 ckan
 
+WORKDIR ${CKAN_DIR}
+
 # Install CKAN
 RUN pip install -e /srv/app/src/ckan && \
-    cd ${SRC_DIR}/ckan && \
     cp who.ini ${APP_DIR} && \
     pip install --no-index --find-links=/srv/app/wheels -r requirements.txt && \
     # Install default CKAN extensions
@@ -212,6 +216,8 @@ RUN rm -rf /srv/app/wheels /srv/app/ext_wheels
 
 # Copy necessary scripts
 COPY setup/app ${APP_DIR}
+
+WORKDIR ${APP_DIR}
 
 # Copy the alias script for paster to be ckan so it's compatible with 2.9
 COPY setup/bin/ckan /usr/bin/ckan
