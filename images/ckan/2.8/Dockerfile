@@ -1,7 +1,7 @@
 ##################
 ### Build CKAN ###
 ##################
-FROM alpine:3.12 as ckanbuild
+FROM alpine:3.13 as ckanbuild
 
 # Set CKAN version to build
 ENV GIT_URL=https://github.com/ckan/ckan.git
@@ -57,7 +57,7 @@ RUN pip wheel --wheel-dir=/wheels uwsgi==2.0.19.1 gevent==20.6.2 greenlet==0.4.1
 ###########################
 ### Default-Extensions ####
 ###########################
-FROM alpine:3.12 as extbuild
+FROM alpine:3.13 as extbuild
 
 # Set src dirs
 ENV SRC_DIR=/srv/app/src
@@ -89,7 +89,7 @@ RUN pip wheel --wheel-dir=/wheels git+${ENVVARS_GIT_URL}@${ENVVARS_GIT_BRANCH}#e
 ############
 ### MAIN ###
 ############
-FROM alpine:3.12
+FROM alpine:3.13
 
 MAINTAINER Keitaro Inc <info@keitaro.com>
 

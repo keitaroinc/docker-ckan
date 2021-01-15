@@ -1,7 +1,7 @@
 #############
 ### Build ###
 #############
-FROM alpine:3.12 as build
+FROM alpine:3.13 as build
 
 # Set datapusher version to build
 ENV GIT_URL https://github.com/keitaroinc/datapusher.git
@@ -51,7 +51,7 @@ RUN pip wheel --wheel-dir=/wheels uwsgi==2.0.19.1 gevent==20.6.2 greenlet==0.4.1
 ############
 ### MAIN ###
 ############
-FROM alpine:3.12
+FROM alpine:3.13
 
 MAINTAINER Keitaro Inc <info@keitaro.com>
 
