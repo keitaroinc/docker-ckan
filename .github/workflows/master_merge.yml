@@ -1,7 +1,7 @@
-name: PR Checks
+name: Build and push docker images
 
 on:
-  pull_request:
+  push:
     branches: master
 
 jobs:
@@ -12,6 +12,19 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v1 
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+        name: Login to GitHub Container Registry
+        uses: docker/login-action@v1 
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.CR_PAT }}
 
       - name: Cache Docker layers
         uses: actions/cache@v2
@@ -26,13 +39,15 @@ jobs:
         run: |
           echo "::set-output name=IMAGE_TAG::$(awk -F '=' '/IMAGE_TAG/{print $2}' ./images/ckan/2.9/Dockerfile)"
 
-      - name: Build CKAN 2.9 alpine
+      - name: Build and push CKAN 2.9 alpine
         uses: docker/build-push-action@v2
         with:
           context: ./images/ckan/2.9
           file: ./images/ckan/2.9/Dockerfile
-          push: false
-          tags: keitaro/ckan:${{ steps.alpine.outputs.IMAGE_TAG }}
+          push: true
+          tags: |
+            keitaro/ckan:${{ steps.alpine.outputs.IMAGE_TAG }}
+            ghcr.io/keitaroinc/ckan:${{ steps.alpine.outputs.IMAGE_TAG }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,mode=max,dest=/tmp/.buildx-cache
 
@@ -41,13 +56,15 @@ jobs:
         run: |
           echo "::set-output name=IMAGE_TAG::$(awk -F '=' '/IMAGE_TAG/{print $2}' ./images/ckan/2.9/Dockerfile.focal)"
 
-      - name: Build CKAN 2.9 ubuntu
+      - name: Build and push CKAN 2.9 ubuntu
         uses: docker/build-push-action@v2
         with:
           context: ./images/ckan/2.9
           file: ./images/ckan/2.9/Dockerfile.focal
-          push: false
-          tags: keitaro/ckan:${{ steps.ubuntu.outputs.IMAGE_TAG }}
+          push: true
+          tags: |
+            keitaro/ckan:${{ steps.ubuntu.outputs.IMAGE_TAG }}
+            ghcr.io/keitaroinc/ckan:${{ steps.ubuntu.outputs.IMAGE_TAG }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,mode=max,dest=/tmp/.buildx-cache
 
@@ -58,6 +75,19 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v1 
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+        name: Login to GitHub Container Registry
+        uses: docker/login-action@v1 
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.CR_PAT }}
 
       - name: Cache Docker layers
         uses: actions/cache@v2
@@ -72,13 +102,15 @@ jobs:
         run: |
           echo "::set-output name=IMAGE_TAG::$(awk -F '=' '/IMAGE_TAG/{print $2}' ./images/ckan/2.8/Dockerfile)"
 
-      - name: Build CKAN 2.8 alpine
+      - name: Build and push CKAN 2.8 alpine
         uses: docker/build-push-action@v2
         with:
           context: ./images/ckan/2.8
           file: ./images/ckan/2.8/Dockerfile
-          push: false
-          tags: keitaro/ckan:${{ steps.alpine.outputs.IMAGE_TAG }}
+          push: true
+          tags: |
+            keitaro/ckan:${{ steps.alpine.outputs.IMAGE_TAG }}
+            ghcr.io/keitaroinc/ckan:${{ steps.alpine.outputs.IMAGE_TAG }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,mode=max,dest=/tmp/.buildx-cache
 
@@ -87,13 +119,15 @@ jobs:
         run: |
           echo "::set-output name=IMAGE_TAG::$(awk -F '=' '/IMAGE_TAG/{print $2}' ./images/ckan/2.8/Dockerfile.focal)"
 
-      - name: Build CKAN 2.8 ubuntu
+      - name: Build and push CKAN 2.8 ubuntu
         uses: docker/build-push-action@v2
         with:
           context: ./images/ckan/2.8
           file: ./images/ckan/2.8/Dockerfile.focal
-          push: false
-          tags: keitaro/ckan:${{ steps.ubuntu.outputs.IMAGE_TAG }}
+          push: true
+          tags: |
+            keitaro/ckan:${{ steps.ubuntu.outputs.IMAGE_TAG }}
+            ghcr.io/keitaroinc/ckan:${{ steps.ubuntu.outputs.IMAGE_TAG }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,mode=max,dest=/tmp/.buildx-cache
 
@@ -104,6 +138,19 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v1 
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+        name: Login to GitHub Container Registry
+        uses: docker/login-action@v1 
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.CR_PAT }}
 
       - name: Cache Docker layers
         uses: actions/cache@v2
@@ -118,13 +165,15 @@ jobs:
         run: |
           echo "::set-output name=IMAGE_TAG::$(awk -F '=' '/IMAGE_TAG/{print $2}' ./images/ckan/2.7/Dockerfile)"
 
-      - name: Build CKAN 2.7 alpine
+      - name: Build and push CKAN 2.7 alpine
         uses: docker/build-push-action@v2
         with:
           context: ./images/ckan/2.7
           file: ./images/ckan/2.7/Dockerfile
-          push: false
-          tags: keitaro/ckan:${{ steps.alpine.outputs.IMAGE_TAG }}
+          push: true
+          tags: |
+            keitaro/ckan:${{ steps.alpine.outputs.IMAGE_TAG }}
+            ghcr.io/keitaroinc/ckan:${{ steps.alpine.outputs.IMAGE_TAG }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,mode=max,dest=/tmp/.buildx-cache
 
@@ -138,8 +187,10 @@ jobs:
         with:
           context: ./images/ckan/2.7
           file: ./images/ckan/2.7/Dockerfile.focal
-          push: false
-          tags: keitaro/ckan:${{ steps.ubuntu.outputs.IMAGE_TAG }}
+          push: true
+          tags: |
+            keitaro/ckan:${{ steps.ubuntu.outputs.IMAGE_TAG }}
+            ghcr.io/keitaroinc/ckan:${{ steps.ubuntu.outputs.IMAGE_TAG }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,mode=max,dest=/tmp/.buildx-cache
 
@@ -150,6 +201,19 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v1 
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+        name: Login to GitHub Container Registry
+        uses: docker/login-action@v1 
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.CR_PAT }}
 
       - name: Cache Docker layers
         uses: actions/cache@v2
@@ -164,12 +228,14 @@ jobs:
         run: |
           echo "::set-output name=IMAGE_TAG::$(awk -F '=' '/IMAGE_TAG/{print $2}' ./images/datapusher/Dockerfile)"
 
-      - name: Build CKAN datapusher
+      - name: Build and push CKAN datapusher
         uses: docker/build-push-action@v2
         with:
           context: ./images/datapusher
           file: ./images/datapusher/Dockerfile
-          push: false
-          tags: keitaro/ckandatapusher:${{ steps.datapusher.outputs.IMAGE_TAG }}
+          push: true
+          tags: |
+            keitaro/datapusher:${{ steps.datapusher.outputs.IMAGE_TAG }}
+            ghcr.io/keitaroinc/datapusher:${{ steps.datapusher.outputs.IMAGE_TAG }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,mode=max,dest=/tmp/.buildx-cache

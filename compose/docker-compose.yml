@@ -9,7 +9,7 @@ volumes:
 services:
   ckan:
     container_name: ckan
-    image: keitaro/ckan:${CKAN_VERSION}
+    image: ghcr.io/keitaroinc/ckan:${CKAN_VERSION}
     networks:
       - frontend
       - backend
@@ -34,7 +34,7 @@ services:
 
   datapusher:
     container_name: datapusher
-    image: keitaro/ckan-datapusher:${DATAPUSHER_VERSION}
+    image: ghcr.io/keitaroinc/datapusher:${DATAPUSHER_VERSION}
     networks:
       - frontend
       - backend

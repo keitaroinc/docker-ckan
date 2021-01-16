@@ -1,7 +1,7 @@
 ###################
 ### Extensions ####
 ###################
-FROM keitaro/ckan:2.9.1 as extbuild
+FROM ghcr.io/keitaroinc/ckan:2.9.1 as extbuild
 
 # Locations and tags, please use specific tags or revisions
 ENV HARVEST_GIT_URL=https://github.com/ckan/ckanext-harvest
@@ -28,7 +28,7 @@ USER ckan
 ############
 ### MAIN ###
 ############
-FROM keitaro/ckan:2.9.1
+FROM ghcr.io/keitaroinc/ckan:2.9.1
 
 LABEL maintainer="Keitaro Inc <info@keitaro.com>"
 
