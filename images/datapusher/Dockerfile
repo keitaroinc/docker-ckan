@@ -3,6 +3,9 @@
 #############
 FROM alpine:3.13 as build
 
+# Used by Github Actions to tag the image with
+ENV IMAGE_TAG=0.0.17
+
 # Set datapusher version to build
 ENV GIT_URL https://github.com/keitaroinc/datapusher.git
 ENV GIT_BRANCH master

@@ -3,6 +3,9 @@
 ##################
 FROM alpine:3.13 as ckanbuild
 
+# Used by Github Actions to tag the image with
+ENV IMAGE_TAG=2.9.1
+
 # Set CKAN version to build
 ENV GIT_URL=https://github.com/ckan/ckan.git
 ENV GIT_BRANCH=ckan-2.9.1

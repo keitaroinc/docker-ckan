@@ -22,15 +22,25 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-buildx
 
+      - name: Get docker tag for Alpine image
+        id: alpine
+        run: |
+          echo "::set-output name=IMAGE_TAG::$(awk -F '=' '/IMAGE_TAG/{print $2}' ./images/ckan/2.9/Dockerfile)"
+
       - name: Build CKAN 2.9 alpine
         uses: docker/build-push-action@v2
         with:
           context: ./images/ckan/2.9
           file: ./images/ckan/2.9/Dockerfile
           push: false
-          tags: keitaro/ckan:2.9
+          tags: keitaro/ckan:${{ steps.alpine.outputs.IMAGE_TAG }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,mode=max,dest=/tmp/.buildx-cache
+
+      - name: Get docker tag for Ubuntu image
+        id: ubuntu
+        run: |
+          echo "::set-output name=IMAGE_TAG::$(awk -F '=' '/IMAGE_TAG/{print $2}' ./images/ckan/2.9/Dockerfile.focal)"
 
       - name: Build CKAN 2.9 ubuntu
         uses: docker/build-push-action@v2
@@ -38,7 +48,7 @@ jobs:
           context: ./images/ckan/2.9
           file: ./images/ckan/2.9/Dockerfile.focal
           push: false
-          tags: keitaro/ckan:2.9-focal
+          tags: keitaro/ckan:${{ steps.ubuntu.outputs.IMAGE_TAG }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,mode=max,dest=/tmp/.buildx-cache
 
@@ -58,15 +68,25 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-buildx-
 
+      - name: Get docker tag for Alpine image
+        id: alpine
+        run: |
+          echo "::set-output name=IMAGE_TAG::$(awk -F '=' '/IMAGE_TAG/{print $2}' ./images/ckan/2.8/Dockerfile)"
+
       - name: Build CKAN 2.8 alpine
         uses: docker/build-push-action@v2
         with:
           context: ./images/ckan/2.8
           file: ./images/ckan/2.8/Dockerfile
           push: false
-          tags: keitaro/ckan:2.8
+          tags: keitaro/ckan:${{ steps.alpine.outputs.IMAGE_TAG }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,mode=max,dest=/tmp/.buildx-cache
+
+      - name: Get docker tag for Ubuntu image
+        id: ubuntu
+        run: |
+          echo "::set-output name=IMAGE_TAG::$(awk -F '=' '/IMAGE_TAG/{print $2}' ./images/ckan/2.8/Dockerfile.focal)"
 
       - name: Build CKAN 2.8 ubuntu
         uses: docker/build-push-action@v2
@@ -74,7 +94,7 @@ jobs:
           context: ./images/ckan/2.8
           file: ./images/ckan/2.8/Dockerfile.focal
           push: false
-          tags: keitaro/ckan:2.8-focal
+          tags: keitaro/ckan:${{ steps.ubuntu.outputs.IMAGE_TAG }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,mode=max,dest=/tmp/.buildx-cache
 
@@ -94,15 +114,25 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-buildx-
 
+      - name: Get docker tag for Alpine image
+        id: alpine
+        run: |
+          echo "::set-output name=IMAGE_TAG::$(awk -F '=' '/IMAGE_TAG/{print $2}' ./images/ckan/2.7/Dockerfile)"
+
       - name: Build CKAN 2.7 alpine
         uses: docker/build-push-action@v2
         with:
           context: ./images/ckan/2.7
           file: ./images/ckan/2.7/Dockerfile
           push: false
-          tags: keitaro/ckan:2.7
+          tags: keitaro/ckan:${{ steps.alpine.outputs.IMAGE_TAG }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,mode=max,dest=/tmp/.buildx-cache
+
+      - name: Get docker tag for Ubuntu image
+        id: ubuntu
+        run: |
+          echo "::set-output name=IMAGE_TAG::$(awk -F '=' '/IMAGE_TAG/{print $2}' ./images/ckan/2.7/Dockerfile.focal)"
 
       - name: Build CKAN 2.7 ubuntu
         uses: docker/build-push-action@v2
@@ -110,7 +140,7 @@ jobs:
           context: ./images/ckan/2.7
           file: ./images/ckan/2.7/Dockerfile.focal
           push: false
-          tags: keitaro/ckan:2.7-focal
+          tags: keitaro/ckan:${{ steps.ubuntu.outputs.IMAGE_TAG }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,mode=max,dest=/tmp/.buildx-cache
 
@@ -130,12 +160,17 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-buildx-
 
+      - name: Get docker tag for datapusher image
+        id: datapusher
+        run: |
+          echo "::set-output name=IMAGE_TAG::$(awk -F '=' '/IMAGE_TAG/{print $2}' ./images/datapusher/Dockerfile)"
+
       - name: Build CKAN datapusher
         uses: docker/build-push-action@v2
         with:
           context: ./images/datapusher
           file: ./images/datapusher/Dockerfile
           push: false
-          tags: keitaro/ckandatapusher:latest
+          tags: keitaro/ckandatapusher:${{ steps.datapusher.outputs.IMAGE_TAG }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,mode=max,dest=/tmp/.buildx-cache
