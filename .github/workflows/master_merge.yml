@@ -29,10 +29,12 @@ jobs:
       - name: Cache Docker layers
         uses: actions/cache@v2
         with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          path: |
+            /tmp/.buildx-cache-alpine-2-9
+            /tmp/.buildx-cache-ubuntu-2-9
+          key: ${{ runner.os }}-buildx-2-9-${{ github.sha }}
           restore-keys: |
-            ${{ runner.os }}-buildx
+            ${{ runner.os }}-buildx-2-9
 
       - name: Get docker tag for Alpine image
         id: alpine
@@ -48,8 +50,8 @@ jobs:
           tags: |
             keitaro/ckan:${{ steps.alpine.outputs.IMAGE_TAG }}
             ghcr.io/keitaroinc/ckan:${{ steps.alpine.outputs.IMAGE_TAG }}
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache
+          cache-from: type=local,src=/tmp/.buildx-cache-alpine-2-9
+          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-alpine-2-9
 
       - name: Get docker tag for Ubuntu image
         id: ubuntu
@@ -65,8 +67,8 @@ jobs:
           tags: |
             keitaro/ckan:${{ steps.ubuntu.outputs.IMAGE_TAG }}
             ghcr.io/keitaroinc/ckan:${{ steps.ubuntu.outputs.IMAGE_TAG }}
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache
+          cache-from: type=local,src=/tmp/.buildx-cache-ubuntu-2-9
+          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-ubuntu-2-9
 
   build-ckan-2-8:
     runs-on: ubuntu-latest
@@ -92,10 +94,12 @@ jobs:
       - name: Cache Docker layers
         uses: actions/cache@v2
         with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          path: |
+            /tmp/.buildx-cache-alpine-2-8
+            /tmp/.buildx-cache-ubuntu-2-8
+          key: ${{ runner.os }}-buildx-2-8-${{ github.sha }}
           restore-keys: |
-            ${{ runner.os }}-buildx-
+            ${{ runner.os }}-buildx-2-8
 
       - name: Get docker tag for Alpine image
         id: alpine
@@ -111,8 +115,8 @@ jobs:
           tags: |
             keitaro/ckan:${{ steps.alpine.outputs.IMAGE_TAG }}
             ghcr.io/keitaroinc/ckan:${{ steps.alpine.outputs.IMAGE_TAG }}
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache
+          cache-from: type=local,src=/tmp/.buildx-cache-alpine-2-8
+          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-alpine-2-8
 
       - name: Get docker tag for Ubuntu image
         id: ubuntu
@@ -128,8 +132,8 @@ jobs:
           tags: |
             keitaro/ckan:${{ steps.ubuntu.outputs.IMAGE_TAG }}
             ghcr.io/keitaroinc/ckan:${{ steps.ubuntu.outputs.IMAGE_TAG }}
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache
+          cache-from: type=local,src=/tmp/.buildx-cache-ubuntu-2-8
+          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-ubuntu-2-8
 
   build-ckan-2-7:
     runs-on: ubuntu-latest
@@ -155,10 +159,12 @@ jobs:
       - name: Cache Docker layers
         uses: actions/cache@v2
         with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          path: |
+            /tmp/.buildx-cache-alpine-2-7
+            /tmp/.buildx-cache-ubuntu-2-7
+          key: ${{ runner.os }}-buildx-2-7-${{ github.sha }}
           restore-keys: |
-            ${{ runner.os }}-buildx-
+            ${{ runner.os }}-buildx-2-7
 
       - name: Get docker tag for Alpine image
         id: alpine
@@ -174,8 +180,8 @@ jobs:
           tags: |
             keitaro/ckan:${{ steps.alpine.outputs.IMAGE_TAG }}
             ghcr.io/keitaroinc/ckan:${{ steps.alpine.outputs.IMAGE_TAG }}
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache
+          cache-from: type=local,src=/tmp/.buildx-cache-alpine-2-7
+          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-alpine-2-7
 
       - name: Get docker tag for Ubuntu image
         id: ubuntu
@@ -191,8 +197,8 @@ jobs:
           tags: |
             keitaro/ckan:${{ steps.ubuntu.outputs.IMAGE_TAG }}
             ghcr.io/keitaroinc/ckan:${{ steps.ubuntu.outputs.IMAGE_TAG }}
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache
+          cache-from: type=local,src=/tmp/.buildx-cache-ubuntu-2-7
+          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-ubuntu-2-7
 
   build-ckan-datapusher:
     runs-on: ubuntu-latest
@@ -218,10 +224,10 @@ jobs:
       - name: Cache Docker layers
         uses: actions/cache@v2
         with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          path: /tmp/.buildx-cache-datapusher
+          key: ${{ runner.os }}-buildx-datapusher-${{ github.sha }}
           restore-keys: |
-            ${{ runner.os }}-buildx-
+            ${{ runner.os }}-buildx-datapusher
 
       - name: Get docker tag for datapusher image
         id: datapusher
@@ -237,5 +243,5 @@ jobs:
           tags: |
             keitaro/datapusher:${{ steps.datapusher.outputs.IMAGE_TAG }}
             ghcr.io/keitaroinc/datapusher:${{ steps.datapusher.outputs.IMAGE_TAG }}
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache
+          cache-from: type=local,src=/tmp/.buildx-cache-datapusher
+          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-datapusher

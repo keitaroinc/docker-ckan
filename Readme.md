@@ -15,7 +15,11 @@ and Github Container Registry:
 Looking to run CKAN on Kubernetes? Check out our [CKAN Helm Chart](https://github.com/keitaroinc/ckan-helm)!
 
 ## Overview
-All images are based on [Alpine Linux](https://alpinelinux.org/) and include only required extensions to start a CKAN instance. The docker images are built using a multi-stage docker approach in order to produce slim production grade docker images with the right libraries and configuration. This multi-stage approach allows us to build python binary wheels in the build stages that later on we install in the main stage.
+Images are provided in two flavors:
+- [Alpine Linux](https://alpinelinux.org/) based images
+- [Ubuntu Focal](https://ubuntu.com/) based images are the ones ending with `-focal` in the tag name
+
+The Docker containers include only the required extensions to start a CKAN instance. The docker images are built using a multi-stage docker approach in order to produce slim production grade docker images with the right libraries and configuration. This multi-stage approach allows us to build python binary wheels in the build stages that later on we install in the main stage.
 
 Directory layout:
 - [compose](./compose) - contains a docker-compose setup allowing users to spin up a CKAN setup easily using [docker-compose](https://docs.docker.com/compose/)
