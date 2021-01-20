@@ -1,8 +1,8 @@
-name: Build and push docker images
+name: Docker Image Build
 
 on:
   push:
-    branches: workflow-fix
+    branches: master
 
 jobs:
   build-ckan-2-9:
