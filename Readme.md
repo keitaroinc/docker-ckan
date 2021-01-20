@@ -1,6 +1,6 @@
 # Dockerized CKAN 
 
-[![License][]][1] [![Docker Pulls][]][2] [![Chat on Gitter][]][3]
+[![build-status](https://github.com/keitaroinc/docker-ckan/workflows/Docker%20Image%20Build/badge.svg?branch=master)](https://github.com/keitaroinc/docker-ckan/actions) [![License][]][1] [![Docker Pulls][]][2] [![Chat on Gitter][]][3]
     
 This repository contains base docker images, examples and docker-compose used to build and run CKAN. 
 
