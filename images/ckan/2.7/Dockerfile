@@ -1,7 +1,10 @@
 ##################
 ### Build CKAN ###
 ##################
-FROM alpine:3.12 as ckanbuild
+FROM alpine:3.13 as ckanbuild
+
+# Used by Github Actions to tag the image with
+ENV IMAGE_TAG=2.7.9
 
 # Set CKAN version to build
 ENV GIT_URL=https://github.com/ckan/ckan.git
@@ -36,7 +39,7 @@ RUN apk add --no-cache \
         libxslt-dev
 
 # Install version 9.x of postgresql-dev so that CKAN requirements can be built
-RUN apk add --repository http://dl-cdn.alpinelinux.org/alpine/v3.6/main \
+RUN apk add --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/v3.6/main \
         postgresql-dev~=9.6
 
 # Create the src directory
@@ -61,7 +64,7 @@ RUN pip wheel --wheel-dir=/wheels uwsgi==2.0.19.1 gevent==20.6.2 greenlet==0.4.1
 ###########################
 ### Default-Extensions ####
 ###########################
-FROM alpine:3.12 as extbuild
+FROM alpine:3.13 as extbuild
 
 # Set src dirs
 ENV SRC_DIR=/srv/app/src
@@ -93,21 +96,22 @@ RUN pip wheel --wheel-dir=/wheels git+${ENVVARS_GIT_URL}@${ENVVARS_GIT_BRANCH}#e
 ############
 ### MAIN ###
 ############
-FROM alpine:3.12
+FROM alpine:3.13
 
-MAINTAINER Keitaro Inc <info@keitaro.com>
+LABEL maintainer="Keitaro Inc <info@keitaro.com>"
+LABEL org.opencontainers.image.source https://github.com/keitaroinc/docker-ckan
 
 ENV APP_DIR=/srv/app
 ENV SRC_DIR=/srv/app/src
+ENV CKAN_DIR=${SRC_DIR}/ckan
 ENV DATA_DIR=/srv/app/data
 ENV PIP_SRC=${SRC_DIR}
 ENV CKAN_SITE_URL=http://localhost:5000
 ENV CKAN__PLUGINS envvars image_view text_view recline_view datastore datapusher
 
-WORKDIR ${APP_DIR}
-
 # Install necessary packages to run CKAN
-RUN apk add --no-cache git \
+RUN apk add --no-cache \ 
+        git \
         bash \
         gettext \
         curl \
@@ -119,7 +123,7 @@ RUN apk add --no-cache git \
         tzdata \
         apache2-utils && \
     # Install version 9.x of postgresql-client so that CKAN can run
-    apk add --repository http://dl-cdn.alpinelinux.org/alpine/v3.6/main \
+    apk add --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/v3.6/main \
         postgresql-client~=9.6 && \
     # Create SRC_DIR
     mkdir -p ${SRC_DIR}
@@ -131,18 +135,19 @@ RUN curl -o ${SRC_DIR}/get-pip.py https://bootstrap.pypa.io/get-pip.py && \
 # Get artifacts from build stages
 COPY --from=ckanbuild /wheels /srv/app/wheels
 COPY --from=extbuild /wheels /srv/app/ext_wheels
-COPY --from=ckanbuild /srv/app/src/ckan /srv/app/src/ckan
+COPY --from=ckanbuild /srv/app/src/ckan ${CKAN_DIR}
 
 # Additional install steps for build stages artifacts
-RUN pip install --no-index --find-links=/srv/app/wheels uwsgi gevent
+RUN pip install --no-index --find-links=/srv/app/wheels uwsgi==2.0.19.1 gevent==20.6.2
 
 # Create a local user and group to run the app
 RUN addgroup -g 92 -S ckan && \
     adduser -u 92 -h /srv/app -H -D -S -G ckan ckan
 
+WORKDIR ${CKAN_DIR}
+
 # Install CKAN
 RUN pip install -e /srv/app/src/ckan && \
-    cd ${SRC_DIR}/ckan && \
     cp who.ini ${APP_DIR} && \
     pip install --no-index --find-links=/srv/app/wheels -r requirements.txt && \
     # Install default CKAN extensions
@@ -165,6 +170,8 @@ RUN rm -rf /srv/app/wheels /srv/app/ext_wheels
 
 # Copy necessary scripts
 COPY setup/app ${APP_DIR}
+
+WORKDIR ${APP_DIR}
 
 # Copy the alias script for paster to be ckan so it's compatible with 2.9
 COPY setup/bin/ckan /usr/bin/ckan

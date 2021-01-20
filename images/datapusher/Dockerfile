@@ -1,7 +1,10 @@
 #############
 ### Build ###
 #############
-FROM alpine:3.12 as build
+FROM alpine:3.13 as build
+
+# Used by Github Actions to tag the image with
+ENV IMAGE_TAG=0.0.17
 
 # Set datapusher version to build
 ENV GIT_URL https://github.com/keitaroinc/datapusher.git
@@ -51,9 +54,10 @@ RUN pip wheel --wheel-dir=/wheels uwsgi==2.0.19.1 gevent==20.6.2 greenlet==0.4.1
 ############
 ### MAIN ###
 ############
-FROM alpine:3.12
+FROM alpine:3.13
 
-MAINTAINER Keitaro Inc <info@keitaro.com>
+LABEL maintainer="Keitaro Inc <info@keitaro.com>"
+LABEL org.opencontainers.image.source https://github.com/keitaroinc/docker-ckan
 
 ENV APP_DIR=/srv/app
 ENV JOB_CONFIG ${APP_DIR}/datapusher_settings.py
@@ -67,14 +71,14 @@ RUN apk add --no-cache \
         libxslt
 
 # Install pip
-RUN curl -o ${src_dir}/get-pip.py https://bootstrap.pypa.io/get-pip.py && \
-    python3 ${src_dir}/get-pip.py
+RUN curl -o /tmp/get-pip.py https://bootstrap.pypa.io/get-pip.py && \
+    python3 /tmp/get-pip.py
 
 # Get artifacts from build stages
 COPY --from=build /wheels /srv/app/wheels
 
 # Install uwsgi and gevent
-RUN pip install --no-index --find-links=/srv/app/wheels uwsgi gevent
+RUN pip install --no-index --find-links=/srv/app/wheels uwsgi==2.0.19.1 gevent==20.6.2
 
 # Create a local user and group to run the app
 RUN addgroup -g 92 -S ckan && \

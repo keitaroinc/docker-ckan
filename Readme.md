@@ -8,10 +8,18 @@ We build and publish docker images built using this repository to Dockerhub:
 - [CKAN docker images](https://hub.docker.com/r/keitaro/ckan). 
 - [Datapusher docker images](https://hub.docker.com/r/keitaro/ckan-datapusher)
 
+and Github Container Registry:
+- [CKAN docker images on GHCR](https://github.com/orgs/keitaroinc/packages/container/package/ckan)
+- [Datapusher docker images on GHCR](https://github.com/orgs/keitaroinc/packages/container/package/datapusher)
+
 Looking to run CKAN on Kubernetes? Check out our [CKAN Helm Chart](https://github.com/keitaroinc/ckan-helm)!
 
 ## Overview
-All images are based on [Alpine Linux](https://alpinelinux.org/) and include only required extensions to start a CKAN instance. The docker images are built using a multi-stage docker approach in order to produce slim production grade docker images with the right libraries and configuration. This multi-stage approach allows us to build python binary wheels in the build stages that later on we install in the main stage.
+Images are provided in two flavors:
+- [Alpine Linux](https://alpinelinux.org/) based images
+- [Ubuntu Focal](https://ubuntu.com/) based images are the ones ending with `-focal` in the tag name
+
+The Docker containers include only the required extensions to start a CKAN instance. The docker images are built using a multi-stage docker approach in order to produce slim production grade docker images with the right libraries and configuration. This multi-stage approach allows us to build python binary wheels in the build stages that later on we install in the main stage.
 
 Directory layout:
 - [compose](./compose) - contains a docker-compose setup allowing users to spin up a CKAN setup easily using [docker-compose](https://docs.docker.com/compose/)
@@ -40,7 +48,7 @@ We recommend to use a multi-stage approach to extend the docker images that we p
 ###################
 ### Extensions ####
 ###################
-FROM keitaro/ckan:2.9.1 as extbuild
+FROM ghcr.io/keitaroinc/ckan:2.9.1 as extbuild
 
 # Switch to the root user
 USER root
@@ -54,7 +62,7 @@ RUN pip wheel --wheel-dir=/wheels git+https://github.com/acmecorp/ckanext-acme@0
 ############
 ### MAIN ###
 ############
-FROM keitaro/ckan:2.9.1
+FROM ghcr.io/keitaroinc/ckan:2.9.1
 
 # Add the custom extensions to the plugins list
 ENV CKAN__PLUGINS envvars image_view text_view recline_view datastore datapusher acme
@@ -84,9 +92,9 @@ You can add scripts to CKAN custom images and copy them to the *docker-afterinit
 ## Build
 To build a CKAN image run:
 ```sh 
-docker build --tag keitaro/ckan:2.9.1 images/ckan/2.9
+docker build --tag ghcr.io/keitaroinc/ckan:2.9.1 images/ckan/2.9
 ``` 
-The –-tag keitaro/ckan:2.9.1 flag sets the image name to ketiaro/ckan:2.9.1 and 'images/ckan/2.9'  at the end tells docker build to use the context into the specified directory where the Dockerfile and related contents are.
+The –-tag ghcr.io/keitaroinc/ckan:2.9.1 flag sets the image name to ghcr.io/keitaroinc/ckan:2.9.1 and 'images/ckan/2.9'  at the end tells docker build to use the context into the specified directory where the Dockerfile and related contents are.
 
 ## Upload to DockerHub
 >*It's recommended to upload built images to DockerHub* 

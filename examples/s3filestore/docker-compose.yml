@@ -33,7 +33,7 @@ services:
 
   datapusher:
     container_name: datapusher
-    image: keitaro/ckan-datapusher:${DATAPUSHER_VERSION}
+    image: ghcr.io/keitaroinc/datapusher:${DATAPUSHER_VERSION}
     networks:
       - frontend
       - backend
