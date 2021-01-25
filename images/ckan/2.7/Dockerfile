@@ -46,7 +46,7 @@ RUN apk add --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/v3.6/ma
 RUN mkdir -p ${SRC_DIR}
 
 # Install pip
-RUN curl -o ${SRC_DIR}/get-pip.py https://bootstrap.pypa.io/get-pip.py && \
+RUN curl -o ${SRC_DIR}/get-pip.py https://bootstrap.pypa.io/2.7/get-pip.py && \
     python ${SRC_DIR}/get-pip.py
 
 # Fetch and build CKAN and requirements
@@ -87,7 +87,7 @@ RUN apk add --no-cache \
 RUN mkdir -p ${SRC_DIR}
 
 # Install pip
-RUN curl -o ${SRC_DIR}/get-pip.py https://bootstrap.pypa.io/get-pip.py && \
+RUN curl -o ${SRC_DIR}/get-pip.py https://bootstrap.pypa.io/2.7/get-pip.py && \
     python ${SRC_DIR}/get-pip.py
 
 # Fetch and build the default CKAN extensions
@@ -129,7 +129,7 @@ RUN apk add --no-cache \
     mkdir -p ${SRC_DIR}
 
 # Install pip
-RUN curl -o ${SRC_DIR}/get-pip.py https://bootstrap.pypa.io/get-pip.py && \
+RUN curl -o ${SRC_DIR}/get-pip.py https://bootstrap.pypa.io/2.7/get-pip.py && \
     python ${SRC_DIR}/get-pip.py
 
 # Get artifacts from build stages
