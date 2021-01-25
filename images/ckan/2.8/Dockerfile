@@ -43,7 +43,7 @@ RUN mkdir -p ${SRC_DIR}
 
 # Install pip
 RUN curl -o ${SRC_DIR}/get-pip.py https://bootstrap.pypa.io/2.7/get-pip.py && \
-    python ${SRC_DIR}/get-pip.py
+    python ${SRC_DIR}/get-pip.py 'pip==20.3.3'
 
 # Fetch and build CKAN and requirements
 RUN pip install -e git+${GIT_URL}@${GIT_BRANCH}#egg=ckan
@@ -84,7 +84,7 @@ RUN mkdir -p ${SRC_DIR}
 
 # Install pip
 RUN curl -o ${SRC_DIR}/get-pip.py https://bootstrap.pypa.io/2.7/get-pip.py && \
-    python ${SRC_DIR}/get-pip.py
+    python ${SRC_DIR}/get-pip.py 'pip==20.3.3'
 
 # Fetch and build the default CKAN extensions
 RUN pip wheel --wheel-dir=/wheels git+${ENVVARS_GIT_URL}@${ENVVARS_GIT_BRANCH}#egg=ckanext-envvars
@@ -123,7 +123,7 @@ RUN apk add --no-cache git \
 
 # Install pip
 RUN curl -o ${SRC_DIR}/get-pip.py https://bootstrap.pypa.io/2.7/get-pip.py && \
-    python ${SRC_DIR}/get-pip.py
+    python ${SRC_DIR}/get-pip.py 'pip==20.3.3'
 
 # Get artifacts from build stages
 COPY --from=ckanbuild /wheels /srv/app/wheels
