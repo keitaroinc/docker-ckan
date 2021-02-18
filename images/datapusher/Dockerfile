@@ -33,7 +33,9 @@ RUN apk add --no-cache \
         libffi-dev \
         openssl-dev \
         libxml2-dev \
-        libxslt-dev
+        libxslt-dev \
+        rust \
+        cargo
 
 # Create the src directory
 RUN mkdir -p ${SRC_DIR}
