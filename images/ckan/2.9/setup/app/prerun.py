@@ -2,7 +2,7 @@ import os
 import sys
 import subprocess
 import psycopg2
-import sqlalchemy
+from sqlalchemy.engine.url import make_url
 import urllib.request, urllib.error, urllib.parse
 import re
 
@@ -24,10 +24,10 @@ def check_db_connection(retry=None):
 
     conn_str = os.environ.get('CKAN_SQLALCHEMY_URL', '')
     try:
-        db_user = sqlalchemy.engine.url.make_url(conn_str).username
-        db_passwd = sqlalchemy.engine.url.make_url(conn_str).password
-        db_host = sqlalchemy.engine.url.make_url(conn_str).host
-        db_name = sqlalchemy.engine.url.make_url(conn_str).database
+        db_user = make_url(conn_str).username
+        db_passwd = make_url(conn_str).password
+        db_host = make_url(conn_str).host
+        db_name = make_url(conn_str).database
         connection = psycopg2.connect(user=db_user,
                                host=db_host,
                                password=db_passwd,
@@ -104,10 +104,10 @@ def init_datastore():
     datastore_perms_command = ['ckan', '-c', ckan_ini, 'datastore',
                                'set-permissions']
 
-    db_user = sqlalchemy.engine.url.make_url(conn_str).username
-    db_passwd = sqlalchemy.engine.url.make_url(conn_str).password
-    db_host = sqlalchemy.engine.url.make_url(conn_str).host
-    db_name = sqlalchemy.engine.url.make_url(conn_str).database
+    db_user = make_url(conn_str).username
+    db_passwd = make_url(conn_str).password
+    db_host = make_url(conn_str).host
+    db_name = make_url(conn_str).database
     connection = psycopg2.connect(user=db_user,
                             host=db_host,
                             password=db_passwd,
