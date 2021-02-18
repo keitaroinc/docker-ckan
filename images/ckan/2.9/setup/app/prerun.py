@@ -2,6 +2,7 @@ import os
 import sys
 import subprocess
 import psycopg2
+from sqlalchemy.engine.url import make_url
 import urllib.request, urllib.error, urllib.parse
 import re
 
@@ -23,7 +24,14 @@ def check_db_connection(retry=None):
 
     conn_str = os.environ.get('CKAN_SQLALCHEMY_URL', '')
     try:
-        connection = psycopg2.connect(conn_str)
+        db_user = make_url(conn_str).username
+        db_passwd = make_url(conn_str).password
+        db_host = make_url(conn_str).host
+        db_name = make_url(conn_str).database
+        connection = psycopg2.connect(user=db_user,
+                               host=db_host,
+                               password=db_passwd,
+                               database=db_name)
 
     except psycopg2.Error as e:
         print((str(e)))
@@ -96,7 +104,14 @@ def init_datastore():
     datastore_perms_command = ['ckan', '-c', ckan_ini, 'datastore',
                                'set-permissions']
 
-    connection = psycopg2.connect(conn_str)
+    db_user = make_url(conn_str).username
+    db_passwd = make_url(conn_str).password
+    db_host = make_url(conn_str).host
+    db_name = make_url(conn_str).database
+    connection = psycopg2.connect(user=db_user,
+                            host=db_host,
+                            password=db_passwd,
+                            database=db_name)
     cursor = connection.cursor()
 
     print('[prerun] Initializing datastore db - start')
@@ -106,8 +121,10 @@ def init_datastore():
             stdout=subprocess.PIPE)
 
         perms_sql = datastore_perms.stdout.read()
+        perms_sql = perms_sql.decode('utf-8')
+        perms_sql = perms_sql.replace("@"+db_host, "")
         # Remove internal pg command as psycopg2 does not like it
-        perms_sql = re.sub('\\\\connect \"(.*)\"', '', perms_sql.decode('utf-8'))
+        perms_sql = re.sub('\\\\connect \"(.*)\"', '', perms_sql)
         cursor.execute(perms_sql)
         for notice in connection.notices:
             print(notice)
