@@ -74,7 +74,7 @@ COPY --from=extbuild /wheels /srv/app/ext_wheels
 
 # Install and enable the custom extensions
 RUN pip install --no-index --find-links=/srv/app/ext_wheels ckanext-acme && \
-    ckan -c ${APP_DIR}/production.ini config-tool "ckan.plugins = ${CKAN__PLUGINS}" && \
+    ckan config-tool ${APP_DIR}/production.ini "ckan.plugins = ${CKAN__PLUGINS}" && \
     chown -R ckan:ckan /srv/app
 
 # Remove wheels
