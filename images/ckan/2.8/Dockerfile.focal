@@ -1,7 +1,7 @@
 ##################
 ### Build CKAN ###
 ##################
-FROM ubuntu:focal-20201106 as ckanbuild
+FROM ubuntu:focal-20210217 as ckanbuild
 
 # Used by Github Actions to tag the image with
 ENV IMAGE_TAG=2.8.7-focal
@@ -64,7 +64,7 @@ RUN mkdir -p ${SRC_DIR}
 
 # Install pip
 RUN curl -o ${SRC_DIR}/get-pip.py https://bootstrap.pypa.io/pip/2.7/get-pip.py && \
-    python ${SRC_DIR}/get-pip.py
+    python ${SRC_DIR}/get-pip.py 'pip==20.3.3'
 
 # Fetch and build CKAN and requirements
 RUN pip install -e git+${GIT_URL}@${GIT_BRANCH}#egg=ckan
@@ -81,7 +81,7 @@ RUN pip wheel --wheel-dir=/wheels uwsgi==2.0.19.1 gevent==20.6.2 greenlet==0.4.1
 ###########################
 ### Default-Extensions ####
 ###########################
-FROM ubuntu:focal-20201106 as extbuild
+FROM ubuntu:focal-20210217 as extbuild
 
 # Set src dirs
 ENV SRC_DIR=/srv/app/src
@@ -107,7 +107,7 @@ RUN mkdir -p ${SRC_DIR}
 
 # Install pip
 RUN curl -o ${SRC_DIR}/get-pip.py https://bootstrap.pypa.io/pip/2.7/get-pip.py && \
-    python ${SRC_DIR}/get-pip.py
+    python ${SRC_DIR}/get-pip.py 'pip==20.3.3'
 
 # Fetch and build the default CKAN extensions
 RUN pip wheel --wheel-dir=/wheels git+${ENVVARS_GIT_URL}@${ENVVARS_GIT_BRANCH}#egg=ckanext-envvars
@@ -115,7 +115,7 @@ RUN pip wheel --wheel-dir=/wheels git+${ENVVARS_GIT_URL}@${ENVVARS_GIT_BRANCH}#e
 ############
 ### MAIN ###
 ############
-FROM ubuntu:focal-20201106
+FROM ubuntu:focal-20210217
 
 LABEL maintainer="Keitaro Inc <info@keitaro.com>"
 LABEL org.opencontainers.image.source https://github.com/keitaroinc/docker-ckan
@@ -166,7 +166,7 @@ RUN apt-get update && \
 
 # Install pip
 RUN curl -o ${SRC_DIR}/get-pip.py https://bootstrap.pypa.io/pip/2.7/get-pip.py && \
-    python ${SRC_DIR}/get-pip.py
+    python ${SRC_DIR}/get-pip.py 'pip==20.3.3'
 
 # Get artifacts from build stages
 COPY --from=ckanbuild /wheels /srv/app/wheels
