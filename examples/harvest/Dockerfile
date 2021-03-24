@@ -16,7 +16,9 @@ RUN apk add --no-cache \
         g++ \
         libffi-dev \
         openssl-dev \
-        python3-dev 
+        python3-dev \
+        rust \
+        cargo
 
 # Fetch and build the custom CKAN extensions
 RUN pip wheel --wheel-dir=/wheels git+${HARVEST_GIT_URL}@${HARVEST_GIT_BRANCH}#egg=ckanext-harvest
