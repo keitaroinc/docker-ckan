@@ -8,7 +8,7 @@ CKAN_SITE_URL=http://localhost:5000
 CKAN_PORT=5000
 CKAN_MAX_UPLOAD_SIZE_MB=10
 # CKAN Plugins
-CKAN__PLUGINS=envvars s3filestore image_view text_view recline_view datastore datapusher
+CKAN__PLUGINS=envvars s3filestore image_view webpage_view text_view recline_view datastore datapusher
 # CKAN requires storage path to be set in order for filestore to be enabled
 CKAN__STORAGE_PATH=/srv/app/data
 CKAN__WEBASSETS__PATH=/srv/app/data/webassets
@@ -16,6 +16,7 @@ CKAN__WEBASSETS__PATH=/srv/app/data/webassets
 CKAN_SYSADMIN_NAME=sysadmin
 CKAN_SYSADMIN_PASSWORD=password
 CKAN_SYSADMIN_EMAIL=sysadmin@ckantest.com
+CKAN__VIEWS__DEFAULT_VIEWS=image_view webpage_view text_view recline_view
 
 # Email settings
 CKAN_SMTP_SERVER=smtp.corporateict.domain:25
