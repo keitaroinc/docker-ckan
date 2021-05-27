@@ -1,7 +1,7 @@
 ###################
 ### Extensions ####
 ###################
-FROM ghcr.io/keitaroinc/ckan:2.8.8 as extbuild
+FROM ghcr.io/keitaroinc/ckan:2.9.3 as extbuild
 
 # Locations and tags, please use specific tags or revisions
 ENV S3FILESTORE_GIT_URL=https://github.com/keitaroinc/ckanext-s3filestore
@@ -20,11 +20,11 @@ USER ckan
 ############
 ### MAIN ###
 ############
-FROM ghcr.io/keitaroinc/ckan:2.8.8
+FROM ghcr.io/keitaroinc/ckan:2.9.3
 
 LABEL maintainer="Keitaro Inc <info@keitaro.com>"
 
-ENV CKAN__PLUGINS envvars s3filestore image_view text_view recline_view datastore datapusher
+ENV CKAN__PLUGINS envvars s3filestore image_view webpage_view text_view recline_view datastore datapusher
 
 # Switch to the root user
 USER root
@@ -34,7 +34,7 @@ COPY --from=extbuild /wheels /srv/app/ext_wheels
 # Install and enable the custom extensions
 RUN pip install --no-index --find-links=/srv/app/ext_wheels ckanext-s3filestore && \
     pip install --no-index --find-links=/srv/app/ext_wheels -r /srv/app/ext_wheels/s3filestore.txt && \
-    paster --plugin=ckan config-tool "${APP_DIR}/production.ini" "ckan.plugins = ${CKAN__PLUGINS}" && \
+    ckan config-tool "${APP_DIR}/production.ini" "ckan.plugins = ${CKAN__PLUGINS}" && \
     chown -R ckan:ckan /srv/app
 
 # Remove wheels
