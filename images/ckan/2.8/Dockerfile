@@ -1,14 +1,14 @@
 ##################
 ### Build CKAN ###
 ##################
-FROM alpine:3.13.5 as ckanbuild
+FROM alpine:3.14.2 as ckanbuild
 
 # Used by Github Actions to tag the image with
-ENV IMAGE_TAG=2.8.8
+ENV IMAGE_TAG=2.8.9
 
 # Set CKAN version to build
 ENV GIT_URL=https://github.com/ckan/ckan.git
-ENV GIT_BRANCH=ckan-2.8.8
+ENV GIT_BRANCH=ckan-2.8.9
 
 # Set src dirs
 ENV SRC_DIR=/srv/app/src
@@ -60,7 +60,7 @@ RUN pip wheel --wheel-dir=/wheels uwsgi==2.0.19.1 gevent==21.1.2 greenlet==1.1.0
 ###########################
 ### Default-Extensions ####
 ###########################
-FROM alpine:3.13.5 as extbuild
+FROM alpine:3.14.2 as extbuild
 
 # Set src dirs
 ENV SRC_DIR=/srv/app/src
@@ -92,7 +92,7 @@ RUN pip wheel --wheel-dir=/wheels git+${ENVVARS_GIT_URL}@${ENVVARS_GIT_BRANCH}#e
 ############
 ### MAIN ###
 ############
-FROM alpine:3.13.5
+FROM alpine:3.14.2
 
 LABEL maintainer="Keitaro Inc <info@keitaro.com>"
 LABEL org.opencontainers.image.source https://github.com/keitaroinc/docker-ckan
