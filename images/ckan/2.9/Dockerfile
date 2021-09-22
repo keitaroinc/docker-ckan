@@ -1,14 +1,14 @@
 ##################
 ### Build CKAN ###
 ##################
-FROM alpine:3.13.5 as ckanbuild
+FROM alpine:3.14.2 as ckanbuild
 
 # Used by Github Actions to tag the image with
-ENV IMAGE_TAG=2.9.3
+ENV IMAGE_TAG=2.9.4
 
 # Set CKAN version to build
 ENV GIT_URL=https://github.com/ckan/ckan.git
-ENV GIT_BRANCH=ckan-2.9.3
+ENV GIT_BRANCH=ckan-2.9.4
 
 # Set src dirs
 ENV SRC_DIR=/srv/app/src
@@ -17,10 +17,13 @@ ENV PIP_SRC=${SRC_DIR}
 WORKDIR ${SRC_DIR}
 
 # Packages to build CKAN requirements and plugins
-RUN apk add --no-cache \
+# Make sure we install python 3.8, cause CKAN is not compatible with 3.9
+RUN apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/v3.13/main \
+        python3=3.8.10-r0 \
+        python3-dev=3.8.10-r0 && \
+    apk add --no-cache \
         git \
         curl \
-        python3 \
         postgresql-dev \
         linux-headers \
         gcc \
@@ -33,7 +36,6 @@ RUN apk add --no-cache \
         musl-dev \
         pcre-dev \
         pcre \
-        python3-dev \
         libffi-dev \
         libxml2-dev \
         libxslt-dev
@@ -66,7 +68,7 @@ RUN pip wheel --wheel-dir=/wheels uwsgi==2.0.19.1 gevent==21.1.2 greenlet==1.1.0
 ###########################
 ### Default-Extensions ####
 ###########################
-FROM alpine:3.13.5 as extbuild
+FROM alpine:3.14.2 as extbuild
 
 # Set src dirs
 ENV SRC_DIR=/srv/app/src
@@ -79,11 +81,13 @@ ENV DEFAULT_EXTENSIONS envvars
 ENV ENVVARS_GIT_URL=https://github.com/okfn/ckanext-envvars
 ENV ENVVARS_GIT_BRANCH=0.0.1
 
-RUN apk add --no-cache \
+# Make sure we install python 3.8, cause CKAN is not compatible with 3.9
+RUN apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/v3.13/main \
+        python3=3.8.10-r0 \
+        python3-dev=3.8.10-r0 && \
+    apk add --no-cache \
         git \
-        curl \
-        python3 \
-        python3-dev
+        curl 
 
 # Link python to python3
 RUN ln -s /usr/bin/python3 /usr/bin/python
@@ -101,7 +105,7 @@ RUN pip wheel --wheel-dir=/wheels git+${ENVVARS_GIT_URL}@${ENVVARS_GIT_BRANCH}#e
 ############
 ### MAIN ###
 ############
-FROM alpine:3.13.5
+FROM alpine:3.14.2
 
 LABEL maintainer="Keitaro Inc <info@keitaro.com>"
 LABEL org.opencontainers.image.source https://github.com/keitaroinc/docker-ckan
@@ -115,12 +119,14 @@ ENV CKAN_SITE_URL=http://localhost:5000
 ENV CKAN__PLUGINS envvars image_view text_view recline_view datastore datapusher
 
 # Install necessary packages to run CKAN
-RUN apk add --no-cache git \
+# Make sure we install python 3.8, cause CKAN is not compatible with 3.9
+RUN apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/v3.13/main \
+        python3=3.8.10-r0 && \
+    apk add --no-cache git \
         bash \
         gettext \
         curl \
         postgresql-client \
-        python3 \
         libmagic \
         pcre \
         libxslt \

@@ -1,14 +1,14 @@
 ##################
 ### Build CKAN ###
 ##################
-FROM ubuntu:focal-20210416 as ckanbuild
+FROM ubuntu:focal-20210827 as ckanbuild
 
 # Used by Github Actions to tag the image with
-ENV IMAGE_TAG=2.7.11-focal
+ENV IMAGE_TAG=2.7.12-focal
 
 # Set CKAN version to build
 ENV GIT_URL=https://github.com/ckan/ckan.git
-ENV GIT_BRANCH=ckan-2.7.11
+ENV GIT_BRANCH=ckan-2.7.12
 
 # Set timezone
 ENV TZ=UTC
@@ -89,7 +89,7 @@ RUN pip wheel --wheel-dir=/wheels uwsgi==2.0.19.1 gevent==21.1.2 greenlet==1.1.0
 ###########################
 ### Default-Extensions ####
 ###########################
-FROM ubuntu:focal-20210416 as extbuild
+FROM ubuntu:focal-20210827 as extbuild
 
 # Set src dirs
 ENV SRC_DIR=/srv/app/src
@@ -123,7 +123,7 @@ RUN pip wheel --wheel-dir=/wheels git+${ENVVARS_GIT_URL}@${ENVVARS_GIT_BRANCH}#e
 ############
 ### MAIN ###
 ############
-FROM ubuntu:focal-20210416
+FROM ubuntu:focal-20210827
 
 LABEL maintainer="Keitaro Inc <info@keitaro.com>"
 LABEL org.opencontainers.image.source https://github.com/keitaroinc/docker-ckan

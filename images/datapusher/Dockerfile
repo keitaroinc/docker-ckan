@@ -1,7 +1,7 @@
 #############
 ### Build ###
 #############
-FROM alpine:3.13.5 as build
+FROM alpine:3.14.2 as build
 
 # Used by Github Actions to tag the image with
 ENV IMAGE_TAG=0.0.17
@@ -56,7 +56,7 @@ RUN pip wheel --wheel-dir=/wheels uwsgi==2.0.19.1 gevent==20.6.2 greenlet==0.4.1
 ############
 ### MAIN ###
 ############
-FROM alpine:3.13.5
+FROM alpine:3.14.2
 
 LABEL maintainer="Keitaro Inc <info@keitaro.com>"
 LABEL org.opencontainers.image.source https://github.com/keitaroinc/docker-ckan
