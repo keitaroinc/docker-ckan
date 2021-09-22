@@ -11,12 +11,14 @@ ENV HARVEST_GIT_BRANCH=v1.3.1
 USER root
 
 # Install necessary packages to build extensions
-RUN apk add --no-cache \
+# Make sure we install python 3.8, cause CKAN is not compatible with 3.9
+RUN apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/v3.13/main \
+        python3-dev=3.8.10-r0 && \
+    apk add --no-cache \
         gcc \
         g++ \
         libffi-dev \
         openssl-dev \
-        python3-dev \
         rust \
         cargo
 
