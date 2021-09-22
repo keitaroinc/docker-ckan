@@ -54,7 +54,9 @@ FROM ghcr.io/keitaroinc/ckan:2.9.4 as extbuild
 USER root
 
 # Install any system packages necessary to build extensions
-RUN apk add --no-cache python3-dev
+# Make sure we install python 3.8, cause CKAN is not compatible with 3.9
+RUN apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/v3.13/main \
+        python3-dev=3.8.10-r0 
 
 # Fetch and build the custom CKAN extensions
 RUN pip wheel --wheel-dir=/wheels git+https://github.com/acmecorp/ckanext-acme@0.0.1#egg=ckanext-acme
