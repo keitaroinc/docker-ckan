@@ -18,8 +18,11 @@ ENV PIP_SRC=${SRC_DIR}
 WORKDIR ${SRC_DIR}
 
 # Packages to build datapusher
-RUN apk add --no-cache \
-        python3 \
+# Make sure we install python 3.8, cause some dependencies are not compatible with 3.9
+RUN apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/v3.13/main \
+        python3=3.8.10-r0 \
+        python3-dev=3.8.10-r0 && \
+    apk add --no-cache \
         curl \
         gcc \
         make \
@@ -29,7 +32,6 @@ RUN apk add --no-cache \
         libtool \
         git \
         musl-dev \
-        python3-dev \
         libffi-dev \
         openssl-dev \
         libxml2-dev \
@@ -66,8 +68,10 @@ ENV JOB_CONFIG ${APP_DIR}/datapusher_settings.py
 
 WORKDIR ${APP_DIR}
 
-RUN apk add --no-cache \
-        python3 \
+# Make sure we install python 3.8, cause some dependencies are not compatible with 3.9
+RUN apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/v3.13/main \
+        python3=3.8.10-r0 \
+    apk add --no-cache \
         curl \
         libmagic \
         libxslt
