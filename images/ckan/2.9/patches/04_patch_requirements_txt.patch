@@ -1,5 +1,5 @@
---- requirements.txt	2022-01-19 01:33:36.736080826 +0100
-+++ requirements.txt	2022-01-19 01:37:35.882216912 +0100
+--- ckan/requirements.txt	2022-01-19 01:33:36.736080826 +0100
++++ ckan/requirements.txt	2022-01-19 01:37:35.882216912 +0100
 @@ -23,7 +23,7 @@
  jinja2==2.10.1            # via -r requirements.in, flask, flask-babel
  lxml==4.6.3               # via feedgen
