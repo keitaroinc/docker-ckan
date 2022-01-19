@@ -18,10 +18,9 @@ WORKDIR ${SRC_DIR}
 
 # Packages to build CKAN requirements and plugins
 # Make sure we install python 3.8, cause CKAN is not compatible with 3.9
-RUN apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/v3.13/main \
-        python3=3.8.10-r0 \
-        python3-dev=3.8.10-r0 && \
-    apk add --no-cache \
+RUN apk add --no-cache \
+        python3 \
+        python3-dev \
         git \
         curl \
         postgresql-dev \
@@ -82,10 +81,9 @@ ENV ENVVARS_GIT_URL=https://github.com/okfn/ckanext-envvars
 ENV ENVVARS_GIT_BRANCH=0.0.1
 
 # Make sure we install python 3.8, cause CKAN is not compatible with 3.9
-RUN apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/v3.13/main \
-        python3=3.8.10-r0 \
-        python3-dev=3.8.10-r0 && \
-    apk add --no-cache \
+RUN apk add --no-cache \
+        python3 \
+        python3-dev \
         git \
         curl 
 
@@ -120,9 +118,9 @@ ENV CKAN__PLUGINS envvars image_view text_view recline_view datastore datapusher
 
 # Install necessary packages to run CKAN
 # Make sure we install python 3.8, cause CKAN is not compatible with 3.9
-RUN apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/v3.13/main \
-        python3=3.8.10-r0 && \
-    apk add --no-cache git \
+RUN apk add --no-cache \
+        python3 \
+        git \
         bash \
         gettext \
         curl \

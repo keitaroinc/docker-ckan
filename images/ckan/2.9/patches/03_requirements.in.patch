@@ -1,0 +1,11 @@
+--- requirements.in	2022-01-19 01:33:36.736080826 +0100
++++ requirements.in	2022-01-19 01:35:54.517310487 +0100
+@@ -13,7 +13,7 @@
+ flask-multistatic==1.0
+ Jinja2==2.10.1
+ PyJWT==1.7.1
+-Markdown==2.6.7
++Markdown==3.3.3
+ passlib==1.6.5
+ polib==1.0.7
+ psycopg2==2.8.2
