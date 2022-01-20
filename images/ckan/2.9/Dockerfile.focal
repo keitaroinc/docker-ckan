@@ -118,6 +118,9 @@ RUN mkdir -p ${SRC_DIR}
 RUN curl -o ${SRC_DIR}/get-pip.py https://bootstrap.pypa.io/get-pip.py && \
     python ${SRC_DIR}/get-pip.py
 
+# Downgrade setuptools so that CKAN requirements can be built
+RUN pip install setuptools==44.1.0
+
 # Fetch and build the default CKAN extensions
 RUN pip wheel --wheel-dir=/wheels git+${ENVVARS_GIT_URL}@${ENVVARS_GIT_BRANCH}#egg=ckanext-envvars
 
@@ -179,6 +182,9 @@ RUN apt-get update && \
 # Install pip
 RUN curl -o ${SRC_DIR}/get-pip.py https://bootstrap.pypa.io/get-pip.py && \
     python ${SRC_DIR}/get-pip.py
+
+# Downgrade setuptools so that CKAN requirements can be built
+RUN pip install setuptools==44.1.0
 
 # Get artifacts from build stages
 COPY --from=ckanbuild /wheels /srv/app/wheels

@@ -1,7 +1,7 @@
 ##################
 ### Build CKAN ###
 ##################
-FROM alpine:3.14.2 as ckanbuild
+FROM alpine:3.13.7 as ckanbuild
 
 # Used by Github Actions to tag the image with
 ENV IMAGE_TAG=2.9.5
@@ -17,11 +17,9 @@ ENV PIP_SRC=${SRC_DIR}
 WORKDIR ${SRC_DIR}
 
 # Packages to build CKAN requirements and plugins
-# Make sure we install python 3.8, cause CKAN is not compatible with 3.9
-RUN apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/v3.13/main \
-        python3=3.8.10-r0 \
-        python3-dev=3.8.10-r0 && \
-    apk add --no-cache \
+RUN apk add --no-cache \
+        python3 \
+        python3-dev \
         git \
         curl \
         postgresql-dev \
@@ -68,7 +66,7 @@ RUN pip wheel --wheel-dir=/wheels uwsgi==2.0.19.1 gevent==21.1.2 greenlet==1.1.0
 ###########################
 ### Default-Extensions ####
 ###########################
-FROM alpine:3.14.2 as extbuild
+FROM alpine:3.13.7 as extbuild
 
 # Set src dirs
 ENV SRC_DIR=/srv/app/src
@@ -81,11 +79,9 @@ ENV DEFAULT_EXTENSIONS envvars
 ENV ENVVARS_GIT_URL=https://github.com/okfn/ckanext-envvars
 ENV ENVVARS_GIT_BRANCH=0.0.1
 
-# Make sure we install python 3.8, cause CKAN is not compatible with 3.9
-RUN apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/v3.13/main \
-        python3=3.8.10-r0 \
-        python3-dev=3.8.10-r0 && \
-    apk add --no-cache \
+RUN apk add --no-cache \
+        python3 \
+        python3-dev \
         git \
         curl 
 
@@ -105,7 +101,7 @@ RUN pip wheel --wheel-dir=/wheels git+${ENVVARS_GIT_URL}@${ENVVARS_GIT_BRANCH}#e
 ############
 ### MAIN ###
 ############
-FROM alpine:3.14.2
+FROM alpine:3.13.7
 
 LABEL maintainer="Keitaro Inc <info@keitaro.com>"
 LABEL org.opencontainers.image.source https://github.com/keitaroinc/docker-ckan
@@ -119,10 +115,8 @@ ENV CKAN_SITE_URL=http://localhost:5000
 ENV CKAN__PLUGINS envvars image_view text_view recline_view datastore datapusher
 
 # Install necessary packages to run CKAN
-# Make sure we install python 3.8, cause CKAN is not compatible with 3.9
-RUN apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/v3.13/main \
-        python3=3.8.10-r0 && \
-    apk add --no-cache git \
+RUN apk add --no-cache \
+        python3 \
         bash \
         gettext \
         curl \
