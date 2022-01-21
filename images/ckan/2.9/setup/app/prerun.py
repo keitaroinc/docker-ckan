@@ -83,7 +83,6 @@ def check_solr_connection(retry=None):
         conn_info = connection.read()
         # SolrCloud
         conn_info = re.sub(r'"zkConnected":true', '"zkConnected":True', conn_info.decode('utf-8'))
-        conn_info = re.sub(r'"zkConnected":false', '"zkConnected":False', conn_info.decode('utf-8'))
         eval(conn_info)
 
 def init_db():
