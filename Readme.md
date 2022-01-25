@@ -29,16 +29,16 @@ Directory layout:
 ## Running CKAN using docker-compose
 To start CKAN using docker-compose, simply change into the *compose* directory and run
 ```sh
-cd compose
+cd compose/2.9
 docker-compose build
 docker-compose up
 ```
 Check if CKAN was succesfuly started on http://localhost:5000. 
 
 ### Configuration
-In order to configure CKAN within docker-compose we use both build/up time variables loaded via the [.env](./compose/.env) file, and runtime variables loaded via the [.ckan-env](./compose/.ckan-env) file. 
+In order to configure CKAN within docker-compose we use both build/up time variables loaded via the [.env](./compose/2.9/.env) file, and runtime variables loaded via the [.ckan-env](./compose/2.9/.ckan-env) file. 
 
-Variables in the [.env](./compose/.env) file are loaded when running `docker-compose build` and `docker-compose up`, while variables in [.ckan-env](./compose/.ckan-env) file are used withing the CKAN container at runtime to configure CKAN and CKAN extensions using [ckanext-envvars](https://github.com/okfn/ckanext-envvars).
+Variables in the [.env](./compose/2.9/.env) file are loaded when running `docker-compose build` and `docker-compose up`, while variables in [.ckan-env](./compose/2.9/.ckan-env) file are used withing the CKAN container at runtime to configure CKAN and CKAN extensions using [ckanext-envvars](https://github.com/okfn/ckanext-envvars).
 
 ## Extending CKAN docker images
 Check some examples of extending CKAN docker images in the [examples](./examples) directory.

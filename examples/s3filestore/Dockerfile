@@ -5,7 +5,7 @@ FROM ghcr.io/keitaroinc/ckan:2.9.5 as extbuild
 
 # Locations and tags, please use specific tags or revisions
 ENV S3FILESTORE_GIT_URL=https://github.com/keitaroinc/ckanext-s3filestore
-ENV S3FILESTORE_GIT_BRANCH=master
+ENV S3FILESTORE_GIT_BRANCH=v1.0.0
 
 # Switch to the root user
 USER root

@@ -113,6 +113,7 @@ ENV CKAN__PLUGINS envvars image_view text_view recline_view datastore datapusher
 RUN apk add --no-cache \ 
         git \
         bash \
+        git \
         gettext \
         curl \
         python2 \

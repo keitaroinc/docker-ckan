@@ -108,6 +108,7 @@ ENV CKAN__PLUGINS envvars image_view text_view recline_view datastore datapusher
 # Install necessary packages to run CKAN
 RUN apk add --no-cache git \
         bash \
+        git \
         gettext \
         curl \
         postgresql-client \

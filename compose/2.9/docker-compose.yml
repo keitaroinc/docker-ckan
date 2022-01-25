@@ -2,15 +2,14 @@
 version: "3"
 
 volumes:
-  minio_data:
+  ckan_data:
   pg_data:
   solr_data:
 
 services:
   ckan:
     container_name: ckan
-    build:
-      context: .
+    image: ghcr.io/keitaroinc/ckan:${CKAN_VERSION}
     networks:
       - frontend
       - backend
@@ -30,6 +29,8 @@ services:
       - CKAN_MAX_UPLOAD_SIZE_MB=${CKAN_MAX_UPLOAD_SIZE_MB}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - DS_RO_PASS=${DATASTORE_READONLY_PASSWORD}
+    volumes:
+      - ckan_data:/srv/app/data
 
   datapusher:
     container_name: datapusher
@@ -44,14 +45,15 @@ services:
       - DATAPUSHER_CHUNK_SIZE=${DATAPUSHER_CHUNK_SIZE}
       - DATAPUSHER_CHUNK_INSERT_ROWS=${DATAPUSHER_CHUNK_INSERT_ROWS}
       - DATAPUSHER_DOWNLOAD_TIMEOUT=${DATAPUSHER_DOWNLOAD_TIMEOUT}
-      - DATAPUSHER_SSL_VERIFY=${DATAPUSHER_SSL_VERIFY}
+      - DATAPUSHER_SSL_VERIFY=${DATA_PUSHER_SSL_VERIFY}
       - DATAPUSHER_REWRITE_RESOURCES=${DATAPUSHER_REWRITE_RESOURCES}
       - DATAPUSHER_REWRITE_URL=${DATAPUSHER_REWRITE_URL}
+
 
   db:
     container_name: db
     build:
-      context: ../../compose/2.9
+      context: .
       dockerfile: postgresql/Dockerfile
       args:
         - DS_RO_PASS=${DATASTORE_READONLY_PASSWORD}
@@ -79,43 +81,13 @@ services:
       - CKAN_VERSION=${CKAN_VERSION}
     volumes:
       - solr_data:/var/solr
-      - ${PWD}/../../compose/2.9/solr8/ckan_init_solr.sh:/docker-entrypoint-initdb.d/ckan_init_solr.sh
+      - ${PWD}/solr8/ckan_init_solr.sh:/docker-entrypoint-initdb.d/ckan_init_solr.sh
 
   redis:
     container_name: redis
     image: redis:${REDIS_VERSION}
     networks:
       - backend
-
-  minio:
-    container_name: minio
-    image: minio/minio:RELEASE.2020-08-08T04-50-06Z
-    networks:
-      - backend
-      - frontend
-    ports:
-      - "0.0.0.0:9000:9000"
-    environment:
-      - MINIO_ACCESS_KEY=MINIOACCESSKEY
-      - MINIO_SECRET_KEY=MINIOSECRETKEY
-    volumes:
-      - minio_data:/data
-    command: server /data
-
-  mc:
-    container_name: mc
-    image: minio/mc:RELEASE.2020-08-08T02-33-58Z
-    networks:
-      - backend
-    depends_on:
-      - minio
-    entrypoint: >
-      /bin/sh -c "
-      /usr/bin/mc config host rm local;
-      /usr/bin/mc config host add --api s3v4 local http://minio:9000 MINIOACCESSKEY MINIOSECRETKEY;
-      /usr/bin/mc mb local/ckan/;
-      /usr/bin/mc policy set download local/ckan/storage;
-      "
 
 networks:
   frontend:
