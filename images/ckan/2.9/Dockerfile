@@ -118,6 +118,7 @@ ENV CKAN__PLUGINS envvars image_view text_view recline_view datastore datapusher
 RUN apk add --no-cache \
         python3 \
         bash \
+        git \
         gettext \
         curl \
         postgresql-client \

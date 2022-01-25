@@ -5,16 +5,14 @@ FROM ghcr.io/keitaroinc/ckan:2.9.5 as extbuild
 
 # Locations and tags, please use specific tags or revisions
 ENV HARVEST_GIT_URL=https://github.com/ckan/ckanext-harvest
-ENV HARVEST_GIT_BRANCH=v1.3.1
+ENV HARVEST_GIT_BRANCH=v1.3.4
 
 # Switch to the root user
 USER root
 
 # Install necessary packages to build extensions
-# Make sure we install python 3.8, cause CKAN is not compatible with 3.9
-RUN apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/v3.13/main \
-        python3-dev=3.8.10-r0 && \
-    apk add --no-cache \
+RUN apk add --no-cache \
+        python3-dev \
         gcc \
         g++ \
         libffi-dev \

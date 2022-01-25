@@ -31,3 +31,7 @@ CKAN__DATAPUSHER__CALLBACK_URL_BASE=http://ckan:5000/
 # Harvest settings
 CKAN__HARVEST__MQ__TYPE=redis
 CKAN__HARVEST__MQ__HOSTNAME=redis
+
+# Solr configuration
+CKAN_VERSION=2.9.5
+CKAN_CORE_NAME=ckan

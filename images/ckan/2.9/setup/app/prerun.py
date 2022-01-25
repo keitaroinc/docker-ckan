@@ -21,6 +21,7 @@ import psycopg2
 from sqlalchemy.engine.url import make_url
 import urllib.request, urllib.error, urllib.parse
 import re
+import json
 
 import time
 
@@ -69,7 +70,7 @@ def check_solr_connection(retry=None):
         sys.exit(1)
 
     url = os.environ.get('CKAN_SOLR_URL', '')
-    search_url = '{url}/select/?q=*&wt=json'.format(url=url)
+    search_url = '{url}/schema/name?wt=json'.format(url=url)
 
     try:
         connection = urllib.request.urlopen(search_url)
@@ -81,10 +82,13 @@ def check_solr_connection(retry=None):
     else:
         import re
         conn_info = connection.read()
-        # SolrCloud
-        conn_info = re.sub(r'"zkConnected":true', '"zkConnected":True', conn_info.decode('utf-8'))
-        eval(conn_info)
-
+        schema_name = json.loads(conn_info)
+        if 'ckan' in schema_name['name']:
+            print('[prerun] Succesfully connected to solr and CKAN schema loaded')
+        else:
+            print('[prerun] Succesfully connected to solr, but CKAN schema not found')
+            sys.exit(1)
+           
 def init_db():
 
     print('[prerun] Start init_db...')
