@@ -1,12 +1,9 @@
 """
 Copyright (c) 2016 Keitaro AB
-
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
-
     https://www.apache.org/licenses/LICENSE-2.0
-
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,7 +16,7 @@ import sys
 import subprocess
 import psycopg2
 from sqlalchemy.engine.url import make_url
-import urllib.request, urllib.error, urllib.parse
+import urllib.request, urllib.error, urllib.parse, base64
 import re
 import json
 
@@ -69,11 +66,18 @@ def check_solr_connection(retry=None):
         print('[prerun] Giving up after 5 tries...')
         sys.exit(1)
 
-    url = os.environ.get('CKAN_SOLR_URL', '')
+    url = os.environ.get('CKAN_SOLR_URL_AUTH', '')
+    username = os.environ.get('SOLR_ADMIN_USERNAME', '')
+    password = os.environ.get('SOLR_ADMIN_PASSWORD', '')
     search_url = '{url}/schema/name?wt=json'.format(url=url)
 
+
+
     try:
-        connection = urllib.request.urlopen(search_url)
+         request = urllib.request.Request(search_url)
+         base64string = base64.b64encode(bytes('%s:%s' % (username, password),'ascii'))
+         request.add_header("Authorization", "Basic %s" % base64string.decode('utf-8'))
+         connection = urllib.request.urlopen(request)
     except urllib.error.URLError as e:
         print('[prerun] Unable to connect to solr...try again in a while.')
         import time
