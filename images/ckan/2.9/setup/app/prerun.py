@@ -11,6 +11,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+from multiprocessing import connection
 import os
 import sys
 import subprocess
@@ -66,18 +67,21 @@ def check_solr_connection(retry=None):
         print('[prerun] Giving up after 5 tries...')
         sys.exit(1)
 
-    url = os.environ.get('CKAN_SOLR_URL_AUTH', '')
+    url = os.environ.get('CKAN_SOLR_URL', '')
     username = os.environ.get('SOLR_ADMIN_USERNAME', '')
     password = os.environ.get('SOLR_ADMIN_PASSWORD', '')
     search_url = '{url}/schema/name?wt=json'.format(url=url)
 
 
-
+ 
     try:
-         request = urllib.request.Request(search_url)
-         base64string = base64.b64encode(bytes('%s:%s' % (username, password),'ascii'))
-         request.add_header("Authorization", "Basic %s" % base64string.decode('utf-8'))
-         connection = urllib.request.urlopen(request)
+        if not username:
+            connection = urllib.request.urlopen(search_url)
+        else:
+            request = urllib.request.Request(search_url)
+            base64string = base64.b64encode(bytes('%s:%s' % (username, password),'ascii'))
+            request.add_header("Authorization", "Basic %s" % base64string.decode('utf-8'))
+            connection = urllib.request.urlopen(request)
     except urllib.error.URLError as e:
         print('[prerun] Unable to connect to solr...try again in a while.')
         import time
