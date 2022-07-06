@@ -13,7 +13,7 @@ then
 fi
 
 # Set the common uwsgi options
-if [ ${UWSGI_PROC_NO} == "0" ] || [ ${UWSGI_PROC_NO} == "null" ] || [ ${UWSGI_PROC_NO} == "" ];
+if [ ${UWSGI_PROC_NO} == "0" ] || [ ${UWSGI_PROC_NO} == "" ];
   then
     echo setting USWGI proc to 2
     ${UWSGI_PROC_NO}=2
