@@ -60,7 +60,7 @@ COPY ./scripts/apply_ckan_patches.sh ${SRC_DIR}/apply_ckan_patches.sh
 RUN ${SRC_DIR}/apply_ckan_patches.sh
 RUN rm -rf /srv/app/src/ckan/.git
 RUN pip wheel --wheel-dir=/wheels -r ckan/requirements.txt
-RUN pip wheel --wheel-dir=/wheels uwsgi==2.0.19.1 gevent==21.1.2 greenlet==1.1.0
+RUN pip wheel --wheel-dir=/wheels uWSGI==2.0.20 gevent==21.1.2 greenlet==1.1.0
 
 
 ###########################
@@ -143,7 +143,7 @@ COPY --from=extbuild /wheels /srv/app/ext_wheels
 COPY --from=ckanbuild /srv/app/src/ckan ${CKAN_DIR}
 
 # Additional install steps for build stages artifacts
-RUN pip install --no-index --find-links=/srv/app/wheels uwsgi==2.0.19.1 gevent==21.1.2
+RUN pip install --no-index --find-links=/srv/app/wheels uWSGI==2.0.20 gevent==21.1.2
 
 # Create a local user and group to run the app
 RUN addgroup -g 92 -S ckan && \

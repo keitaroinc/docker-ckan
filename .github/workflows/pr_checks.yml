@@ -4,9 +4,10 @@ on:
   pull_request:
     branches: master
 
+
 jobs:
   build-ckan-2-9:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
 
@@ -52,6 +53,8 @@ jobs:
           tags: keitaro/ckan:${{ steps.ubuntu.outputs.IMAGE_TAG }}
           cache-from: type=local,src=/tmp/.buildx-cache-ubuntu-2-9
           cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-ubuntu-2-9
+          build-args: |
+           --progress=plain
 
   build-ckan-2-8:
     runs-on: ubuntu-latest
