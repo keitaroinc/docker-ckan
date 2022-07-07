@@ -4,8 +4,6 @@ on:
   push:
     branches: master
 
-env:
-  DOCKER_BUILDKIT: 1
 
 jobs:
   build-ckan-2-9:
