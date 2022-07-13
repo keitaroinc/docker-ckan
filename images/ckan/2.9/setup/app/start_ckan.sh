@@ -12,13 +12,8 @@ then
     done
 fi
 
-# Set the common uwsgi options
-if [ ${UWSGI_PROC_NO} == "0" ] || [ ${UWSGI_PROC_NO} == "" ];
-  then
-    echo setting USWGI proc to 2
-    ${UWSGI_PROC_NO}=2
-fi
-UWSGI_OPTS="--socket /tmp/uwsgi.sock --uid ckan --gid ckan --http :5000 --master --enable-threads --wsgi-file /srv/app/wsgi.py --module wsgi:application --lazy-apps --gevent 2000 -p ${UWSGI_PROC_NO} -L --gevent-early-monkey-patch --vacuum --harakiri 50 --callable application"
+echo "Starting UWSGI with '${UWSGI_PROC_NO:-2}' workers"
+UWSGI_OPTS="--socket /tmp/uwsgi.sock --uid ckan --gid ckan --http :5000 --master --enable-threads --wsgi-file /srv/app/wsgi.py --module wsgi:application --lazy-apps --gevent 2000 -p ${UWSGI_PROC_NO:-2} -L --gevent-early-monkey-patch --vacuum --harakiri 50 --callable application"
 
 # Run the prerun script to init CKAN and create the default admin user
 python prerun.py || { echo '[CKAN prerun] FAILED. Exiting...' ; exit 1; }
