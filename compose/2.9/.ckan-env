@@ -32,5 +32,5 @@ CKAN__DATAPUSHER__URL=http://datapusher:8000
 CKAN__DATAPUSHER__CALLBACK_URL_BASE=http://ckan:5000/
 
 # Solr configuration
-CKAN_VERSION=2.9.5
+CKAN_VERSION=2.9.6
 CKAN_CORE_NAME=ckan

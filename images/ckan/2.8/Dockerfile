@@ -4,11 +4,11 @@
 FROM alpine:3.14.2 as ckanbuild
 
 # Used by Github Actions to tag the image with
-ENV IMAGE_TAG=2.8.10
+ENV IMAGE_TAG=2.8.11
 
 # Set CKAN version to build
 ENV GIT_URL=https://github.com/ckan/ckan.git
-ENV GIT_BRANCH=ckan-2.8.10
+ENV GIT_BRANCH=ckan-2.8.11
 
 # Set src dirs
 ENV SRC_DIR=/srv/app/src
@@ -54,7 +54,7 @@ COPY ./scripts/apply_ckan_patches.sh ${SRC_DIR}/apply_ckan_patches.sh
 RUN ${SRC_DIR}/apply_ckan_patches.sh
 RUN rm -rf /srv/app/src/ckan/.git
 RUN pip wheel --wheel-dir=/wheels -r ckan/requirements.txt
-RUN pip wheel --wheel-dir=/wheels uwsgi==2.0.19.1 gevent==21.1.2 greenlet==1.1.0
+RUN pip wheel --wheel-dir=/wheels uwsgi==2.0.19.1 gevent==21.12.0 greenlet==1.1.3
 
 
 ###########################
@@ -132,7 +132,7 @@ COPY --from=extbuild /wheels /srv/app/ext_wheels
 COPY --from=ckanbuild /srv/app/src/ckan ${CKAN_DIR}
 
 # Additional install steps for build stages artifacts
-RUN pip install --no-index --find-links=/srv/app/wheels uwsgi==2.0.19.1 gevent==21.1.2
+RUN pip install --no-index --find-links=/srv/app/wheels uwsgi==2.0.19.1 gevent==21.12.0
 
 # Create a local user and group to run the app
 RUN addgroup -g 92 -S ckan && \
