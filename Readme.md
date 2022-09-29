@@ -48,7 +48,7 @@ We recommend to use a multi-stage approach to extend the docker images that we p
 ###################
 ### Extensions ####
 ###################
-FROM ghcr.io/keitaroinc/ckan:2.9.5 as extbuild
+FROM ghcr.io/keitaroinc/ckan:2.9.6 as extbuild
 
 # Switch to the root user
 USER root
@@ -64,7 +64,7 @@ RUN pip wheel --wheel-dir=/wheels git+https://github.com/acmecorp/ckanext-acme@0
 ############
 ### MAIN ###
 ############
-FROM ghcr.io/keitaroinc/ckan:2.9.5
+FROM ghcr.io/keitaroinc/ckan:2.9.6
 
 # Add the custom extensions to the plugins list
 ENV CKAN__PLUGINS envvars image_view text_view recline_view datastore datapusher acme
@@ -94,9 +94,9 @@ You can add scripts to CKAN custom images and copy them to the *docker-afterinit
 ## Build
 To build a CKAN image run:
 ```sh 
-docker build --tag ghcr.io/keitaroinc/ckan:2.9.5 images/ckan/2.9
+docker build --tag ghcr.io/keitaroinc/ckan:2.9.6 images/ckan/2.9
 ``` 
-The –-tag ghcr.io/keitaroinc/ckan:2.9.5 flag sets the image name to ghcr.io/keitaroinc/ckan:2.9.5 and 'images/ckan/2.9'  at the end tells docker build to use the context into the specified directory where the Dockerfile and related contents are.
+The –-tag ghcr.io/keitaroinc/ckan:2.9.6 flag sets the image name to ghcr.io/keitaroinc/ckan:2.9.6 and 'images/ckan/2.9'  at the end tells docker build to use the context into the specified directory where the Dockerfile and related contents are.
 
 ## Upload to DockerHub
 >*It's recommended to upload built images to DockerHub* 

@@ -1,7 +1,7 @@
 ###################
 ### Extensions ####
 ###################
-FROM ghcr.io/keitaroinc/ckan:2.9.5 as extbuild
+FROM ghcr.io/keitaroinc/ckan:2.9.6 as extbuild
 
 # Locations and tags, please use specific tags or revisions
 ENV S3FILESTORE_GIT_URL=https://github.com/keitaroinc/ckanext-s3filestore
@@ -20,7 +20,7 @@ USER ckan
 ############
 ### MAIN ###
 ############
-FROM ghcr.io/keitaroinc/ckan:2.9.5
+FROM ghcr.io/keitaroinc/ckan:2.9.6
 
 LABEL maintainer="Keitaro Inc <info@keitaro.com>"
 
