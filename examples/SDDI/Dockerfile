@@ -1,58 +1,86 @@
 ###################
 ### Extensions ####
 ###################
-FROM ghcr.io/keitaroinc/ckan:2.9.7 as extbuild
-
-# Locations and tags, please use specific tags or revisions
-ENV HARVEST_GIT_URL=https://github.com/ckan/ckanext-harvest
-ENV HARVEST_GIT_BRANCH=v1.3.4
+ARG CKAN_VERSION=2.9.5
+FROM ghcr.io/keitaroinc/ckan:${CKAN_VERSION} as extbuild
 
 # Switch to the root user
 USER root
 
-# Install necessary packages to build extensions
-RUN apk add --no-cache \
-        python3-dev \
-        gcc \
-        g++ \
-        libffi-dev \
-        openssl-dev \
-        rust \
-        cargo
+###############################################################################################################
+# Hierarchy
+###############################################################################################################
+ARG CKAN_EXT_HIERARCHY_VERSION=v1.0.3
+ENV CKAN_EXT_HIERARCHY_VERSION=${CKAN_EXT_HIERARCHY_VERSION}
 
-# Fetch and build the custom CKAN extensions
-RUN pip wheel --wheel-dir=/wheels git+${HARVEST_GIT_URL}@${HARVEST_GIT_BRANCH}#egg=ckanext-harvest
-RUN pip wheel --wheel-dir=/wheels -r https://raw.githubusercontent.com/ckan/ckanext-harvest/${HARVEST_GIT_BRANCH}/pip-requirements.txt
-RUN curl -o /wheels/harvest.txt https://raw.githubusercontent.com/ckan/ckanext-harvest/${HARVEST_GIT_BRANCH}/pip-requirements.txt
+# Install any system packages necessary to build extensions
+RUN set -ex && \
+  apk add --no-cache --virtual .build-deps \
+    python3-dev && \
+    pip install --upgrade pip \
+    pip install -r https://raw.githubusercontent.com/ckan/ckanext-hierarchy/${CKAN_EXT_HIERARCHY_VERSION}/dev-requirements.txt
 
-USER ckan
+RUN set -ex && \
+  mkdir -p /wheels && \
+  pip wheel --wheel-dir=/wheels git+https://github.com/davidread/ckanext-hierarchy.git@${CKAN_EXT_HIERARCHY_VERSION}#egg=ckanext-hierarchy && \
+  pip wheel --wheel-dir=/wheels -r https://raw.githubusercontent.com/ckan/ckanext-hierarchy/${CKAN_EXT_HIERARCHY_VERSION}/requirements.txt && \
+  curl -o /wheels/ckanext-hierarchy.txt https://raw.githubusercontent.com/ckan/ckanext-hierarchy/${CKAN_EXT_HIERARCHY_VERSION}/requirements.txt && \
+  ls -lah /wheels
+  
+###############################################################################################################
+# TUM-GIS Scheming
+###############################################################################################################
+ENV CKAN_EXT_TUMGIS_SCHEMING_VERSION=master
+
+RUN pip wheel --wheel-dir=/wheels git+https://github.com/tum-gis/ckanext-scheming-sddi@${CKAN_EXT_TUMGIS_SCHEMING_VERSION}#egg=ckanext-scheming
+RUN pip wheel --wheel-dir=/wheels -r https://raw.githubusercontent.com/tum-gis/ckanext-scheming-sddi/${CKAN_EXT_TUMGIS_SCHEMING_VERSION}/requirements.txt
+RUN curl -o /wheels/tumgis-scheming.txt https://raw.githubusercontent.com/tum-gis/ckanext-scheming-sddi/${CKAN_EXT_TUMGIS_SCHEMING_VERSION}/requirements.txt
+
 
 ############
 ### MAIN ###
 ############
-FROM ghcr.io/keitaroinc/ckan:2.9.7
+ARG CKAN_VERSION=2.9.5
+FROM ghcr.io/keitaroinc/ckan:${CKAN_VERSION} as runtime
 
 LABEL maintainer="Keitaro Inc <info@keitaro.com>"
 
-ENV CKAN__PLUGINS envvars image_view text_view recline_view datastore datapusher harvest ckan_harvester
+
+# List CKAN extensions
+ENV CKAN__PLUGINS envvars image_view text_view recline_view datastore datapusher
 
 # Switch to the root user
 USER root
 
+# Copy python wheels from build stage
 COPY --from=extbuild /wheels /srv/app/ext_wheels
 
-# Install and enable the custom extensions
-RUN pip install --no-index --find-links=/srv/app/ext_wheels ckanext-harvest && \
-    pip install --no-index --find-links=/srv/app/ext_wheels -r /srv/app/ext_wheels/harvest.txt && \
-    # Configure plugins
-    ckan config-tool "${APP_DIR}/production.ini" "ckan.plugins = ${CKAN__PLUGINS}" && \
-    chown -R ckan:ckan /srv/app
 
+# Install and enable the custom extensions, remove wheels
+RUN set -ex && \
+
+###############################################################################################################
+# Hierarchy
+###############################################################################################################
+pip install --no-index --find-links=/srv/app/ext_wheels ckanext-hierarchy && \
+pip install --no-index --find-links=/srv/app/ext_wheels -r /srv/app/ext_wheels/ckanext-hierarchy.txt && \
+
+###############################################################################################################
+# TUM-GIS Scheming
+###############################################################################################################
+  pip install --no-index --find-links=/srv/app/ext_wheels ckanext-scheming && \
+  pip install --no-index --find-links=/srv/app/ext_wheels -r /srv/app/ext_wheels/tumgis-scheming.txt && \
+###############################################################################################################
+  
+######
+  # Finalize extensions
+###############################################################################################################  
+  
+# Configure plugins
+  chown -R ckan:ckan /srv/app
+  
 # Remove wheels
 RUN rm -rf /srv/app/ext_wheels
-
-# Add harvest afterinit script
-COPY ./afterinit.d/00_harvest.sh ${APP_DIR}/docker-afterinit.d/00_harvest.sh
 
 # Switch to the ckan user
 USER ckan
