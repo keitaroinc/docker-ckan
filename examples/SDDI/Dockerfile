@@ -10,8 +10,7 @@ USER root
 ###############################################################################################################
 # Hierarchy
 ###############################################################################################################
-ARG CKAN_EXT_HIERARCHY_VERSION=v1.0.3
-ENV CKAN_EXT_HIERARCHY_VERSION=${CKAN_EXT_HIERARCHY_VERSION}
+ENV CKAN_EXT_HIERARCHY_VERSION=master
 
 # Install any system packages necessary to build extensions
 RUN set -ex && \
@@ -35,6 +34,10 @@ ENV CKAN_EXT_TUMGIS_SCHEMING_VERSION=master
 RUN pip wheel --wheel-dir=/wheels git+https://github.com/tum-gis/ckanext-scheming-sddi@${CKAN_EXT_TUMGIS_SCHEMING_VERSION}#egg=ckanext-scheming
 RUN pip wheel --wheel-dir=/wheels -r https://raw.githubusercontent.com/tum-gis/ckanext-scheming-sddi/${CKAN_EXT_TUMGIS_SCHEMING_VERSION}/requirements.txt
 RUN curl -o /wheels/tumgis-scheming.txt https://raw.githubusercontent.com/tum-gis/ckanext-scheming-sddi/${CKAN_EXT_TUMGIS_SCHEMING_VERSION}/requirements.txt
+
+
+
+
 
 
 ############
