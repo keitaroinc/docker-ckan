@@ -12,6 +12,14 @@ then
     done
 fi
 
+if grep -E "beaker.session.secret ?= ?$" ckan.ini
+then
+    echo "Setting secrets in ini file"
+    ckan config-tool $CKAN_INI "beaker.session.secret=$(python3 -c 'import secrets; print(secrets.token_urlsafe())')"
+    ckan config-tool $CKAN_INI "api_token.jwt.encode.secret=$(python3 -c 'import secrets; print("string:" + secrets.token_urlsafe())')"
+    ckan config-tool $CKAN_INI "api_token.jwt.decode.secret=$(python3 -c 'import secrets; print("string:" + secrets.token_urlsafe())')"
+fi
+
 echo "Starting UWSGI with '${UWSGI_PROC_NO:-2}' workers"
 UWSGI_OPTS="--socket /tmp/uwsgi.sock --uid ckan --gid ckan --http :5000 --master --enable-threads --wsgi-file /srv/app/wsgi.py --module wsgi:application --lazy-apps --gevent 2000 -p ${UWSGI_PROC_NO:-2} -L --gevent-early-monkey-patch --vacuum --harakiri 50 --callable application"
 
