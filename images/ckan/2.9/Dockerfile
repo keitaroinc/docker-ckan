@@ -162,6 +162,7 @@ RUN pip install -e /srv/app/src/ckan && \
     echo "UTC" >  /etc/timezone && \
     # Generate CKAN config
     ckan generate config ${APP_DIR}/production.ini && \
+    ckan config-tool ${CKAN_INI} "beaker.session.secret = " && \
     # Configure plugins
     ckan config-tool ${APP_DIR}/production.ini "ckan.plugins = ${CKAN__PLUGINS}" && \
     # Create the data directory
