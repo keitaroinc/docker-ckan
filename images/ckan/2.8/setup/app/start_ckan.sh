@@ -12,10 +12,10 @@ then
     done
 fi
 
-if grep -E "beaker.session.secret ?= ?$" ckan.ini
+if grep -E "beaker.session.secret ?= ?$" production.ini
 then
     echo "Setting beaker.session.secret in ini file"
-    paster --plugin=ckan config-tool $CKAN_INI "beaker.session.secret=$(python -c 'import secrets; print(secrets.token_urlsafe())')"
+    paster --plugin=ckan config-tool $APP_DIR "beaker.session.secret=$(python -c 'import secrets; print(secrets.token_urlsafe())')"
 fi
 
 # Set the common uwsgi options
