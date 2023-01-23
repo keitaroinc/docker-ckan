@@ -12,7 +12,7 @@ then
     done
 fi
 
-if grep -E "beaker.session.secret ?= ?$" production.ini
+if grep -E "beaker.session.secret ?= ?$" ckan.ini
 then
     echo "Setting secrets in ini file"
     ckan config-tool $CKAN_INI "beaker.session.secret=$(python3 -c 'import secrets; print(secrets.token_urlsafe())')"
