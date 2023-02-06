@@ -12,12 +12,12 @@ then
     done
 fi
 
-if grep -E "beaker.session.secret ?= ?$" production.ini
+if grep -E "beaker.session.secret ?= ?$" $APP_DIR/production.ini
 then
     echo "Setting secrets in ini file"
-    ckan config-tool $APP_DIR "beaker.session.secret=$(python3 -c 'import secrets; print(secrets.token_urlsafe())')"
-    ckan config-tool $APP_DIR "api_token.jwt.encode.secret=$(python3 -c 'import secrets; print("string:" + secrets.token_urlsafe())')"
-    ckan config-tool $APP_DIR "api_token.jwt.decode.secret=$(python3 -c 'import secrets; print("string:" + secrets.token_urlsafe())')"
+    ckan config-tool $APP_DIR/production.ini "beaker.session.secret=$(python3 -c 'import secrets; print(secrets.token_urlsafe())')"
+    ckan config-tool $APP_DIR/production.ini "api_token.jwt.encode.secret=$(python3 -c 'import secrets; print("string:" + secrets.token_urlsafe())')"
+    ckan config-tool $APP_DIR/production.ini "api_token.jwt.decode.secret=$(python3 -c 'import secrets; print("string:" + secrets.token_urlsafe())')"
 fi
 
 echo "Starting UWSGI with '${UWSGI_PROC_NO:-2}' workers"
