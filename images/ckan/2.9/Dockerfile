@@ -112,7 +112,7 @@ ENV CKAN_DIR=${SRC_DIR}/ckan
 ENV DATA_DIR=/srv/app/data
 ENV PIP_SRC=${SRC_DIR}
 ENV CKAN_SITE_URL=http://localhost:5000
-ENV CKAN__PLUGINS image_view text_view recline_view datastore datapusher envvars
+ENV CKAN__PLUGINS image_view text_view recline_view datastore datapusher envvars 
 
 # Install necessary packages to run CKAN
 RUN apk add --no-cache \
