@@ -9,7 +9,7 @@ volumes:
 services:
   ckan:
     container_name: ckan
-    build: /home/filip/Desktop/Projects/localdev/docker-ckan/images/ckan/2.10/
+    build: ../../images/ckan/2.10/
     networks:
       - frontend
       - backend
