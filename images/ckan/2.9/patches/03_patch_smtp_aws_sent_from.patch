@@ -1,0 +1,13 @@
+diff --git a/ckan/lib/mailer.py b/ckan/lib/mailer.py
+index dc83eb0f1..b9839a70d 100644
+--- a/ckan/lib/mailer.py
++++ b/ckan/lib/mailer.py
+@@ -55,7 +55,7 @@ def _mail_recipient(recipient_name, recipient_email,
+             msg.add_header(k, v)
+     subject = Header(subject.encode('utf-8'), 'utf-8')
+     msg['Subject'] = subject
+-    msg['From'] = _("%s <%s>") % (sender_name, mail_from)
++    msg['From'] = _("%s <%s>") % ('CKAN', mail_from)
+     msg['To'] = u"%s <%s>" % (recipient_name, recipient_email)
+     msg['Date'] = utils.formatdate(time())
+     msg['X-Mailer'] = "CKAN %s" % ckan.__version__
