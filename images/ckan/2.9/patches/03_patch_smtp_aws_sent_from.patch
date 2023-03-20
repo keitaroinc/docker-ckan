@@ -1,7 +1,5 @@
-diff --git a/ckan/lib/mailer.py b/ckan/lib/mailer.py
-index dc83eb0f1..b9839a70d 100644
---- a/ckan/lib/mailer.py
-+++ b/ckan/lib/mailer.py
+--- ckan/ckan/lib/mailer.py
++++ ckan/ckan/lib/mailer.py
 @@ -55,7 +55,7 @@ def _mail_recipient(recipient_name, recipient_email,
              msg.add_header(k, v)
      subject = Header(subject.encode('utf-8'), 'utf-8')
