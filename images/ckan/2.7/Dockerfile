@@ -58,7 +58,7 @@ COPY ./scripts/apply_ckan_patches.sh ${SRC_DIR}/apply_ckan_patches.sh
 RUN ${SRC_DIR}/apply_ckan_patches.sh
 RUN rm -rf /srv/app/src/ckan/.git
 RUN pip wheel --wheel-dir=/wheels -r ckan/requirements.txt
-RUN pip wheel --wheel-dir=/wheels uwsgi==2.0.19.1 gevent==21.1.2 greenlet==1.1.0
+RUN pip wheel --wheel-dir=/wheels uwsgi==2.0.19.1 gevent==21.12.0 greenlet==1.1.3
 
 
 ###########################
@@ -139,7 +139,7 @@ COPY --from=extbuild /wheels /srv/app/ext_wheels
 COPY --from=ckanbuild /srv/app/src/ckan ${CKAN_DIR}
 
 # Additional install steps for build stages artifacts
-RUN pip install --no-index --find-links=/srv/app/wheels uwsgi==2.0.19.1 gevent==21.1.2
+RUN pip install --no-index --find-links=/srv/app/wheels uwsgi==2.0.19.1 gevent==21.12.0
 
 # Create a local user and group to run the app
 RUN addgroup -g 92 -S ckan && \
@@ -158,6 +158,7 @@ RUN pip install -e /srv/app/src/ckan && \
     echo "UTC" >  /etc/timezone && \
     # Generate CKAN config
     paster --plugin=ckan make-config ckan ${APP_DIR}/production.ini && \
+    paster --plugin=ckan config-tool ${APP_DIR}/production.ini "beaker.session.secret = " && \
     paster --plugin=ckan config-tool ${APP_DIR}/production.ini "ckan.plugins = ${CKAN__PLUGINS}" && \
     # Set the default level for extensions to INFO
     paster --plugin=ckan config-tool ${APP_DIR}/production.ini -s logger_ckanext -e level=INFO && \

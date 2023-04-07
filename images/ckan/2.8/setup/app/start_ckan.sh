@@ -12,8 +12,16 @@ then
     done
 fi
 
+if grep -E "beaker.session.secret ?= ?$" $APP_DIR/production.ini
+then
+    echo "Setting beaker.session.secret in ini file"
+    paster --plugin=ckan config-tool $APP_DIR/production.ini "beaker.session.secret=$(python -c 'import secrets; print(secrets.token_urlsafe())')"
+fi
+
 # Set the common uwsgi options
-UWSGI_OPTS="--socket /tmp/uwsgi.sock --uid 92 --gid 92 --http :5000 --master --enable-threads --paste config:/srv/app/production.ini --paste-logger /srv/app/production.ini --lazy-apps --gevent 2000 -p 2 -L --gevent-early-monkey-patch"
+echo "Starting UWSGI with '${UWSGI_PROC_NO:-2}' workers"
+
+UWSGI_OPTS="--socket /tmp/uwsgi.sock --uid 92 --gid 92 --http :5000 --master --enable-threads --paste config:/srv/app/production.ini --paste-logger /srv/app/production.ini --lazy-apps --gevent 2000 -p ${UWSGI_PROC_NO:-2} -L --gevent-early-monkey-patch"
 
 # Run the prerun script to init CKAN and create the default admin user
 python prerun.py || { echo '[CKAN prerun] FAILED. Exiting...' ; exit 1; }
