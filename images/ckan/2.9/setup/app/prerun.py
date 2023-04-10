@@ -68,8 +68,8 @@ def check_solr_connection(retry=None):
         sys.exit(1)
 
     url = os.environ.get('CKAN_SOLR_URL', '')
-    username = os.environ.get('SOLR_ADMIN_USERNAME', '')
-    password = os.environ.get('SOLR_ADMIN_PASSWORD', '')
+    username = os.environ.get('CKAN_SOLR_USER', '')
+    password = os.environ.get('CKAN_SOLR_PASSWORD', '')
     search_url = '{url}/schema/name?wt=json'.format(url=url)
 
 
