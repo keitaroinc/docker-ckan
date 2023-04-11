@@ -210,6 +210,7 @@ RUN pip install -e /srv/app/src/ckan && \
     # Generate CKAN config
     ckan generate config ${APP_DIR}/production.ini && \
     # Configure plugins
+    ckan config-tool ${APP_DIR}/production.ini "beaker.session.secret = " && \
     ckan config-tool ${APP_DIR}/production.ini "ckan.plugins = ${CKAN__PLUGINS}" && \
     # Create the data directory
     mkdir ${DATA_DIR} && \
