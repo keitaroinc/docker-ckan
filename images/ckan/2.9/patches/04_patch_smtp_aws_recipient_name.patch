@@ -1,0 +1,11 @@
+--- a/ckan/lib/mailer.py
++++ b/ckan/lib/mailer.py
+@@ -121,7 +121,7 @@ def mail_recipient(recipient_name, recipient_email, subject,
+     '''Sends an email'''
+     site_title = config.get('ckan.site_title')
+     site_url = config.get('ckan.site_url')
+-    return _mail_recipient(recipient_name, recipient_email,
++    return _mail_recipient("", recipient_email,
+                            site_title, site_url, subject, body,
+                            body_html=body_html, headers=headers)
+ 
