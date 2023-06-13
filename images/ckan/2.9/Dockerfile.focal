@@ -4,11 +4,11 @@
 FROM ubuntu:focal-20210827 as ckanbuild
 
 # Used by Github Actions to tag the image with
-ENV IMAGE_TAG=2.9.8-focal
+ENV IMAGE_TAG=2.9.9-focal
 
 # Set CKAN version to build
 ENV GIT_URL=https://github.com/ckan/ckan.git
-ENV GIT_BRANCH=ckan-2.9.8
+ENV GIT_BRANCH=ckan-2.9.9
 
 # Set timezone
 ENV TZ=UTC
@@ -32,29 +32,29 @@ RUN update-locale LANG=${LC_ALL}
 
 # Instal apt-utils
 RUN apt-get install --no-install-recommends -y \
-        apt-utils
+    apt-utils
 
 # Packages to build CKAN requirements and plugins
 RUN apt-get install --no-install-recommends -y \
-        git \
-        curl \
-        ca-certificates \
-        python3 \
-        libpq-dev \
-        linux-headers-generic \
-	    gcc-10 \
-	    make \
-	    g++-10 \
-	    autoconf \
-	    automake \
-	    libtool \
-        patch \
-        libpcre3-dev \
-        libpcre3 \
-        python3-dev \
-        libffi-dev \
-        libxml2-dev \
-        libxslt-dev
+    git \
+    curl \
+    ca-certificates \
+    python3 \
+    libpq-dev \
+    linux-headers-generic \
+    gcc-10 \
+    make \
+    g++-10 \
+    autoconf \
+    automake \
+    libtool \
+    patch \
+    libpcre3-dev \
+    libpcre3 \
+    python3-dev \
+    libffi-dev \
+    libxml2-dev \
+    libxslt-dev
 
 # Use gcc 10
 RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 100 --slave /usr/bin/g++ g++ /usr/bin/g++-10 --slave /usr/bin/gcov gcov /usr/bin/gcov-10 --slave /usr/bin/x86_64-linux-gnu-gcc x86_64-linux-gnu-gcc /usr/bin/x86_64-linux-gnu-gcc-10
@@ -102,11 +102,11 @@ ENV ENVVARS_GIT_BRANCH=0.0.1
 
 RUN apt-get update && \
     apt-get install --no-install-recommends -y \
-        git \
-        curl \
-        ca-certificates \
-        python3 \
-        python3-dev
+    git \
+    curl \
+    ca-certificates \
+    python3 \
+    python3-dev
 
 # Link python to python3
 RUN ln -s /usr/bin/python3 /usr/bin/python
@@ -158,21 +158,21 @@ ENV CKAN__PLUGINS envvars image_view text_view recline_view datastore datapusher
 # Install necessary packages to run CKAN
 RUN apt-get update && \
     apt-get install --no-install-recommends -y \
-        gettext \
-	curl \
-        ca-certificates \
-        libpq5 \
-        git \
-	postgresql-client \
-        python3 \
-	python3-distutils \
-	libpython3.8 \
-        libmagic1 \
-        libpcre3 \
-        libxslt1.1 \
-        libxml2 \
-        tzdata \
-        apache2-utils && \
+    gettext \
+    curl \
+    ca-certificates \
+    libpq5 \
+    git \
+    postgresql-client \
+    python3 \
+    python3-distutils \
+    libpython3.8 \
+    libmagic1 \
+    libpcre3 \
+    libxslt1.1 \
+    libxml2 \
+    tzdata \
+    apache2-utils && \
     rm -rf /var/lib/apt/lists/* && \
     # Create SRC_DIR
     mkdir -p ${SRC_DIR} && \
