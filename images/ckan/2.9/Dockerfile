@@ -1,6 +1,7 @@
 ##################
 ### Build CKAN ###
 ##################
+
 FROM alpine:3.13.7 as ckanbuild
 
 # Used by Github Actions to tag the image with
@@ -79,6 +80,7 @@ ENV DEFAULT_EXTENSIONS envvars
 ENV ENVVARS_GIT_URL=https://github.com/okfn/ckanext-envvars
 ENV ENVVARS_GIT_BRANCH=0.0.1
 
+
 RUN apk add --no-cache \
         python3 \
         python3-dev \
@@ -115,8 +117,10 @@ ENV CKAN_SITE_URL=http://localhost:5000
 ENV CKAN__PLUGINS envvars image_view text_view recline_view datastore datapusher
 
 # Install necessary packages to run CKAN
+
 RUN apk add --no-cache \
         python3 \
+        git \
         bash \
         git \
         gettext \
