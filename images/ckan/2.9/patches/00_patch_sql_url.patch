@@ -1,5 +1,5 @@
---- a/ckan/model/__init__.py
-+++ b/ckan/model/__init__.py
+--- ckan/ckan/model/__init__.py
++++ ckan/ckan/model/__init__.py
 @@ -276,7 +276,7 @@ class Repository():
          self.reset_alembic_output()
          alembic_config = AlembicConfig(self._alembic_ini)

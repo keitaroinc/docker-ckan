@@ -1,5 +1,5 @@
---- a/ckanext/datastore/backend/postgres.py
-+++ b/ckanext/datastore/backend/postgres.py
+--- ckan/ckanext/datastore/backend/postgres.py
++++ ckan/ckanext/datastore/backend/postgres.py
 @@ -1809,7 +1809,7 @@ class DatastorePostgresqlBackend(DatastoreBackend):
          read only user.
          '''
