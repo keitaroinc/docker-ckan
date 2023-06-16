@@ -4,11 +4,11 @@
 FROM alpine:3.13.7 as ckanbuild
 
 # Used by Github Actions to tag the image with
-ENV IMAGE_TAG=2.9.8
+ENV IMAGE_TAG=2.9.9
 
 # Set CKAN version to build
 ENV GIT_URL=https://github.com/ckan/ckan.git
-ENV GIT_BRANCH=ckan-2.9.8
+ENV GIT_BRANCH=ckan-2.9.9
 
 # Set src dirs
 ENV SRC_DIR=/srv/app/src
@@ -18,25 +18,25 @@ WORKDIR ${SRC_DIR}
 
 # Packages to build CKAN requirements and plugins
 RUN apk add --no-cache \
-        python3 \
-        python3-dev \
-        git \
-        curl \
-        postgresql-dev \
-        linux-headers \
-        gcc \
-        make \
-        g++ \
-        autoconf \
-        automake \
-        libtool \
-        patch \
-        musl-dev \
-        pcre-dev \
-        pcre \
-        libffi-dev \
-        libxml2-dev \
-        libxslt-dev
+    python3 \
+    python3-dev \
+    git \
+    curl \
+    postgresql-dev \
+    linux-headers \
+    gcc \
+    make \
+    g++ \
+    autoconf \
+    automake \
+    libtool \
+    patch \
+    musl-dev \
+    pcre-dev \
+    pcre \
+    libffi-dev \
+    libxml2-dev \
+    libxslt-dev
 
 # Link python to python3
 RUN ln -s /usr/bin/python3 /usr/bin/python
@@ -80,10 +80,10 @@ ENV ENVVARS_GIT_URL=https://github.com/okfn/ckanext-envvars
 ENV ENVVARS_GIT_BRANCH=0.0.1
 
 RUN apk add --no-cache \
-        python3 \
-        python3-dev \
-        git \
-        curl 
+    python3 \
+    python3-dev \
+    git \
+    curl 
 
 # Link python to python3
 RUN ln -s /usr/bin/python3 /usr/bin/python
@@ -116,18 +116,18 @@ ENV CKAN__PLUGINS envvars image_view text_view recline_view datastore datapusher
 
 # Install necessary packages to run CKAN
 RUN apk add --no-cache \
-        python3 \
-        bash \
-        git \
-        gettext \
-        curl \
-        postgresql-client \
-        libmagic \
-        pcre \
-        libxslt \
-        libxml2 \
-        tzdata \
-        apache2-utils && \
+    python3 \
+    bash \
+    git \
+    gettext \
+    curl \
+    postgresql-client \
+    libmagic \
+    pcre \
+    libxslt \
+    libxml2 \
+    tzdata \
+    apache2-utils && \
     # Create SRC_DIR
     mkdir -p ${SRC_DIR} && \
     # Link python to python3

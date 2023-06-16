@@ -1,6 +1,6 @@
---- ckan/ckanext/datastore/backend/postgres.py	2021-02-18 11:01:56.692267462 +0100
-+++ ckan/ckanext/datastore/backend/postgres-patch.py	2021-02-18 13:45:16.033193435 +0100
-@@ -1690,7 +1690,7 @@
+--- ckan/ckanext/datastore/backend/postgres.py
++++ ckan/ckanext/datastore/backend/postgres.py
+@@ -1809,7 +1809,7 @@ class DatastorePostgresqlBackend(DatastoreBackend):
          read only user.
          '''
          write_connection = self._get_write_engine().connect()
