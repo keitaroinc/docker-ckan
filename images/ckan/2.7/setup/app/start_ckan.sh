@@ -17,7 +17,7 @@ if [[ -z $BEAKER_SESSION_SECRET || -v $BEAKER_SESSION_SECRET ]];then
   echo "Not all environment variables are set. Generating sessions..."
 else
   echo "Setting session secrets from environment variables"
-  paster --plugin=ckan $APP_DIR/production.ini "beaker.session.secret=$BEAKER_SESSION_SECRET"
+  paster --plugin=ckan config-tool $APP_DIR/production.ini "beaker.session.secret=$BEAKER_SESSION_SECRET"
 fi
 
 if grep -E "beaker.session.secret ?= ?$" $APP_DIR/production.ini
