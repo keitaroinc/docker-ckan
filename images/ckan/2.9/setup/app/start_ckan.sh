@@ -12,6 +12,16 @@ then
     done
 fi
 
+# Add session secret from chart
+if [[ -z $BEAKER_SESSION_SECRET || -v $BEAKER_SESSION_SECRET || -z $JWT_ENCODE_SECRET || -v $JWT_ENCODE_SECRET || -z $JWT_DECODE_SECRET || -v $JWT_DECODE_SECRET ]];then
+  echo "Not all environment variables are set. Generating sessions..."
+else
+  echo "Setting session secrets from environment variables"
+  ckan config-tool $APP_DIR/production.ini "beaker.session.secret=$BEAKER_SESSION_SECRET"
+  ckan config-tool $APP_DIR/production.ini "api_token.jwt.encode.secret=$JWT_ENCODE_SECRET"
+  ckan config-tool $APP_DIR/production.ini "api_token.jwt.decode.secret=$JWT_DECODE_SECRET"
+fi
+
 if grep -E "beaker.session.secret ?= ?$" $APP_DIR/production.ini
 then
     echo "Setting secrets in ini file"
