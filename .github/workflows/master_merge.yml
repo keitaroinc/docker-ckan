@@ -289,6 +289,6 @@ jobs:
           push: true
           tags: |
             keitaro/psql-init:${{ steps.psql-init.outputs.IMAGE_TAG }}
-            ghcr.io/keitaroinc/datapusher:${{ steps.psql-init.outputs.IMAGE_TAG }}
+            ghcr.io/keitaroinc/psql-init:${{ steps.psql-init.outputs.IMAGE_TAG }}
           cache-from: type=local,src=/tmp/.buildx-cache-psql-init
           cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-psql-init
