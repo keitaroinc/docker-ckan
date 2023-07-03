@@ -248,12 +248,12 @@ def execute_sql_script(ckan_dbp, datastorero_dbp, datastorerw_dbp, script_path):
 
         print("SQL script executed successfully.")
 
-        # print("CKAN DB User:", ckan_dbp.db_user)
-        # print("read/write DB User:", datastorerw_dbp.db_user)
-        # print("read/write DB name:", datastorerw_dbp.db_name)
-        # print("read/write host:", datastorerw_dbp.db_host)
-        # print("read DB user:", datastorero_dbp.db_user)
-        # print("read DB name:", datastorero_dbp.db_name)
+        print("CKAN DB User:", ckan_dbp.db_user)
+        print("read/write DB User:", datastorerw_dbp.db_user)
+        print("read/write DB name:", datastorerw_dbp.db_name)
+        print("read/write host:", datastorerw_dbp.db_host)
+        print("read DB user:", datastorero_dbp.db_user)
+        print("read DB name:", datastorero_dbp.db_name)
 
     except psycopg2.Error as e:
         print(f"Error executing SQL script: {str(e)}")
