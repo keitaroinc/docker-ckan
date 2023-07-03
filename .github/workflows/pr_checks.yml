@@ -207,7 +207,7 @@ jobs:
       - name: Build psql-init
         uses: docker/build-push-action@v2
         with:
-          context: ./images/psgl-init
+          context: ./images/psql-init
           file: ./images/psql-init/Dockerfile
           push: false
           tags: keitaro/psql-init:${{ steps.psql-init.outputs.IMAGE_TAG }}
