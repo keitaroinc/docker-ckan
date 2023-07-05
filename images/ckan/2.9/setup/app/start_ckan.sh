@@ -31,7 +31,7 @@ then
 fi
 
 echo "Starting UWSGI with '${UWSGI_PROC_NO:-2}' workers"
-UWSGI_OPTS="--socket /tmp/uwsgi.sock --uid ckan --gid ckan --http :5000 --master --enable-threads --wsgi-file /srv/app/wsgi.py --module wsgi:application --lazy-apps --gevent 2000 -p ${UWSGI_PROC_NO:-2} -L --gevent-early-monkey-patch --vacuum --harakiri 50 --callable application"
+uwsgi --ini uwsgi.conf -p ${UWSGI_PROC_NO:-2}
 
 # Run the prerun script to init CKAN and create the default admin user
 python prerun.py || { echo '[CKAN prerun] FAILED. Exiting...' ; exit 1; }
@@ -62,7 +62,7 @@ then
       # Generate htpasswd file for basicauth
       htpasswd -d -b -c /srv/app/.htpasswd $HTPASSWD_USER $HTPASSWD_PASSWORD
       # Start uwsgi with basicauth
-      uwsgi --ini /srv/app/uwsgi.conf --pcre-jit $UWSGI_OPTS
+      uwsgi --ini /srv/app/basic-auth-uwsgi.conf --pcre-jit $UWSGI_OPTS
     else
       echo "Missing HTPASSWD_USER or HTPASSWD_PASSWORD environment variables. Exiting..."
       exit 1
