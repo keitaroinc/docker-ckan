@@ -30,9 +30,6 @@ then
     ckan config-tool $APP_DIR/production.ini "api_token.jwt.decode.secret=$(python3 -c 'import secrets; print("string:" + secrets.token_urlsafe())')"
 fi
 
-echo "Starting UWSGI with '${UWSGI_PROC_NO:-2}' workers"
-uwsgi --ini uwsgi.conf -p ${UWSGI_PROC_NO:-2}
-
 # Run the prerun script to init CKAN and create the default admin user
 python prerun.py || { echo '[CKAN prerun] FAILED. Exiting...' ; exit 1; }
 
@@ -62,14 +59,15 @@ then
       # Generate htpasswd file for basicauth
       htpasswd -d -b -c /srv/app/.htpasswd $HTPASSWD_USER $HTPASSWD_PASSWORD
       # Start uwsgi with basicauth
-      uwsgi --ini /srv/app/basic-auth-uwsgi.conf --pcre-jit $UWSGI_OPTS
+      uwsgi --ini /srv/app/basic-auth-uwsgi.conf -p ${UWSGI_PROC_NO:-2} --pcre-jit 
     else
       echo "Missing HTPASSWD_USER or HTPASSWD_PASSWORD environment variables. Exiting..."
       exit 1
     fi
   else
     # Start uwsgi
-    uwsgi $UWSGI_OPTS
+    echo "Starting UWSGI with '${UWSGI_PROC_NO:-2}' workers"
+    uwsgi --ini /srv/app/uwsgi.conf -p ${UWSGI_PROC_NO:-2}
   fi
 else
   echo "[prerun] failed...not starting CKAN."
