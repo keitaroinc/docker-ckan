@@ -57,7 +57,7 @@ RUN pip install -e git+${GIT_URL}@${GIT_BRANCH}#egg=ckan
 COPY ./patches ${SRC_DIR}/patches
 COPY ./scripts/apply_ckan_patches.sh ${SRC_DIR}/apply_ckan_patches.sh
 # Apply patches
-RUN ${SRC_DIR}/apply_ckan_patches.sh
+RUN cd ${SRC_DIR} && ls -lah ${SRC_DIR} && ash ${SRC_DIR}/apply_ckan_patches.sh
 RUN rm -rf /srv/app/src/ckan/.git
 
 #### PATCH SINCE CYTON UPDATED TO 3.0.0 ###
