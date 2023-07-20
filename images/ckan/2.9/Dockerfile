@@ -154,6 +154,8 @@ RUN addgroup -g 92 -S ckan && \
     adduser -u 92 -h /srv/app -H -D -S -G ckan ckan
 
 WORKDIR ${CKAN_DIR}
+RUN ls -lah /usr/lib/python3.10/collections/ && cat /usr/lib/python3.10/collections/__init__.py
+COPY __init__.py /usr/lib/python3.10/collections/__init__.py
 
 # Install CKAN
 RUN pip install -e /srv/app/src/ckan && \
