@@ -56,11 +56,12 @@ RUN pip install -e git+${GIT_URL}@${GIT_BRANCH}#egg=ckan
 # Copy patches and apply patches script
 COPY ./patches ${SRC_DIR}/patches
 COPY ./scripts/apply_ckan_patches.sh ${SRC_DIR}/apply_ckan_patches.sh
+
 # Apply patches
 RUN cd ${SRC_DIR} && ls -lah ${SRC_DIR} && ash ${SRC_DIR}/apply_ckan_patches.sh
 RUN rm -rf /srv/app/src/ckan/.git
 
-#### PATCH SINCE CYTON UPDATED TO 3.0.0 ###
+#### PATCH SINCE CYTHON UPDATED TO 3.0.0 ###
 RUN sed -i 's/pyyaml==5.4.1/pyyaml>=6.0.1/g' ckan/requirements.txt
 
 # RUN pip-compile ckan/requirements.in 
