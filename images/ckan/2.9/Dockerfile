@@ -60,10 +60,11 @@ COPY ./scripts/apply_ckan_patches.sh ${SRC_DIR}/apply_ckan_patches.sh
 RUN cd ${SRC_DIR} && ls -lah ${SRC_DIR} && ash ${SRC_DIR}/apply_ckan_patches.sh
 RUN rm -rf /srv/app/src/ckan/.git
 
-#### PATCH SINCE CYTON UPDATED TO 3.0.0 ###
-RUN sed -i 's/pyyaml==5.4.1/pyyaml>=6.0.1/g' ckan/requirements.txt
+# Create a constraint file that limits the Cython version to a compatible one, see https://github.com/yaml/pyyaml/issues/736
+RUN echo 'Cython < 3.0' > /tmp/constraint.txt
+RUN PIP_CONSTRAINT=/tmp/constraint.txt pip wheel --wheel-dir=/wheels PyYAML==5.4.1
 
-# RUN pip-compile ckan/requirements.in 
+# RUN pip-compile ckan/requirements.in
 RUN pip wheel --wheel-dir=/wheels -r ckan/requirements.txt
 RUN pip wheel --wheel-dir=/wheels uWSGI==2.0.20 gevent==21.12.0 greenlet==1.1.3
 
