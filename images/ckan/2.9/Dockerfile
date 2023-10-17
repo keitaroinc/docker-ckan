@@ -179,6 +179,7 @@ RUN pip install -e /srv/app/src/ckan && \
     # Change ownership to app user
     chown -R ckan:ckan /srv/app
 
+RUN pip install sqlalchemy==1.3.19
 # Remove wheels
 RUN rm -rf /srv/app/wheels /srv/app/ext_wheels
 
