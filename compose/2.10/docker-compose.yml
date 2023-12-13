@@ -1,5 +1,5 @@
 # docker-compose build && docker-compose up -d
-version: "3"
+version: "3.8"
 
 volumes:
   ckan_data:

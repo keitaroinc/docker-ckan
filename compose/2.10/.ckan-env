@@ -7,8 +7,8 @@ MAINTENANCE_MODE=false
 
 # General Settings
 CKAN_SITE_ID=default
-CKAN_SITE_URL=http://localhost:5005
-CKAN_PORT=5005
+CKAN_SITE_URL=http://localhost:5000
+CKAN_PORT=5000
 CKAN_MAX_UPLOAD_SIZE_MB=20
 CKAN___BEAKER__SESSION__SECRET=CHANGE_ME
 # See https://docs.ckan.org/en/latest/maintaining/configuration.html#api-token-settings
@@ -38,5 +38,5 @@ CKAN__DATAPUSHER__API_TOKEN=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJ6M0l
 # CKAN__DATAPUSHER__API_TOKEN=replace_this_with_api_token_once_ckan_starts
 
 # Solr configuration
-CKAN_VERSION=2.9.7
+CKAN_VERSION=2.10
 CKAN_CORE_NAME=ckan
