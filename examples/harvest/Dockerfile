@@ -1,7 +1,7 @@
 ###################
 ### Extensions ####
 ###################
-FROM ghcr.io/keitaroinc/ckan:2.9.7 as extbuild
+FROM ghcr.io/keitaroinc/ckan:2.9.9 as extbuild
 
 # Locations and tags, please use specific tags or revisions
 ENV HARVEST_GIT_URL=https://github.com/ckan/ckanext-harvest
@@ -12,13 +12,13 @@ USER root
 
 # Install necessary packages to build extensions
 RUN apk add --no-cache \
-        python3-dev \
-        gcc \
-        g++ \
-        libffi-dev \
-        openssl-dev \
-        rust \
-        cargo
+    python3-dev \
+    gcc \
+    g++ \
+    libffi-dev \
+    openssl-dev \
+    rust \
+    cargo
 
 # Fetch and build the custom CKAN extensions
 RUN pip wheel --wheel-dir=/wheels git+${HARVEST_GIT_URL}@${HARVEST_GIT_BRANCH}#egg=ckanext-harvest
@@ -30,7 +30,7 @@ USER ckan
 ############
 ### MAIN ###
 ############
-FROM ghcr.io/keitaroinc/ckan:2.9.7
+FROM ghcr.io/keitaroinc/ckan:2.9.9
 
 LABEL maintainer="Keitaro Inc <info@keitaro.com>"
 

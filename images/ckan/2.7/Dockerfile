@@ -170,6 +170,9 @@ RUN pip install -e /srv/app/src/ckan && \
 # Remove wheels
 RUN rm -rf /srv/app/wheels /srv/app/ext_wheels
 
+# Install python2 secrets for generating sessions
+RUN pip install python2-secrets 
+
 # Copy necessary scripts
 COPY setup/app ${APP_DIR}
 

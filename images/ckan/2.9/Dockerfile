@@ -4,11 +4,11 @@
 FROM alpine:3.13.7 as ckanbuild
 
 # Used by Github Actions to tag the image with
-ENV IMAGE_TAG=2.9.7
+ENV IMAGE_TAG=2.9.9
 
 # Set CKAN version to build
 ENV GIT_URL=https://github.com/ckan/ckan.git
-ENV GIT_BRANCH=ckan-2.9.7
+ENV GIT_BRANCH=ckan-2.9.9
 
 # Set src dirs
 ENV SRC_DIR=/srv/app/src
@@ -18,25 +18,25 @@ WORKDIR ${SRC_DIR}
 
 # Packages to build CKAN requirements and plugins
 RUN apk add --no-cache \
-        python3 \
-        python3-dev \
-        git \
-        curl \
-        postgresql-dev \
-        linux-headers \
-        gcc \
-        make \
-        g++ \
-        autoconf \
-        automake \
-        libtool \
-        patch \
-        musl-dev \
-        pcre-dev \
-        pcre \
-        libffi-dev \
-        libxml2-dev \
-        libxslt-dev
+    python3 \
+    python3-dev \
+    git \
+    curl \
+    postgresql-dev \
+    linux-headers \
+    gcc \
+    make \
+    g++ \
+    autoconf \
+    automake \
+    libtool \
+    patch \
+    musl-dev \
+    pcre-dev \
+    pcre \
+    libffi-dev \
+    libxml2-dev \
+    libxslt-dev
 
 # Link python to python3
 RUN ln -s /usr/bin/python3 /usr/bin/python
@@ -57,11 +57,16 @@ RUN pip install -e git+${GIT_URL}@${GIT_BRANCH}#egg=ckan
 COPY ./patches ${SRC_DIR}/patches
 COPY ./scripts/apply_ckan_patches.sh ${SRC_DIR}/apply_ckan_patches.sh
 # Apply patches
-RUN ${SRC_DIR}/apply_ckan_patches.sh
+RUN cd ${SRC_DIR} && ls -lah ${SRC_DIR} && ash ${SRC_DIR}/apply_ckan_patches.sh
 RUN rm -rf /srv/app/src/ckan/.git
+
+# Create a constraint file that limits the Cython version to a compatible one, see https://github.com/yaml/pyyaml/issues/736
+RUN echo 'Cython < 3.0' > /tmp/constraint.txt
+RUN PIP_CONSTRAINT=/tmp/constraint.txt pip wheel --wheel-dir=/wheels PyYAML==5.4.1
+
+# RUN pip-compile ckan/requirements.in
 RUN pip wheel --wheel-dir=/wheels -r ckan/requirements.txt
 RUN pip wheel --wheel-dir=/wheels uWSGI==2.0.20 gevent==21.12.0 greenlet==1.1.3
-
 
 ###########################
 ### Default-Extensions ####
@@ -80,10 +85,10 @@ ENV ENVVARS_GIT_URL=https://github.com/okfn/ckanext-envvars
 ENV ENVVARS_GIT_BRANCH=0.0.1
 
 RUN apk add --no-cache \
-        python3 \
-        python3-dev \
-        git \
-        curl 
+    python3 \
+    python3-dev \
+    git \
+    curl 
 
 # Link python to python3
 RUN ln -s /usr/bin/python3 /usr/bin/python
@@ -116,18 +121,18 @@ ENV CKAN__PLUGINS envvars image_view text_view recline_view datastore datapusher
 
 # Install necessary packages to run CKAN
 RUN apk add --no-cache \
-        python3 \
-        bash \
-        git \
-        gettext \
-        curl \
-        postgresql-client \
-        libmagic \
-        pcre \
-        libxslt \
-        libxml2 \
-        tzdata \
-        apache2-utils && \
+    python3 \
+    bash \
+    git \
+    gettext \
+    curl \
+    postgresql-client \
+    libmagic \
+    pcre \
+    libxslt \
+    libxml2 \
+    tzdata \
+    apache2-utils && \
     # Create SRC_DIR
     mkdir -p ${SRC_DIR} && \
     # Link python to python3
@@ -174,6 +179,7 @@ RUN pip install -e /srv/app/src/ckan && \
     # Change ownership to app user
     chown -R ckan:ckan /srv/app
 
+RUN pip install sqlalchemy==1.3.19
 # Remove wheels
 RUN rm -rf /srv/app/wheels /srv/app/ext_wheels
 

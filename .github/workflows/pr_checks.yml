@@ -233,3 +233,34 @@ jobs:
           tags: keitaro/ckandatapusher:${{ steps.datapusher.outputs.IMAGE_TAG }}
           cache-from: type=local,src=/tmp/.buildx-cache-datapusher
           cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-datapusher
+
+  build-psql-init:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        with:
+          path: /tmp/.buildx-cache-psql-init
+          key: ${{ runner.os }}-buildx-psql-init-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-psql-init
+
+      - name: Get docker tag for psql-init image
+        id: psql-init
+        run: |
+          echo "::set-output name=IMAGE_TAG::$(awk -F '=' '/IMAGE_TAG/{print $2}' ./images/psql-init/Dockerfile)"
+
+      - name: Build psql-init
+        uses: docker/build-push-action@v2
+        with:
+          context: ./images/psql-init
+          file: ./images/psql-init/Dockerfile
+          push: false
+          tags: keitaro/psql-init:${{ steps.psql-init.outputs.IMAGE_TAG }}
+          cache-from: type=local,src=/tmp/.buildx-cache-psql-init
+          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-psql-init
