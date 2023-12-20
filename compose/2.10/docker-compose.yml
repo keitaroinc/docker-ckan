@@ -1,0 +1,96 @@
+# docker-compose build && docker-compose up -d
+version: "3.8"
+
+volumes:
+  ckan_data:
+  pg_data:
+  solr_data:
+
+services:
+  ckan:
+    container_name: ckan
+    image: ghcr.io/keitaroinc/ckan:2.10.2
+    networks:
+      - frontend
+      - backend
+    depends_on:
+      - db
+      - solr
+    ports:
+      - "0.0.0.0:${CKAN_PORT}:5000"
+    env_file:
+      - ./.ckan-env
+    environment:
+      - CKAN_SQLALCHEMY_URL=postgresql://ckan:${POSTGRES_PASSWORD}@db/ckan
+      - CKAN_DATASTORE_WRITE_URL=postgresql://ckan:${POSTGRES_PASSWORD}@db/datastore
+      - CKAN_DATASTORE_READ_URL=postgresql://datastore_ro:${DATASTORE_READONLY_PASSWORD}@db/datastore
+      - CKAN_SOLR_URL=http://solr:8983/solr/ckan
+      - CKAN_REDIS_URL=redis://redis:6379/1
+      - CKAN_SITE_URL=${CKAN_SITE_URL}
+      - CKAN_MAX_UPLOAD_SIZE_MB=${CKAN_MAX_UPLOAD_SIZE_MB}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - DS_RO_PASS=${DATASTORE_READONLY_PASSWORD}
+      
+    volumes:
+      - ckan_data:/srv/app/data
+
+  datapusher:
+    container_name: datapusher
+    image: ghcr.io/keitaroinc/datapusher:${DATAPUSHER_VERSION}
+    networks:
+      - frontend
+      - backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DATAPUSHER_MAX_CONTENT_LENGTH=${DATAPUSHER_MAX_CONTENT_LENGTH}
+      - DATAPUSHER_CHUNK_SIZE=${DATAPUSHER_CHUNK_SIZE}
+      - DATAPUSHER_CHUNK_INSERT_ROWS=${DATAPUSHER_CHUNK_INSERT_ROWS}
+      - DATAPUSHER_DOWNLOAD_TIMEOUT=${DATAPUSHER_DOWNLOAD_TIMEOUT}
+      - DATAPUSHER_SSL_VERIFY=${DATA_PUSHER_SSL_VERIFY}
+      - DATAPUSHER_REWRITE_RESOURCES=${DATAPUSHER_REWRITE_RESOURCES}
+      - DATAPUSHER_REWRITE_URL=${DATAPUSHER_REWRITE_URL}
+
+
+  db:
+    container_name: db
+    build:
+      context: .
+      dockerfile: postgresql/Dockerfile
+      args:
+        - DS_RO_PASS=${DATASTORE_READONLY_PASSWORD}
+        - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    networks:
+      - backend
+    environment:
+      - DS_RO_PASS=${DATASTORE_READONLY_PASSWORD}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - PGDATA=/var/lib/postgresql/data/db
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "ckan"]
+
+  solr:
+    container_name: solr
+    image: solr:8.11.1
+    networks:
+      - backend
+    env_file:
+      - ./.ckan-env
+    environment:
+      - CKAN_CORE_NAME=${CKAN_CORE_NAME}
+      - CKAN_VERSION=${CKAN_VERSION}
+    volumes:
+      - solr_data:/var/solr
+      - ${PWD}/solr8/ckan_init_solr.sh:/docker-entrypoint-initdb.d/ckan_init_solr.sh
+
+  redis:
+    container_name: redis
+    image: redis:${REDIS_VERSION}
+    networks:
+      - backend
+
+networks:
+  frontend:
+  backend:
