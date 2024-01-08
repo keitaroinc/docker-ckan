@@ -1,21 +1,14 @@
 ##################
 ### Build CKAN ###
 ##################
-FROM ubuntu:focal-20210827 as ckanbuild
+FROM alpine:3.17.2 as ckanbuild
 
 # Used by Github Actions to tag the image with
-ENV IMAGE_TAG=2.9.10-focal
+ENV IMAGE_TAG=2.10.3
 
 # Set CKAN version to build
 ENV GIT_URL=https://github.com/ckan/ckan.git
-ENV GIT_BRANCH=ckan-2.9.10
-
-# Set timezone
-ENV TZ=UTC
-RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
-
-# Set Locale
-ENV LC_ALL=en_US.UTF-8
+ENV GIT_BRANCH=ckan-2.10.3
 
 # Set src dirs
 ENV SRC_DIR=/srv/app/src
@@ -23,44 +16,27 @@ ENV PIP_SRC=${SRC_DIR}
 
 WORKDIR ${SRC_DIR}
 
-# Set the locale          
-RUN apt-get update
-RUN apt-get install --no-install-recommends -y locales
-RUN sed -i "/$LC_ALL/s/^# //g" /etc/locale.gen
-RUN dpkg-reconfigure --frontend=noninteractive locales 
-RUN update-locale LANG=${LC_ALL}
-
-# Instal apt-utils
-RUN apt-get install --no-install-recommends -y \
-    apt-utils
-
 # Packages to build CKAN requirements and plugins
-RUN apt-get install --no-install-recommends -y \
-    git \
-    curl \
-    ca-certificates \
-    python3 \
-    libpq-dev \
-    linux-headers-generic \
-    gcc-10 \
-    make \
-    g++-10 \
-    autoconf \
-    automake \
-    libtool \
-    patch \
-    libpcre3-dev \
-    libpcre3 \
-    python3-dev \
-    libffi-dev \
-    libxml2-dev \
-    libxslt-dev
-
-# Use gcc 10
-RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 100 --slave /usr/bin/g++ g++ /usr/bin/g++-10 --slave /usr/bin/gcov gcov /usr/bin/gcov-10 --slave /usr/bin/x86_64-linux-gnu-gcc x86_64-linux-gnu-gcc /usr/bin/x86_64-linux-gnu-gcc-10
-
-# Link python to python3
-RUN ln -s /usr/bin/python3 /usr/bin/python
+RUN apk add --no-cache \
+        python3 \
+        python3-dev \
+        git \
+        curl \
+        postgresql-dev \
+        linux-headers \
+        gcc \
+        make \
+        g++ \
+        autoconf \
+        automake \
+        libtool \
+        patch \
+        musl-dev \
+        pcre-dev \
+        pcre \
+        libffi-dev \
+        libxml2-dev \
+        libxslt-dev
 
 # Create the src directory
 RUN mkdir -p ${SRC_DIR}
@@ -78,16 +54,16 @@ RUN pip install -e git+${GIT_URL}@${GIT_BRANCH}#egg=ckan
 COPY ./patches ${SRC_DIR}/patches
 COPY ./scripts/apply_ckan_patches.sh ${SRC_DIR}/apply_ckan_patches.sh
 # Apply patches
-RUN ${SRC_DIR}/apply_ckan_patches.sh
+# RUN ${SRC_DIR}/apply_ckan_patches.sh
 RUN rm -rf /srv/app/src/ckan/.git
 RUN pip wheel --wheel-dir=/wheels -r ckan/requirements.txt
-RUN pip wheel --wheel-dir=/wheels uWSGI==2.0.20 gevent==21.12.0 greenlet==1.1.3
+RUN pip wheel --wheel-dir=/wheels uWSGI==2.0.20 gevent==22.10.2 greenlet==2.0.2
 
 
 ###########################
 ### Default-Extensions ####
 ###########################
-FROM ubuntu:focal-20210827 as extbuild
+FROM alpine:3.17.2 as extbuild
 
 # Set src dirs
 ENV SRC_DIR=/srv/app/src
@@ -98,18 +74,13 @@ ENV DEFAULT_EXTENSIONS envvars
 
 # Locations and tags, please use specific tags or revisions
 ENV ENVVARS_GIT_URL=https://github.com/okfn/ckanext-envvars
-ENV ENVVARS_GIT_BRANCH=0.0.1
+ENV ENVVARS_GIT_BRANCH=0.0.2
 
-RUN apt-get update && \
-    apt-get install --no-install-recommends -y \
-    git \
-    curl \
-    ca-certificates \
-    python3 \
-    python3-dev
-
-# Link python to python3
-RUN ln -s /usr/bin/python3 /usr/bin/python
+RUN apk add --no-cache \
+        python3 \
+        python3-dev \
+        git \
+        curl 
 
 # Create the src directory
 RUN mkdir -p ${SRC_DIR}
@@ -118,34 +89,16 @@ RUN mkdir -p ${SRC_DIR}
 RUN curl -o ${SRC_DIR}/get-pip.py https://bootstrap.pypa.io/get-pip.py && \
     python ${SRC_DIR}/get-pip.py
 
-# Downgrade setuptools so that CKAN requirements can be built
-RUN pip install setuptools==44.1.0
-
 # Fetch and build the default CKAN extensions
 RUN pip wheel --wheel-dir=/wheels git+${ENVVARS_GIT_URL}@${ENVVARS_GIT_BRANCH}#egg=ckanext-envvars
 
 ############
 ### MAIN ###
 ############
-FROM ubuntu:focal-20210827
+FROM alpine:3.17.2
 
 LABEL maintainer="Keitaro Inc <info@keitaro.com>"
 LABEL org.opencontainers.image.source https://github.com/keitaroinc/docker-ckan
-
-# Set timezone
-ENV TZ=UTC
-RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
-
-# Set Locale
-ENV LC_ALL=en_US.UTF-8
-
-# Set the locale          
-RUN apt-get update && \
-    apt-get install --no-install-recommends -y locales && \
-    sed -i "/$LC_ALL/s/^# //g" /etc/locale.gen && \
-    dpkg-reconfigure --frontend=noninteractive locales && \
-    update-locale LANG=${LC_ALL} && \
-    rm -rf /var/lib/apt/lists/*
 
 ENV APP_DIR=/srv/app
 ENV SRC_DIR=/srv/app/src
@@ -156,35 +109,26 @@ ENV CKAN_SITE_URL=http://localhost:5000
 ENV CKAN__PLUGINS envvars image_view text_view recline_view datastore datapusher
 
 # Install necessary packages to run CKAN
-RUN apt-get update && \
-    apt-get install --no-install-recommends -y \
-    gettext \
-    curl \
-    ca-certificates \
-    libpq5 \
-    git \
-    postgresql-client \
-    python3 \
-    python3-distutils \
-    libpython3.8 \
-    libmagic1 \
-    libpcre3 \
-    libxslt1.1 \
-    libxml2 \
-    tzdata \
-    apache2-utils && \
-    rm -rf /var/lib/apt/lists/* && \
+RUN apk add --no-cache \
+        python3 \
+        bash \
+        git \
+        gettext \
+        curl \
+        postgresql-client \
+        libmagic \
+        pcre \
+        libxslt \
+        libxml2 \
+        tzdata \
+        apache2-utils && \
     # Create SRC_DIR
-    mkdir -p ${SRC_DIR} && \
-    # Link python to python3
-    ln -s /usr/bin/python3 /usr/bin/python
+    mkdir -p ${SRC_DIR}
+
 
 # Install pip
 RUN curl -o ${SRC_DIR}/get-pip.py https://bootstrap.pypa.io/get-pip.py && \
     python ${SRC_DIR}/get-pip.py
-
-# Downgrade setuptools so that CKAN requirements can be built
-RUN pip install setuptools==44.1.0
 
 # Get artifacts from build stages
 COPY --from=ckanbuild /wheels /srv/app/wheels
@@ -192,11 +136,11 @@ COPY --from=extbuild /wheels /srv/app/ext_wheels
 COPY --from=ckanbuild /srv/app/src/ckan ${CKAN_DIR}
 
 # Additional install steps for build stages artifacts
-RUN pip install --no-index --find-links=/srv/app/wheels uWSGI==2.0.20 gevent==21.12.0
+RUN pip install --no-index --find-links=/srv/app/wheels uWSGI==2.0.20 gevent==22.10.2
 
 # Create a local user and group to run the app
-RUN groupadd -g 92 ckan && \
-    useradd -rm -d /srv/app -s /bin/bash -g ckan -u 92 ckan
+RUN addgroup -g 92 -S ckan && \
+    adduser -u 92 -h /srv/app -H -D -S -G ckan ckan
 
 WORKDIR ${CKAN_DIR}
 
@@ -207,10 +151,12 @@ RUN pip install -e /srv/app/src/ckan && \
     # Install default CKAN extensions
     pip install --no-index --find-links=/srv/app/ext_wheels ckanext-envvars && \
     # Create and update CKAN config
+    # Set timezone
+    echo "UTC" >  /etc/timezone && \
     # Generate CKAN config
     ckan generate config ${APP_DIR}/production.ini && \
-    # Configure plugins
     ckan config-tool ${APP_DIR}/production.ini "beaker.session.secret = " && \
+    # Configure plugins
     ckan config-tool ${APP_DIR}/production.ini "ckan.plugins = ${CKAN__PLUGINS}" && \
     # Create the data directory
     mkdir ${DATA_DIR} && \
