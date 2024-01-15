@@ -42,11 +42,14 @@ jobs:
       - name: Build an image from Dockerfile
         run: |
           docker build -t keitaro/ckan/2.10:${{ github.sha }} -f ./images/ckan/2.10/Dockerfile ./images/ckan/2.10/
+          docker build -t keitaro/ckan/2.10-focal:${{ github.sha }} -f ./images/ckan/2.10/Dockerfile.focal ./images/ckan/2.10/
+          docker build -t keitaro/ckan/2.9:${{ github.sha }} -f ./images/ckan/2.9/Dockerfile ./images/ckan/2.9/
+          docker build -t keitaro/ckan/2.9-focal:${{ github.sha }} -f ./images/ckan/2.9/Dockerfile.focal ./images/ckan/2.9/
 
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: 'keitaro/ckan/2.10:${{ github.sha }}'
+          image-ref: 'keitaro/ckan/2.10:${{ github.sha }},keitaro/ckan/2.10-focal:${{ github.sha }}'
           format: 'sarif'
           output: 'trivy-results.sarif'
 
