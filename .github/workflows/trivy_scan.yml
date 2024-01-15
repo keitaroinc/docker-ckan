@@ -41,7 +41,7 @@ jobs:
 
       - name: Build an image from Dockerfile
         run: |
-          docker build -t keitaro/ckan/2.10:${{ github.sha }} -f ./images/ckan/2.10/Dockerfile .
+          docker build -t keitaro/ckan/2.10:${{ github.sha }} -f ./images/ckan/2.10/Dockerfile ./images/ckan/2.10/
 
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
