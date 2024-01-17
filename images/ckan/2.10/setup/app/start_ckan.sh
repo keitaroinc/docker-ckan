@@ -1,4 +1,8 @@
 #!/bin/bash
+
+# Add ckan.datapusher.api_token to the CKAN config file (updated with corrected value later)
+ckan config-tool $APP_DIR/production.ini ckan.datapusher.api_token=xxx
+
 # Run any startup scripts provided by images extending this one
 if [[ -d "${APP_DIR}/docker-entrypoint.d" ]]
 then
@@ -37,6 +41,9 @@ UWSGI_OPTS="--socket /tmp/uwsgi.sock --uid ckan --gid ckan --http :5000 --master
 
 # Run the prerun script to init CKAN and create the default admin user
 python prerun.py || { echo '[CKAN prerun] FAILED. Exiting...' ; exit 1; }
+
+echo "Set up ckan.datapusher.api_token in the CKAN config file"
+ckan config-tool $APP_DIR/production.ini "ckan.datapusher.api_token=$(ckan -c $APP_DIR/production.ini user token add ckan_admin datapusher | tail -n 1 | tr -d '\t')"
 
 # Check if we are in maintenance mode and if yes serve the maintenance pages
 if [ "$MAINTENANCE_MODE" = true ]; then PYTHONUNBUFFERED=1 python maintenance/serve.py; fi
