@@ -9,13 +9,13 @@ jobs:
   build-ckan-2-10:
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v3
 
       - name: Cache Docker layers
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: |
             /tmp/.buildx-cache-alpine-2-10
@@ -30,7 +30,7 @@ jobs:
           echo "::set-output name=IMAGE_TAG::$(awk -F '=' '/IMAGE_TAG/{print $2}' ./images/ckan/2.10/Dockerfile)"
 
       - name: Build CKAN 2.10 alpine
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v5
         with:
           context: ./images/ckan/2.10
           file: ./images/ckan/2.10/Dockerfile
@@ -45,7 +45,7 @@ jobs:
           echo "::set-output name=IMAGE_TAG::$(awk -F '=' '/IMAGE_TAG/{print $2}' ./images/ckan/2.10/Dockerfile.focal)"
 
       - name: Build CKAN 2.10 ubuntu
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v5
         with:
           context: ./images/ckan/2.10
           file: ./images/ckan/2.10/Dockerfile.focal
@@ -60,13 +60,13 @@ jobs:
   build-ckan-2-9:
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v3
 
       - name: Cache Docker layers
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: |
             /tmp/.buildx-cache-alpine-2-9
@@ -81,7 +81,7 @@ jobs:
           echo "::set-output name=IMAGE_TAG::$(awk -F '=' '/IMAGE_TAG/{print $2}' ./images/ckan/2.9/Dockerfile)"
 
       - name: Build CKAN 2.9 alpine
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v5
         with:
           context: ./images/ckan/2.9
           file: ./images/ckan/2.9/Dockerfile
@@ -96,7 +96,7 @@ jobs:
           echo "::set-output name=IMAGE_TAG::$(awk -F '=' '/IMAGE_TAG/{print $2}' ./images/ckan/2.9/Dockerfile.focal)"
 
       - name: Build CKAN 2.9 ubuntu
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v5
         with:
           context: ./images/ckan/2.9
           file: ./images/ckan/2.9/Dockerfile.focal
@@ -110,13 +110,13 @@ jobs:
   build-ckan-2-8:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v3
 
       - name: Cache Docker layers
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: |
             /tmp/.buildx-cache-alpine-2-8
@@ -131,7 +131,7 @@ jobs:
           echo "::set-output name=IMAGE_TAG::$(awk -F '=' '/IMAGE_TAG/{print $2}' ./images/ckan/2.8/Dockerfile)"
 
       - name: Build CKAN 2.8 alpine
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v5
         with:
           context: ./images/ckan/2.8
           file: ./images/ckan/2.8/Dockerfile
@@ -146,7 +146,7 @@ jobs:
           echo "::set-output name=IMAGE_TAG::$(awk -F '=' '/IMAGE_TAG/{print $2}' ./images/ckan/2.8/Dockerfile.focal)"
 
       - name: Build CKAN 2.8 ubuntu
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v5
         with:
           context: ./images/ckan/2.8
           file: ./images/ckan/2.8/Dockerfile.focal
@@ -158,13 +158,13 @@ jobs:
   build-ckan-2-7:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v3
 
       - name: Cache Docker layers
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: |
             /tmp/.buildx-cache-alpine-2-7
@@ -179,7 +179,7 @@ jobs:
           echo "::set-output name=IMAGE_TAG::$(awk -F '=' '/IMAGE_TAG/{print $2}' ./images/ckan/2.7/Dockerfile)"
 
       - name: Build CKAN 2.7 alpine
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v5
         with:
           context: ./images/ckan/2.7
           file: ./images/ckan/2.7/Dockerfile
@@ -194,7 +194,7 @@ jobs:
           echo "::set-output name=IMAGE_TAG::$(awk -F '=' '/IMAGE_TAG/{print $2}' ./images/ckan/2.7/Dockerfile.focal)"
 
       - name: Build CKAN 2.7 ubuntu
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v5
         with:
           context: ./images/ckan/2.7
           file: ./images/ckan/2.7/Dockerfile.focal
@@ -206,13 +206,13 @@ jobs:
   build-ckan-datapusher:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v3
 
       - name: Cache Docker layers
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: /tmp/.buildx-cache-datapusher
           key: ${{ runner.os }}-buildx-datapusher-${{ github.sha }}
@@ -225,7 +225,7 @@ jobs:
           echo "::set-output name=IMAGE_TAG::$(awk -F '=' '/IMAGE_TAG/{print $2}' ./images/datapusher/Dockerfile)"
 
       - name: Build CKAN datapusher
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v5
         with:
           context: ./images/datapusher
           file: ./images/datapusher/Dockerfile
@@ -237,13 +237,13 @@ jobs:
   build-psql-init:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v3
 
       - name: Cache Docker layers
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: /tmp/.buildx-cache-psql-init
           key: ${{ runner.os }}-buildx-psql-init-${{ github.sha }}
@@ -256,7 +256,7 @@ jobs:
           echo "::set-output name=IMAGE_TAG::$(awk -F '=' '/IMAGE_TAG/{print $2}' ./images/psql-init/Dockerfile)"
 
       - name: Build psql-init
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v5
         with:
           context: ./images/psql-init
           file: ./images/psql-init/Dockerfile
