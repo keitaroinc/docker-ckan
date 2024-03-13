@@ -4,11 +4,11 @@
 FROM alpine:3.17.2 as ckanbuild
 
 # Used by Github Actions to tag the image with
-ENV IMAGE_TAG=2.10.3
+ENV IMAGE_TAG=2.10.4
 
 # Set CKAN version to build
 ENV GIT_URL=https://github.com/ckan/ckan.git
-ENV GIT_BRANCH=ckan-2.10.3
+ENV GIT_BRANCH=ckan-2.10.4
 
 # Set src dirs
 ENV SRC_DIR=/srv/app/src
