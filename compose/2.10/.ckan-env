@@ -38,7 +38,7 @@ CKANEXT__XLOADER__JOB_TIMEOUT="36000"
 CKANEXT__XLOADER__MAX_EXCERPT_LINES="0"
 CKANEXT__XLOADER__SSL_VERIFY="false"
 CKANEXT__XLOADER__FORMATS="csv application/csv xls application/vnd.ms-excel xlsx application/vnd.oasis.opendocument.spreadsheet"
-
+CKANEXT__XLOADER__API_TOKEN="replace_this_with_generated_api_token_for_sysadmin"
 # Solr configuration
 CKAN_VERSION=2.10
 CKAN_CORE_NAME=ckan
