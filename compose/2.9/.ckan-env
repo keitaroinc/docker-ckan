@@ -15,7 +15,7 @@ CKAN___BEAKER__SESSION__SECRET=CHANGE_ME
 CKAN___API_TOKEN__JWT__ENCODE__SECRET=string:CHANGE_ME
 CKAN___API_TOKEN__JWT__DECODE__SECRET=string:CHANGE_ME
 # CKAN Plugins
-CKAN__PLUGINS=envvars image_view text_view recline_view datastore datapusher
+CKAN__PLUGINS=envvars image_view text_view recline_view datastore xloader
 # CKAN requires storage path to be set in order for filestore to be enabled
 CKAN__STORAGE_PATH=/srv/app/data
 CKAN__WEBASSETS__PATH=/srv/app/data/webassets
@@ -31,9 +31,13 @@ CKAN_SMTP_USER=user
 CKAN_SMTP_PASSWORD=pass
 CKAN_SMTP_MAIL_FROM=ckan@localhost
 
-# Datapusher configuration
-CKAN__DATAPUSHER__URL=http://datapusher:8000
-CKAN__DATAPUSHER__CALLBACK_URL_BASE=http://ckan:5000/
+# Xloader configuration
+CKANEXT__XLOADER__JOBS_DB__URI="postgresql://ckan:${POSTGRES_PASSWORD}@db/ckan"
+CKANEXT__XLOADER__MAX_CONTENT_LENGTH="5000000001"
+CKANEXT__XLOADER__JOB_TIMEOUT="36000"
+CKANEXT__XLOADER__MAX_EXCERPT_LINES="0"
+CKANEXT__XLOADER__SSL_VERIFY="false"
+CKANEXT__XLOADER__FORMATS="csv application/csv xls application/vnd.ms-excel xlsx application/vnd.oasis.opendocument.spreadsheet"
 
 # Solr configuration
 CKAN_VERSION=2.9.11

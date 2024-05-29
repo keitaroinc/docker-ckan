@@ -117,10 +117,11 @@ ENV CKAN_DIR=${SRC_DIR}/ckan
 ENV DATA_DIR=/srv/app/data
 ENV PIP_SRC=${SRC_DIR}
 ENV CKAN_SITE_URL=http://localhost:5000
-ENV CKAN__PLUGINS envvars image_view text_view recline_view datastore datapusher
+ENV CKAN__PLUGINS envvars image_view text_view recline_view datastore xloader
 
 # Install necessary packages to run CKAN
 RUN apk add --no-cache \
+    supervisor \
     python3 \
     bash \
     git \
@@ -142,6 +143,11 @@ RUN apk add --no-cache \
 RUN curl -o ${SRC_DIR}/get-pip.py https://bootstrap.pypa.io/get-pip.py && \
     python ${SRC_DIR}/get-pip.py
 
+    ### XLoader ###
+RUN pip3 install -e 'git+https://github.com/keitaroinc/ckanext-xloader.git@change-requirements#egg=ckanext-xloader' && \ 
+   pip3 install -r ${SRC_DIR}/ckanext-xloader/requirements.txt && \
+   pip3 install -U requests[security]
+
 # Get artifacts from build stages
 COPY --from=ckanbuild /wheels /srv/app/wheels
 COPY --from=extbuild /wheels /srv/app/ext_wheels
@@ -159,7 +165,7 @@ WORKDIR ${CKAN_DIR}
 # Install CKAN
 RUN pip install -e /srv/app/src/ckan && \
     cp who.ini ${APP_DIR} && \
-    pip install --no-index --find-links=/srv/app/wheels -r requirements.txt && \
+    pip install --ignore-installed six --no-index --find-links=/srv/app/wheels -r requirements.txt && \
     # Install default CKAN extensions
     pip install --no-index --find-links=/srv/app/ext_wheels ckanext-envvars && \
     # Create and update CKAN config
@@ -189,10 +195,21 @@ COPY setup/app ${APP_DIR}
 WORKDIR ${APP_DIR}
 
 # Create entrypoint directory for children image scripts
-ONBUILD RUN mkdir docker-entrypoint.d
+RUN mkdir docker-entrypoint.d
 
 # Create afterinit directory for children image scripts
-ONBUILD RUN mkdir docker-afterinit.d
+RUN mkdir docker-afterinit.d
+
+RUN pip install supervisor
+RUN mkdir /var/supervisor
+RUN mkdir /var/log/ckan
+RUN mkdir /etc/supervisor/conf.d/ -p
+COPY supervisorvalidation.conf /etc/supervisor/conf.d/supervisor-ckan-worker.conf
+COPY supervisord.conf /etc/supervisord.conf
+COPY supervisorstart.sh /srv/app/docker-afterinit.d
+
+# Change ownership to app user
+RUN chown -R ckan:ckan ${APP_DIR} /var/supervisor /var/log/ckan /etc/supervisor/conf.d/
 
 EXPOSE 5000
 
