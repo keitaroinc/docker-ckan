@@ -103,20 +103,24 @@ ENV CKAN_DIR=${SRC_DIR}/ckan
 ENV DATA_DIR=/srv/app/data
 ENV PIP_SRC=${SRC_DIR}
 ENV CKAN_SITE_URL=http://localhost:5000
-ENV CKAN__PLUGINS envvars image_view text_view recline_view datastore datapusher
+ENV CKAN__PLUGINS envvars image_view text_view recline_view datastore xloader
 
 # Install necessary packages to run CKAN
 RUN apk add --no-cache git \
+	    supervisor \
         bash \
         git \
+        gcc \
         gettext \
         curl \
         postgresql-client \
         python2 \
         libmagic \
         pcre \
-        libxslt \
-        libxml2 \
+        libc-dev \
+        libxslt-dev \
+        libxml2-dev \
+        python2-dev \
         tzdata \
         apache2-utils && \
     # Create SRC_DIR
@@ -125,6 +129,10 @@ RUN apk add --no-cache git \
 # Install pip
 RUN curl -o ${SRC_DIR}/get-pip.py https://bootstrap.pypa.io/pip/2.7/get-pip.py && \
     python ${SRC_DIR}/get-pip.py 'pip==20.3.3'
+    ### XLoader ###
+RUN pip install -e 'git+https://github.com/keitaroinc/ckanext-xloader@ckan-2.8#egg=ckanext-xloader' && \ 
+   pip install -r ${SRC_DIR}/ckanext-xloader/requirements.txt && \
+   pip install -U requests[security]
 
 # Get artifacts from build stages
 COPY --from=ckanbuild /wheels /srv/app/wheels
@@ -133,7 +141,6 @@ COPY --from=ckanbuild /srv/app/src/ckan ${CKAN_DIR}
 
 # Additional install steps for build stages artifacts
 RUN pip install --no-index --find-links=/srv/app/wheels uwsgi==2.0.19.1 gevent==21.12.0
-
 # Create a local user and group to run the app
 RUN addgroup -g 92 -S ckan && \
     adduser -u 92 -h /srv/app -H -D -S -G ckan ckan
@@ -165,7 +172,8 @@ RUN rm -rf /srv/app/wheels /srv/app/ext_wheels
 
 # Install python2 secrets for generating sessions
 RUN pip install python2-secrets 
-
+# Install python-dateutil newer version for xloader
+RUN pip install python-dateutil==2.9.0.post0
 # Copy necessary scripts
 COPY setup/app ${APP_DIR}
 
@@ -175,10 +183,21 @@ WORKDIR ${APP_DIR}
 COPY setup/bin/ckan /usr/bin/ckan
 
 # Create entrypoint directory for children image scripts
-ONBUILD RUN mkdir docker-entrypoint.d
+RUN mkdir docker-entrypoint.d
 
 # Create afterinit directory for children image scripts
-ONBUILD RUN mkdir docker-afterinit.d
+RUN mkdir docker-afterinit.d
+
+RUN pip install supervisor
+RUN mkdir /var/supervisor
+RUN mkdir /var/log/ckan
+RUN mkdir /etc/supervisor/conf.d/ -p
+COPY supervisorvalidation.conf /etc/supervisor/conf.d/supervisor-ckan-worker.conf
+COPY supervisord.conf /etc/supervisord.conf
+COPY supervisorstart.sh /srv/app/docker-afterinit.d
+
+# Change ownership to app user
+RUN chown -R ckan:ckan ${APP_DIR} /var/supervisor /var/log/ckan /etc/supervisor/conf.d/
 
 EXPOSE 5000
 

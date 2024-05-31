@@ -33,24 +33,6 @@ services:
     volumes:
       - ckan_data:/srv/app/data
 
-  datapusher:
-    container_name: datapusher
-    image: ghcr.io/keitaroinc/datapusher:${DATAPUSHER_VERSION}
-    networks:
-      - frontend
-      - backend
-    ports:
-      - "8000:8000"
-    environment:
-      - DATAPUSHER_MAX_CONTENT_LENGTH=${DATAPUSHER_MAX_CONTENT_LENGTH}
-      - DATAPUSHER_CHUNK_SIZE=${DATAPUSHER_CHUNK_SIZE}
-      - DATAPUSHER_CHUNK_INSERT_ROWS=${DATAPUSHER_CHUNK_INSERT_ROWS}
-      - DATAPUSHER_DOWNLOAD_TIMEOUT=${DATAPUSHER_DOWNLOAD_TIMEOUT}
-      - DATAPUSHER_SSL_VERIFY=${DATA_PUSHER_SSL_VERIFY}
-      - DATAPUSHER_REWRITE_RESOURCES=${DATAPUSHER_REWRITE_RESOURCES}
-      - DATAPUSHER_REWRITE_URL=${DATAPUSHER_REWRITE_URL}
-
-
   db:
     container_name: db
     build:
