@@ -54,6 +54,23 @@ jobs:
           cache-from: type=local,src=/tmp/.buildx-cache-alpine-2-10
           cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-alpine-2-10
 
+      - name: Get docker tag for alpine xloader image
+        id: alpine
+        run: |
+          echo "IMAGE_TAG=$(awk -F '=' '/IMAGE_TAG/{print $2}' ./images/ckan/2.10/Dockerfile.xloader)" >> $GITHUB_OUTPUT
+
+      - name: Build and push CKAN 2.10 alpine xloader
+        uses: docker/build-push-action@v5
+        with:
+          context: ./images/ckan/2.10
+          file: ./images/ckan/2.10/Dockerfile.xloader
+          push: true
+          tags: |
+            keitaro/ckan:${{ steps.alpine.outputs.IMAGE_TAG }}
+            ghcr.io/keitaroinc/ckan:${{ steps.alpine.outputs.IMAGE_TAG }}
+          cache-from: type=local,src=/tmp/.buildx-cache-alpine-2-10
+          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-alpine-2-10
+
       - name: Get docker tag for Ubuntu image
         id: ubuntu
         run: |
