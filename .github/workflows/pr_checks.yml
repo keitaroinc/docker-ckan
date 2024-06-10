@@ -44,7 +44,7 @@ jobs:
         run: |
           echo "IMAGE_TAG=$(awk -F '=' '/IMAGE_TAG/{print $2}' ./images/ckan/2.10/Dockerfile.xloader)" >> $GITHUB_OUTPUT
 
-      - name: Build CKAN 2.10 alpine
+      - name: Build CKAN 2.10 alpine xloader
         uses: docker/build-push-action@v5
         with:
           context: ./images/ckan/2.10
