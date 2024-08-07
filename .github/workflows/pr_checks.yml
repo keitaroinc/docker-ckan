@@ -20,6 +20,7 @@ jobs:
           path: |
             /tmp/.buildx-cache-alpine-2-10
             /tmp/.buildx-cache-ubuntu-2-10
+            /tmp/.buildx-cache-alpine-2-10-xloader
           key: ${{ runner.os }}-buildx-2-10-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-buildx-2-10
@@ -50,9 +51,9 @@ jobs:
           context: ./images/ckan/2.10
           file: ./images/ckan/2.10/Dockerfile.xloader
           push: false
-          tags: keitaro/ckan:${{ steps.alpine.outputs.IMAGE_TAG }}
-          cache-from: type=local,src=/tmp/.buildx-cache-alpine-2-10
-          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-alpine-2-10
+          tags: keitaro/ckan:${{ steps.alpine-xloader.outputs.IMAGE_TAG }}
+          cache-from: type=local,src=/tmp/.buildx-cache-alpine-2-10-xloader
+          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-alpine-2-10-xloader
 
       - name: Get docker tag for Ubuntu image
         id: ubuntu
