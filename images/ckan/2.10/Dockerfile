@@ -1,14 +1,14 @@
 ##################
 ### Build CKAN ###
 ##################
-FROM alpine:3.17.2 as ckanbuild
+FROM alpine:3.17.2 AS ckanbuild
 
 # Used by Github Actions to tag the image with
-ENV IMAGE_TAG=2.10.4
+ENV IMAGE_TAG=2.10.5
 
 # Set CKAN version to build
 ENV GIT_URL=https://github.com/ckan/ckan.git
-ENV GIT_BRANCH=ckan-2.10.4
+ENV GIT_BRANCH=ckan-2.10.5
 
 # Set src dirs
 ENV SRC_DIR=/srv/app/src
@@ -63,7 +63,7 @@ RUN pip wheel --wheel-dir=/wheels uWSGI==2.0.20 gevent==22.10.2 greenlet==2.0.2
 ###########################
 ### Default-Extensions ####
 ###########################
-FROM alpine:3.17.2 as extbuild
+FROM alpine:3.17.2 AS extbuild
 
 # Set src dirs
 ENV SRC_DIR=/srv/app/src
