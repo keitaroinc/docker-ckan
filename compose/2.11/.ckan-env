@@ -15,7 +15,7 @@ CKAN___BEAKER__SESSION__SECRET=CHANGE_ME
 CKAN___API_TOKEN__JWT__ENCODE__SECRET=string:CHANGE_ME
 CKAN___API_TOKEN__JWT__DECODE__SECRET=string:CHANGE_ME
 # CKAN Plugins
-CKAN__PLUGINS=envvars image_view text_view recline_view datastore datapusher
+CKAN__PLUGINS=envvars activity image_view
 # CKAN requires storage path to be set in order for filestore to be enabled
 CKAN__STORAGE_PATH=/srv/app/data
 CKAN__WEBASSETS__PATH=/srv/app/data/webassets
@@ -38,5 +38,5 @@ CKAN__DATAPUSHER__API_TOKEN=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJ6M0l
 # CKAN__DATAPUSHER__API_TOKEN=replace_this_with_api_token_once_ckan_starts
 
 # Solr configuration
-CKAN_VERSION=2.10
+CKAN_VERSION=2.11
 CKAN_CORE_NAME=ckan
