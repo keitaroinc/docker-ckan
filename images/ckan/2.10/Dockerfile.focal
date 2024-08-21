@@ -1,7 +1,7 @@
 ##################
 ### Build CKAN ###
 ##################
-FROM ubuntu:focal-20210827 as ckanbuild
+FROM ubuntu:focal-20210827 AS ckanbuild
 
 # Used by Github Actions to tag the image with
 ENV IMAGE_TAG=2.10.5-focal
@@ -86,7 +86,7 @@ RUN pip wheel --wheel-dir=/wheels uWSGI==2.0.20 gevent==22.10.2 greenlet==2.0.2
 ###########################
 ### Default-Extensions ####
 ###########################
-FROM ubuntu:focal-20210827 as extbuild
+FROM ubuntu:focal-20210827 AS extbuild
 
 # Set src dirs
 ENV SRC_DIR=/srv/app/src
