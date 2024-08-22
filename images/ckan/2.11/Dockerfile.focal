@@ -69,14 +69,16 @@ RUN apt-get install --no-install-recommends -y \
 RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 100 --slave /usr/bin/g++ g++ /usr/bin/g++-10 --slave /usr/bin/gcov gcov /usr/bin/gcov-10 --slave /usr/bin/x86_64-linux-gnu-gcc x86_64-linux-gnu-gcc /usr/bin/x86_64-linux-gnu-gcc-10
 
 # Link python to python3
-RUN ln -s /bin/python3.12 /bin/python
+RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.12 312 && \
+    update-alternatives --config python3 && \
+    ln -s /usr/bin/python3 /usr/bin/python
 
 # Create the src directory
 RUN mkdir -p ${SRC_DIR}
 
 # Install pip
 RUN curl -o ${SRC_DIR}/get-pip.py https://bootstrap.pypa.io/get-pip.py && \
-    python3.12 ${SRC_DIR}/get-pip.py
+    python ${SRC_DIR}/get-pip.py
 
 # Downgrade setuptools so that CKAN requirements can be built
 RUN pip install setuptools==73.0.1
@@ -119,13 +121,17 @@ RUN apt-get update && \
         python3.12 \
         python3.12-dev
 
+# Link python to python3
+RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.12 312 && \
+    update-alternatives --config python3 && \
+    ln -s /usr/bin/python3 /usr/bin/python
 
 # Create the src directory
 RUN mkdir -p ${SRC_DIR}
 
 # Install pip
 RUN curl -o ${SRC_DIR}/get-pip.py https://bootstrap.pypa.io/get-pip.py && \
-    python3.12 ${SRC_DIR}/get-pip.py
+    python ${SRC_DIR}/get-pip.py
 
 # Downgrade setuptools so that CKAN requirements can be built
 RUN pip install setuptools==73.0.1
@@ -185,13 +191,16 @@ RUN apt-get update && \
         apache2-utils && \
     rm -rf /var/lib/apt/lists/* && \
     # Create SRC_DIR
-    mkdir -p ${SRC_DIR} && \
-    # Link python to python3
-    ln -s /bin/python3.12 /bin/python
+    mkdir -p ${SRC_DIR}
+
+# Link python to python3
+RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.12 312 && \
+    update-alternatives --config python3 && \
+    ln -s /usr/bin/python3 /usr/bin/python
 
 # Install pip
 RUN curl -o ${SRC_DIR}/get-pip.py https://bootstrap.pypa.io/get-pip.py && \
-    python3.12 ${SRC_DIR}/get-pip.py
+    python ${SRC_DIR}/get-pip.py
 
 # Downgrade setuptools so that CKAN requirements can be built
 RUN pip install setuptools==73.0.1
