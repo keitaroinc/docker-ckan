@@ -12,8 +12,12 @@ services:
       - frontend
       - backend
     depends_on:
-      - db
-      - solr
+      db:
+        condition: service_healthy
+        restart: true
+      solr:
+        condition: service_healthy
+        restart: true
     ports:
       - "0.0.0.0:${CKAN_PORT}:5000"
     env_file:
@@ -28,7 +32,6 @@ services:
       - CKAN_MAX_UPLOAD_SIZE_MB=${CKAN_MAX_UPLOAD_SIZE_MB}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - DS_RO_PASS=${DATASTORE_READONLY_PASSWORD}
-      
     volumes:
       - ckan_data:/srv/app/data
 
@@ -45,7 +48,7 @@ services:
       - DATAPUSHER_CHUNK_SIZE=${DATAPUSHER_CHUNK_SIZE}
       - DATAPUSHER_CHUNK_INSERT_ROWS=${DATAPUSHER_CHUNK_INSERT_ROWS}
       - DATAPUSHER_DOWNLOAD_TIMEOUT=${DATAPUSHER_DOWNLOAD_TIMEOUT}
-      - DATAPUSHER_SSL_VERIFY=${DATA_PUSHER_SSL_VERIFY}
+      - DATAPUSHER_SSL_VERIFY=${DATAPUSHER_SSL_VERIFY}
       - DATAPUSHER_REWRITE_RESOURCES=${DATAPUSHER_REWRITE_RESOURCES}
       - DATAPUSHER_REWRITE_URL=${DATAPUSHER_REWRITE_URL}
 
@@ -82,12 +85,24 @@ services:
     volumes:
       - solr_data:/var/solr
       - ${PWD}/solr8/ckan_init_solr.sh:/docker-entrypoint-initdb.d/ckan_init_solr.sh
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/solr/bin/solr","status"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
 
   redis:
     container_name: redis
     image: redis:${REDIS_VERSION}
     networks:
       - backend
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
 networks:
   frontend:
