@@ -4,11 +4,11 @@
 FROM alpine:3.17.2 AS ckanbuild
 
 # Used by Github Actions to tag the image with
-ENV IMAGE_TAG=2.10.5
+ENV IMAGE_TAG=2.11.0
 
 # Set CKAN version to build
 ENV GIT_URL=https://github.com/ckan/ckan.git
-ENV GIT_BRANCH=ckan-2.10.5
+ENV GIT_BRANCH=ckan-2.11.0
 
 # Set src dirs
 ENV SRC_DIR=/srv/app/src
@@ -106,7 +106,7 @@ ENV CKAN_DIR=${SRC_DIR}/ckan
 ENV DATA_DIR=/srv/app/data
 ENV PIP_SRC=${SRC_DIR}
 ENV CKAN_SITE_URL=http://localhost:5000
-ENV CKAN__PLUGINS envvars image_view text_view recline_view datastore datapusher
+ENV CKAN__PLUGINS envvars activity image_view text_view datatables_view datastore datapusher
 
 # Install necessary packages to run CKAN
 RUN apk add --no-cache \
@@ -146,7 +146,7 @@ WORKDIR ${CKAN_DIR}
 
 # Install CKAN
 RUN pip install -e /srv/app/src/ckan && \
-    cp who.ini ${APP_DIR} && \
+    # cp who.ini ${APP_DIR} removed this because there was not in 2.11.0
     pip install --no-index --find-links=/srv/app/wheels -r requirements.txt && \
     # Install default CKAN extensions
     pip install --no-index --find-links=/srv/app/ext_wheels ckanext-envvars && \

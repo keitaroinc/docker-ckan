@@ -6,33 +6,99 @@ on:
 
 
 jobs:
-  build-ckan-2-10:
+  build-ckan-2-11:
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v3
 
       - name: Login to DockerHub
-        uses: docker/login-action@v1 
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v1 
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.CR_PAT }}
 
       - name: Cache Docker layers
-        uses: actions/cache@v2
+        uses: actions/cache@v4
+        with:
+          path: |
+            /tmp/.buildx-cache-alpine-2-11
+            /tmp/.buildx-cache-ubuntu-2-11
+          key: ${{ runner.os }}-buildx-2-11-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-2-11
+
+      - name: Get docker tag for Alpine image
+        id: alpine
+        run: |
+          echo "IMAGE_TAG=$(awk -F '=' '/IMAGE_TAG/{print $2}' ./images/ckan/2.11/Dockerfile)" >> $GITHUB_OUTPUT
+
+      - name: Build and push CKAN 2.11 alpine
+        uses: docker/build-push-action@v5
+        with:
+          context: ./images/ckan/2.11
+          file: ./images/ckan/2.11/Dockerfile
+          push: true
+          tags: |
+            keitaro/ckan:${{ steps.alpine.outputs.IMAGE_TAG }}
+            ghcr.io/keitaroinc/ckan:${{ steps.alpine.outputs.IMAGE_TAG }}
+          cache-from: type=local,src=/tmp/.buildx-cache-alpine-2-11
+          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-alpine-2-11
+
+      - name: Get docker tag for Ubuntu image
+        id: ubuntu
+        run: |
+          echo "IMAGE_TAG=$(awk -F '=' '/IMAGE_TAG/{print $2}' ./images/ckan/2.11/Dockerfile.focal)" >> $GITHUB_OUTPUT
+
+      - name: Build and push CKAN 2.11 ubuntu
+        uses: docker/build-push-action@v5
+        with:
+          context: ./images/ckan/2.11
+          file: ./images/ckan/2.11/Dockerfile.focal
+          push: true
+          tags: |
+            keitaro/ckan:${{ steps.ubuntu.outputs.IMAGE_TAG }}
+            ghcr.io/keitaroinc/ckan:${{ steps.ubuntu.outputs.IMAGE_TAG }}
+          cache-from: type=local,src=/tmp/.buildx-cache-ubuntu-2-11
+          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-ubuntu-2-11
+
+  build-ckan-2-10:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.CR_PAT }}
+
+      - name: Cache Docker layers
+        uses: actions/cache@v4
         with:
           path: |
             /tmp/.buildx-cache-alpine-2-10
             /tmp/.buildx-cache-ubuntu-2-10
+            /tmp/.buildx-cache-alpine-2-10-xloader
           key: ${{ runner.os }}-buildx-2-10-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-buildx-2-10
@@ -40,10 +106,10 @@ jobs:
       - name: Get docker tag for Alpine image
         id: alpine
         run: |
-          echo "::set-output name=IMAGE_TAG::$(awk -F '=' '/IMAGE_TAG/{print $2}' ./images/ckan/2.10/Dockerfile)"
+          echo "IMAGE_TAG=$(awk -F '=' '/IMAGE_TAG/{print $2}' ./images/ckan/2.10/Dockerfile)" >> $GITHUB_OUTPUT
 
       - name: Build and push CKAN 2.10 alpine
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v5
         with:
           context: ./images/ckan/2.10
           file: ./images/ckan/2.10/Dockerfile
@@ -54,13 +120,30 @@ jobs:
           cache-from: type=local,src=/tmp/.buildx-cache-alpine-2-10
           cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-alpine-2-10
 
+      - name: Get docker tag for alpine xloader image
+        id: alpine-xloader
+        run: |
+          echo "IMAGE_TAG=$(awk -F '=' '/IMAGE_TAG/{print $2}' ./images/ckan/2.10/Dockerfile.xloader)" >> $GITHUB_OUTPUT
+
+      - name: Build and push CKAN 2.10 alpine xloader
+        uses: docker/build-push-action@v5
+        with:
+          context: ./images/ckan/2.10
+          file: ./images/ckan/2.10/Dockerfile.xloader
+          push: true
+          tags: |
+            keitaro/ckan:${{ steps.alpine-xloader.outputs.IMAGE_TAG }}
+            ghcr.io/keitaroinc/ckan:${{ steps.alpine-xloader.outputs.IMAGE_TAG }}
+          cache-from: type=local,src=/tmp/.buildx-cache-alpine-2-10-xloader
+          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-alpine-2-10-xloader
+
       - name: Get docker tag for Ubuntu image
         id: ubuntu
         run: |
-          echo "::set-output name=IMAGE_TAG::$(awk -F '=' '/IMAGE_TAG/{print $2}' ./images/ckan/2.10/Dockerfile.focal)"
+          echo "IMAGE_TAG=$(awk -F '=' '/IMAGE_TAG/{print $2}' ./images/ckan/2.10/Dockerfile.focal)" >> $GITHUB_OUTPUT
 
       - name: Build and push CKAN 2.10 ubuntu
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v5
         with:
           context: ./images/ckan/2.10
           file: ./images/ckan/2.10/Dockerfile.focal
@@ -74,26 +157,26 @@ jobs:
   build-ckan-2-9:
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v3
 
       - name: Login to DockerHub
-        uses: docker/login-action@v1 
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v1 
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.CR_PAT }}
 
       - name: Cache Docker layers
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: |
             /tmp/.buildx-cache-alpine-2-9
@@ -105,10 +188,10 @@ jobs:
       - name: Get docker tag for Alpine image
         id: alpine
         run: |
-          echo "::set-output name=IMAGE_TAG::$(awk -F '=' '/IMAGE_TAG/{print $2}' ./images/ckan/2.9/Dockerfile)"
+          echo "IMAGE_TAG=$(awk -F '=' '/IMAGE_TAG/{print $2}' ./images/ckan/2.9/Dockerfile)" >> $GITHUB_OUTPUT
 
       - name: Build and push CKAN 2.9 alpine
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v5
         with:
           context: ./images/ckan/2.9
           file: ./images/ckan/2.9/Dockerfile
@@ -122,10 +205,10 @@ jobs:
       - name: Get docker tag for Ubuntu image
         id: ubuntu
         run: |
-          echo "::set-output name=IMAGE_TAG::$(awk -F '=' '/IMAGE_TAG/{print $2}' ./images/ckan/2.9/Dockerfile.focal)"
+          echo "IMAGE_TAG=$(awk -F '=' '/IMAGE_TAG/{print $2}' ./images/ckan/2.9/Dockerfile.focal)" >> $GITHUB_OUTPUT
 
       - name: Build and push CKAN 2.9 ubuntu
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v5
         with:
           context: ./images/ckan/2.9
           file: ./images/ckan/2.9/Dockerfile.focal
@@ -139,26 +222,26 @@ jobs:
   build-ckan-2-8:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v3
 
       - name: Login to DockerHub
-        uses: docker/login-action@v1 
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v1 
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.CR_PAT }}
 
       - name: Cache Docker layers
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: |
             /tmp/.buildx-cache-alpine-2-8
@@ -170,10 +253,10 @@ jobs:
       - name: Get docker tag for Alpine image
         id: alpine
         run: |
-          echo "::set-output name=IMAGE_TAG::$(awk -F '=' '/IMAGE_TAG/{print $2}' ./images/ckan/2.8/Dockerfile)"
+          echo "IMAGE_TAG=$(awk -F '=' '/IMAGE_TAG/{print $2}' ./images/ckan/2.8/Dockerfile)" >> $GITHUB_OUTPUT
 
       - name: Build and push CKAN 2.8 alpine
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v5
         with:
           context: ./images/ckan/2.8
           file: ./images/ckan/2.8/Dockerfile
@@ -187,10 +270,10 @@ jobs:
       - name: Get docker tag for Ubuntu image
         id: ubuntu
         run: |
-          echo "::set-output name=IMAGE_TAG::$(awk -F '=' '/IMAGE_TAG/{print $2}' ./images/ckan/2.8/Dockerfile.focal)"
+          echo "IMAGE_TAG=$(awk -F '=' '/IMAGE_TAG/{print $2}' ./images/ckan/2.8/Dockerfile.focal)" >> $GITHUB_OUTPUT
 
       - name: Build and push CKAN 2.8 ubuntu
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v5
         with:
           context: ./images/ckan/2.8
           file: ./images/ckan/2.8/Dockerfile.focal
@@ -204,26 +287,26 @@ jobs:
   build-ckan-2-7:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v3
 
       - name: Login to DockerHub
-        uses: docker/login-action@v1 
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v1 
+        uses: docker/login-action@v3 
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.CR_PAT }}
 
       - name: Cache Docker layers
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: |
             /tmp/.buildx-cache-alpine-2-7
@@ -235,10 +318,10 @@ jobs:
       - name: Get docker tag for Alpine image
         id: alpine
         run: |
-          echo "::set-output name=IMAGE_TAG::$(awk -F '=' '/IMAGE_TAG/{print $2}' ./images/ckan/2.7/Dockerfile)"
+          echo "IMAGE_TAG=$(awk -F '=' '/IMAGE_TAG/{print $2}' ./images/ckan/2.7/Dockerfile)" >> $GITHUB_OUTPUT
 
       - name: Build and push CKAN 2.7 alpine
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v5
         with:
           context: ./images/ckan/2.7
           file: ./images/ckan/2.7/Dockerfile
@@ -252,10 +335,10 @@ jobs:
       - name: Get docker tag for Ubuntu image
         id: ubuntu
         run: |
-          echo "::set-output name=IMAGE_TAG::$(awk -F '=' '/IMAGE_TAG/{print $2}' ./images/ckan/2.7/Dockerfile.focal)"
+          echo "IMAGE_TAG=$(awk -F '=' '/IMAGE_TAG/{print $2}' ./images/ckan/2.7/Dockerfile.focal)" >> $GITHUB_OUTPUT
 
       - name: Build CKAN 2.7 ubuntu
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v5
         with:
           context: ./images/ckan/2.7
           file: ./images/ckan/2.7/Dockerfile.focal
@@ -269,26 +352,26 @@ jobs:
   build-ckan-datapusher:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v3
 
       - name: Login to DockerHub
-        uses: docker/login-action@v1 
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v1 
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.CR_PAT }}
 
       - name: Cache Docker layers
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: /tmp/.buildx-cache-datapusher
           key: ${{ runner.os }}-buildx-datapusher-${{ github.sha }}
@@ -298,10 +381,10 @@ jobs:
       - name: Get docker tag for datapusher image
         id: datapusher
         run: |
-          echo "::set-output name=IMAGE_TAG::$(awk -F '=' '/IMAGE_TAG/{print $2}' ./images/datapusher/Dockerfile)"
+          echo "IMAGE_TAG=$(awk -F '=' '/IMAGE_TAG/{print $2}' ./images/datapusher/Dockerfile)" >> $GITHUB_OUTPUT
 
       - name: Build and push CKAN datapusher
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v5
         with:
           context: ./images/datapusher
           file: ./images/datapusher/Dockerfile
@@ -315,26 +398,26 @@ jobs:
   build-psql-init:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v3
 
       - name: Login to DockerHub
-        uses: docker/login-action@v1 
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v1 
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.CR_PAT }}
 
       - name: Cache Docker layers
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: /tmp/.buildx-cache-psql-init
           key: ${{ runner.os }}-buildx-psql-init-${{ github.sha }}
@@ -344,10 +427,10 @@ jobs:
       - name: Get docker tag for psql-init image
         id: psql-init
         run: |
-          echo "::set-output name=IMAGE_TAG::$(awk -F '=' '/IMAGE_TAG/{print $2}' ./images/psql-init/Dockerfile)"
+          echo "IMAGE_TAG=$(awk -F '=' '/IMAGE_TAG/{print $2}' ./images/psql-init/Dockerfile)" >> $GITHUB_OUTPUT
 
       - name: Build and push psql-init
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v5
         with:
           context: ./images/psql-init
           file: ./images/psql-init/Dockerfile
