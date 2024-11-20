@@ -4,11 +4,14 @@
 FROM alpine:3.17.2 as ckanbuild
 
 # Used by Github Actions to tag the image with
-ENV IMAGE_TAG=2.10.4-xloader
+ENV IMAGE_TAG=2.10.5-xloader
 
 # Set CKAN version to build
 ENV GIT_URL=https://github.com/ckan/ckan.git
-ENV GIT_BRANCH=ckan-2.10.4
+ENV GIT_BRANCH=ckan-2.10.5
+
+ENV XLOADER_URL=https://github.com/ckan/ckanext-xloader
+ENV XLOADER_VERSION=1.1.2
 
 # Set src dirs
 ENV SRC_DIR=/srv/app/src
@@ -132,7 +135,7 @@ RUN curl -o ${SRC_DIR}/get-pip.py https://bootstrap.pypa.io/get-pip.py && \
     python ${SRC_DIR}/get-pip.py
 
     ### XLoader ###
-RUN pip3 install -e 'git+https://github.com/keitaroinc/ckanext-xloader.git@master#egg=ckanext-xloader' && \ 
+RUN pip3 install -e 'git+${XLOADER_URL}.git@${XLOADER_VERSION}#egg=ckanext-xloader' && \ 
    pip3 install -r ${SRC_DIR}/ckanext-xloader/requirements.txt && \
    pip3 install -U requests[security]
 
