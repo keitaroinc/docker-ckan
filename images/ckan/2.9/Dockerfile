@@ -88,7 +88,7 @@ RUN apk add --no-cache \
     python3 \
     python3-dev \
     git \
-    curl 
+    curl
 
 # Link python to python3
 RUN ln -s /usr/bin/python3 /usr/bin/python
@@ -177,7 +177,8 @@ RUN pip install -e /srv/app/src/ckan && \
     # Set the default level for extensions to INFO
     ckan config-tool ${APP_DIR}/production.ini -s logger_ckanext -e level=INFO && \
     # Change ownership to app user
-    chown -R ckan:ckan /srv/app
+    chown -R ckan:ckan /srv/app && \
+    cp /srv/app/src/ckan/ckan/config/solr/schema.solr8.xml /srv/app/src/ckan/ckan/config/solr/schema.xml
 
 RUN pip install sqlalchemy==1.3.19
 # Remove wheels
