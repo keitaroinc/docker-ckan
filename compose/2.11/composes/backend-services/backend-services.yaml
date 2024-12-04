@@ -1,0 +1,58 @@
+services:
+  datapusher:
+    container_name: datapusher
+    image: ghcr.io/keitaroinc/datapusher:${DATAPUSHER_VERSION}
+    networks:
+      - frontend
+      - backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./.datapusher-env
+
+  db:
+    container_name: db
+    build:
+      context: ../../postgresql
+    networks:
+      - backend
+    env_file:
+      - ./.env
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "ckan"]
+
+  solr:
+    container_name: solr
+    image: solr:8.11.1
+    networks:
+      - backend
+    env_file:
+      - ../.composes-env
+      - ./.solr-env
+    volumes:
+      - solr_data:/var/solr
+      - ../../solr8/ckan_init_solr.sh:/docker-entrypoint-initdb.d/ckan_init_solr.sh
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/solr/bin/solr","status"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+  redis:
+    container_name: redis
+    image: redis:${REDIS_VERSION}
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  pg_data:
+  solr_data:
