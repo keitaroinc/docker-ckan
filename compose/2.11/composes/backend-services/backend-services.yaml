@@ -8,16 +8,16 @@ services:
     ports:
       - "8000:8000"
     env_file:
-      - ./.datapusher-env
+      - ${PWD}/composes/backend-services/.datapusher-env
 
   db:
     container_name: db
     build:
-      context: ../../postgresql
+      context: ${PWD}/postgresql
     networks:
       - backend
     env_file:
-      - ./.env
+      - ${PWD}/composes/backend-services/.env
     volumes:
       - pg_data:/var/lib/postgresql/data
     healthcheck:
@@ -29,11 +29,11 @@ services:
     networks:
       - backend
     env_file:
-      - ../.composes-env
-      - ./.solr-env
+      - ${PWD}/composes/.composes-env
+      - ${PWD}/composes/backend-services/.solr-env
     volumes:
       - solr_data:/var/solr
-      - ../../solr8/ckan_init_solr.sh:/docker-entrypoint-initdb.d/ckan_init_solr.sh
+      - ${PWD}/solr8/ckan_init_solr.sh:/docker-entrypoint-initdb.d/ckan_init_solr.sh
     healthcheck:
       test: ["CMD-SHELL", "/opt/solr/bin/solr","status"]
       interval: 5s

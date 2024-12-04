@@ -15,9 +15,9 @@ services:
       ports:
         - "0.0.0.0:${CKAN_PORT}:5000"
       env_file:
-        - ../.composes-env
-        - ../backend-services/.env
-        - ./.env
+        - ${PWD}/composes/.composes-env
+        - ${PWD}/composes/backend-services/.env
+        - ${PWD}/composes/ckan/.env
       volumes:
         - ckan_data:/srv/app/data
 

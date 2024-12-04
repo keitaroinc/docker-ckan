@@ -1,7 +1,13 @@
 # docker-compose build && docker-compose up -d
 include:
-  - composes/ckan/ckan.yaml
-  - composes/backend-services/backend-services.yaml
+  - path: composes/ckan/ckan.yaml
+    env_file: 
+      - composes/ckan/.env
+      - composes/.composes-env
+    project_directory: .
+  - path: composes/backend-services/backend-services.yaml
+    env_file: composes/backend-services/.env
+    project_directory: .
 
 networks:
   frontend:
