@@ -29,7 +29,7 @@ services:
     networks:
       - backend
     env_file:
-      - ${PWD}/composes/.composes-env
+      - ${PWD}/composes/.global-env
       - ${PWD}/composes/backend-services/.solr-env
     volumes:
       - solr_data:/var/solr

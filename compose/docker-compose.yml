@@ -3,7 +3,7 @@ include:
   - path: composes/ckan/ckan.yaml
     env_file: 
       - composes/ckan/.env
-      - composes/.composes-env
+      - composes/.global-env
     project_directory: .
   - path: composes/backend-services/backend-services.yaml
     env_file: composes/backend-services/.env
