@@ -74,7 +74,7 @@ ENV DEFAULT_EXTENSIONS envvars
 
 # Locations and tags, please use specific tags or revisions
 ENV ENVVARS_GIT_URL=https://github.com/okfn/ckanext-envvars
-ENV ENVVARS_GIT_BRANCH=0.0.2
+ENV ENVVARS_GIT_BRANCH=v0.0.6
 
 RUN apk add --no-cache \
         python3 \
