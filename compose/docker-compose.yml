@@ -6,7 +6,9 @@ include:
       - config/.global-env
     project_directory: .
   - path: config/backend-services/backend-services.yaml
-    env_file: config/backend-services/.env
+    env_file: 
+      - config/backend-services/.postgres-env
+      - config/.global-env
     project_directory: .
 
 networks:
