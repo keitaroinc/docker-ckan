@@ -8,7 +8,7 @@ services:
     ports:
       - "8000:8000"
     env_file:
-      - ${PWD}/composes/backend-services/.datapusher-env
+      - ${PWD}/config/backend-services/.datapusher-env
 
   db:
     container_name: db
@@ -17,7 +17,7 @@ services:
     networks:
       - backend
     env_file:
-      - ${PWD}/composes/backend-services/.env
+      - ${PWD}/config/backend-services/.env
     volumes:
       - pg_data:/var/lib/postgresql/data
     healthcheck:
@@ -29,8 +29,8 @@ services:
     networks:
       - backend
     env_file:
-      - ${PWD}/composes/.global-env
-      - ${PWD}/composes/backend-services/.solr-env
+      - ${PWD}/config/.global-env
+      - ${PWD}/config/backend-services/.solr-env
     volumes:
       - solr_data:/var/solr
       - ${PWD}/solr8/ckan_init_solr.sh:/docker-entrypoint-initdb.d/ckan_init_solr.sh
