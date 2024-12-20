@@ -74,7 +74,7 @@ ENV DEFAULT_EXTENSIONS envvars
 
 # Locations and tags, please use specific tags or revisions
 ENV ENVVARS_GIT_URL=https://github.com/okfn/ckanext-envvars
-ENV ENVVARS_GIT_BRANCH=0.0.2
+ENV ENVVARS_GIT_BRANCH=v0.0.6
 
 RUN apk add --no-cache \
         python3 \
@@ -103,7 +103,7 @@ LABEL org.opencontainers.image.source https://github.com/keitaroinc/docker-ckan
 # Xloader version control
 
 ENV XLOADER_URL=https://github.com/ckan/ckanext-xloader.git
-ENV XLOADER_VERSION=1.2.0
+ENV XLOADER_VERSION=1.1.2
 
 ENV APP_DIR=/srv/app
 ENV SRC_DIR=/srv/app/src
@@ -111,7 +111,7 @@ ENV CKAN_DIR=${SRC_DIR}/ckan
 ENV DATA_DIR=/srv/app/data
 ENV PIP_SRC=${SRC_DIR}
 ENV CKAN_SITE_URL=http://localhost:5000
-ENV CKAN__PLUGINS envvars image_view text_view recline_view datastore xloader
+ENV CKAN__PLUGINS envvars image_view text_view datastore xloader
 
 # Install necessary packages to run CKAN
 RUN apk add --no-cache \
