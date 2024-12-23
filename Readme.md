@@ -36,11 +36,6 @@ This will build the docker images and start the necesaary containers and with
 make prune
 ```
 the containers are deleted along with the volume
-This will build the docker images and start the necesaary containers and with
-```sh
-make prune
-```
-the containers are deleted along with the volumes.
 Check if CKAN was succesfuly started on http://localhost:5000. 
 
 ### Configuration
