@@ -11,17 +11,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from multiprocessing import connection
+import base64
+import json
 import os
+import psycopg2
+import re
 import sys
 import subprocess
-import psycopg2
-from sqlalchemy.engine.url import make_url
-import urllib.request, urllib.error, urllib.parse, base64
-import re
-import json
-
 import time
+import urllib.request, urllib.error, urllib.parse, base64
+
+from multiprocessing import connection
+from sqlalchemy.engine.url import make_url
+
 
 ckan_ini = os.environ.get('CKAN_INI', '/srv/app/production.ini')
 
@@ -34,7 +36,7 @@ def check_db_connection(retry=None):
     if retry is None:
         retry = RETRY
     elif retry == 0:
-        print('[prerun] Giving up after 5 tries...')
+        print('[prerun] Giving up after {count} tries...'.format(count=RETRY))
         sys.exit(1)
 
     conn_str = os.environ.get('CKAN_SQLALCHEMY_URL', '')
@@ -44,14 +46,13 @@ def check_db_connection(retry=None):
         db_host = make_url(conn_str).host
         db_name = make_url(conn_str).database
         connection = psycopg2.connect(user=db_user,
-                               host=db_host,
-                               password=db_passwd,
-                               database=db_name)
+                                      host=db_host,
+                                      password=db_passwd,
+                                      database=db_name)
 
     except psycopg2.Error as e:
         print((str(e)))
         print('[prerun] Unable to connect to the database...try again in a while.')
-        import time
         time.sleep(10)
         check_db_connection(retry = retry - 1)
     else:
@@ -64,7 +65,7 @@ def check_solr_connection(retry=None):
     if retry is None:
         retry = RETRY
     elif retry == 0:
-        print('[prerun] Giving up after 5 tries...')
+        print('[prerun] Giving up after {count} tries...'.format(count=RETRY))
         sys.exit(1)
 
     url = os.environ.get('CKAN_SOLR_URL', '')
@@ -72,8 +73,6 @@ def check_solr_connection(retry=None):
     password = os.environ.get('CKAN_SOLR_PASSWORD', '')
     search_url = '{url}/schema/name?wt=json'.format(url=url)
 
-
- 
     try:
         if not username:
             connection = urllib.request.urlopen(search_url)
@@ -84,7 +83,6 @@ def check_solr_connection(retry=None):
             connection = urllib.request.urlopen(request)
     except urllib.error.URLError as e:
         print('[prerun] Unable to connect to solr...try again in a while.')
-        import time
         time.sleep(10)
         check_solr_connection(retry = retry - 1)
     else:
@@ -113,7 +111,6 @@ def init_db():
         if 'OperationalError' in str(e.output):
             print(e.output.decode('utf-8'))
             print('[prerun] Database not ready, waiting a bit before exit...')
-            import time
             time.sleep(5)
             sys.exit(1)
         else:
@@ -137,9 +134,9 @@ def init_datastore():
     db_host = make_url(conn_str).host
     db_name = make_url(conn_str).database
     connection = psycopg2.connect(user=db_user,
-                            host=db_host,
-                            password=db_passwd,
-                            database=db_name)
+                                  host=db_host,
+                                  password=db_passwd,
+                                  database=db_name)
     cursor = connection.cursor()
 
     print('[prerun] Initializing datastore db - start')
@@ -226,3 +223,4 @@ if __name__ == '__main__':
         if os.environ.get('CKAN_DATASTORE_WRITE_URL'):
             init_datastore()
         create_sysadmin()
+
