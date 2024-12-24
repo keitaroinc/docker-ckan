@@ -29,10 +29,13 @@ Directory layout:
 ## Running CKAN using docker-compose
 To start CKAN using docker-compose, simply change into the *compose* directory and run
 ```sh
-cd compose/2.9
-docker-compose build
-docker-compose up
+make start
 ```
+This will build the docker images and start the necesaary containers and with
+```sh
+make prune
+```
+the containers are deleted along with the volume
 Check if CKAN was succesfuly started on http://localhost:5000. 
 
 ### Configuration
