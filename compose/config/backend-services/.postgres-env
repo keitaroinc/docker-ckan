@@ -1,0 +1,6 @@
+# Database
+POSTGRES_PASSWORD=ckan
+POSTGRES_PORT=5432
+DATASTORE_READONLY_PASSWORD=datastore
+PGDATA=/var/lib/postgresql/data/db
+
