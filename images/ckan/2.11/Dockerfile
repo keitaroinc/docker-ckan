@@ -4,11 +4,11 @@
 FROM alpine:3.17.2 AS ckanbuild
 
 # Used by Github Actions to tag the image with
-ENV IMAGE_TAG=2.11.0
+ENV IMAGE_TAG=2.11.2
 
 # Set CKAN version to build
 ENV GIT_URL=https://github.com/ckan/ckan.git
-ENV GIT_BRANCH=ckan-2.11.0
+ENV GIT_BRANCH=ckan-2.11.2
 
 # Set src dirs
 ENV SRC_DIR=/srv/app/src
@@ -74,7 +74,7 @@ ENV DEFAULT_EXTENSIONS envvars
 
 # Locations and tags, please use specific tags or revisions
 ENV ENVVARS_GIT_URL=https://github.com/okfn/ckanext-envvars
-ENV ENVVARS_GIT_BRANCH=v0.0.4
+ENV ENVVARS_GIT_BRANCH=v0.0.6
 
 RUN apk add --no-cache \
         python3 \

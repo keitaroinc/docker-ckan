@@ -4,11 +4,11 @@
 FROM alpine:3.17.2 as ckanbuild
 
 # Used by Github Actions to tag the image with
-ENV IMAGE_TAG=2.10.4-xloader
+ENV IMAGE_TAG=2.10.7-xloader
 
 # Set CKAN version to build
 ENV GIT_URL=https://github.com/ckan/ckan.git
-ENV GIT_BRANCH=ckan-2.10.4
+ENV GIT_BRANCH=ckan-2.10.7
 
 # Set src dirs
 ENV SRC_DIR=/srv/app/src
@@ -74,7 +74,7 @@ ENV DEFAULT_EXTENSIONS envvars
 
 # Locations and tags, please use specific tags or revisions
 ENV ENVVARS_GIT_URL=https://github.com/okfn/ckanext-envvars
-ENV ENVVARS_GIT_BRANCH=0.0.2
+ENV ENVVARS_GIT_BRANCH=v0.0.6
 
 RUN apk add --no-cache \
         python3 \
@@ -99,6 +99,11 @@ FROM alpine:3.17.2
 
 LABEL maintainer="Keitaro Inc <info@keitaro.com>"
 LABEL org.opencontainers.image.source https://github.com/keitaroinc/docker-ckan
+
+# Xloader version control
+
+ENV XLOADER_URL=https://github.com/ckan/ckanext-xloader.git
+ENV XLOADER_VERSION=1.1.2
 
 ENV APP_DIR=/srv/app
 ENV SRC_DIR=/srv/app/src
@@ -131,10 +136,10 @@ RUN apk add --no-cache \
 RUN curl -o ${SRC_DIR}/get-pip.py https://bootstrap.pypa.io/get-pip.py && \
     python ${SRC_DIR}/get-pip.py
 
-    ### XLoader ###
-RUN pip3 install -e 'git+https://github.com/keitaroinc/ckanext-xloader.git@master#egg=ckanext-xloader' && \ 
-   pip3 install -r ${SRC_DIR}/ckanext-xloader/requirements.txt && \
-   pip3 install -U requests[security]
+### XLoader ###
+RUN pip3 install -e git+${XLOADER_URL}@${XLOADER_VERSION}#egg=ckanext-xloader && \ 
+    pip3 install -r ${SRC_DIR}/ckanext-xloader/requirements.txt && \
+    pip3 install -U requests[security]
 
 # Get artifacts from build stages
 COPY --from=ckanbuild /wheels /srv/app/wheels
@@ -150,6 +155,8 @@ RUN addgroup -g 92 -S ckan && \
 
 WORKDIR ${CKAN_DIR}
 
+#Removes bugged package
+RUN rm -rf /usr/lib/python3.10/site-packages/packaging*
 # Install CKAN
 RUN pip install -e /srv/app/src/ckan && \
     cp who.ini ${APP_DIR} && \

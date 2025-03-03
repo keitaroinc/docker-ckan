@@ -4,11 +4,11 @@
 FROM ubuntu:focal-20210827 AS ckanbuild
 
 # Used by Github Actions to tag the image with
-ENV IMAGE_TAG=2.10.5-focal
+ENV IMAGE_TAG=2.10.7-focal
 
 # Set CKAN version to build
 ENV GIT_URL=https://github.com/ckan/ckan.git
-ENV GIT_BRANCH=ckan-2.10.5
+ENV GIT_BRANCH=ckan-2.10.7
 
 # Set timezone
 ENV TZ=UTC
@@ -97,7 +97,7 @@ ENV DEFAULT_EXTENSIONS envvars
 
 # Locations and tags, please use specific tags or revisions
 ENV ENVVARS_GIT_URL=https://github.com/okfn/ckanext-envvars
-ENV ENVVARS_GIT_BRANCH=v0.0.4
+ENV ENVVARS_GIT_BRANCH=v0.0.6
 
 RUN apt-get update && \
     apt-get install --no-install-recommends -y \
