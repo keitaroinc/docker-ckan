@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e;
+set -ex
 
 echo "Starting CKAN..."
 # Run any startup scripts provided by images extending this one

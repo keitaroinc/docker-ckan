@@ -20,11 +20,14 @@ ENV UV_COMPILE_BYTECODE="1"
 ENV UV_LINK_MODE="copy"
 ENV UV_PYTHON_DOWNLOADS="0"
 
+# Set default shell to ash
+SHELL ["/bin/ash", "-o", "pipefail", "-c"]
+
 # System packages to build CKAN requirements and plugins
 RUN apk add --no-cache \
-        git \
-        curl \
-        postgresql-dev
+        git=2.47.2-r0 \
+        curl=8.12.1-r0 \
+        postgresql17-dev=17.4-r0
 
 # Install uv
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -55,12 +58,15 @@ ENV UV_COMPILE_BYTECODE="1"
 ENV UV_LINK_MODE="copy"
 ENV UV_PYTHON_DOWNLOADS="0"
 
+# Set default shell to ash
+SHELL ["/bin/ash", "-o", "pipefail", "-c"]
+
 # System packages to build CKAN requirements and plugins
 RUN apk add --no-cache \
-        curl \
-        linux-headers \
-        musl-dev \
-        gcc
+        curl=8.12.1-r0 \
+        linux-headers=6.6-r1 \
+        musl-dev=1.2.5-r9 \
+        gcc=14.2.0-r4
 
 # Install uv
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -97,14 +103,17 @@ ENV XDG_BIN_HOME="/usr/local/bin"
 ENV XDG_CACHE_HOME="/app/cache"
 ENV UV_PYTHON_DOWNLOADS="0"
 
+# Set default shell to ash
+SHELL ["/bin/ash", "-o", "pipefail", "-c"]
+
 # Install necessary packages to run CKAN
 RUN apk add --no-cache \
-        bash \
-        git \
-        curl \
+        bash=5.2.37-r0 \
+        git=2.47.2-r0 \
+        curl=8.12.1-r0 \
         # Required for CKAN
-        libmagic \
-        postgresql-client
+        libmagic=5.46-r2 \
+        postgresql17-client=17.4-r0
 
 # Install uv
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
