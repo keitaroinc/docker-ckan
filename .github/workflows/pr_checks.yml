@@ -2,7 +2,8 @@ name: PR Checks
 
 on:
   pull_request:
-    branches: master
+    branches: 
+      - master
 
 env:
   ACTION_CHECKOUT_VERSION: "v4"
