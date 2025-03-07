@@ -36,7 +36,7 @@ jobs:
       - name: Get docker tag for Alpine image
         id: alpine
         run: |
-          echo "IMAGE_TAG=$(awk -F '=' '/IMAGE_TAG/{print $2;exit;}' ./images/ckan/2.11/Dockerfile)" >> $GITHUB_OUTPUT
+          echo "IMAGE_TAG=$(awk -F '=' '/IMAGE_TAG/{gsub(/"/, "");print $2;exit;}' ./images/ckan/2.11/Dockerfile)" >> $GITHUB_OUTPUT
 
       - name: Build CKAN 2.11 alpine
         uses: docker/build-push-action@v6.15.0
@@ -79,7 +79,7 @@ jobs:
       - name: Get docker tag for Alpine image
         id: alpine
         run: |
-          echo "IMAGE_TAG=$(awk -F '=' '/IMAGE_TAG/{print $2;exit;}' ./images/ckan/2.10/Dockerfile)" >> $GITHUB_OUTPUT
+          echo "IMAGE_TAG=$(awk -F '=' '/IMAGE_TAG/{gsub(/"/, "");print $2;exit;}' ./images/ckan/2.10/Dockerfile)" >> $GITHUB_OUTPUT
 
       - name: Build CKAN 2.10 alpine
         uses: docker/build-push-action@v6.15.0
