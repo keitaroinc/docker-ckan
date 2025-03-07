@@ -6,11 +6,9 @@ This repository contains base docker images and docker-compose used to build and
 
 We build and publish docker images built using this repository to Dockerhub:
 - [CKAN docker images](https://hub.docker.com/r/keitaro/ckan). 
-- [Datapusher docker images](https://hub.docker.com/r/keitaro/ckan-datapusher)
 
 and Github Container Registry:
 - [CKAN docker images on GHCR](https://github.com/orgs/keitaroinc/packages/container/package/ckan)
-- [Datapusher docker images on GHCR](https://github.com/orgs/keitaroinc/packages/container/package/datapusher)
 
 Looking to run CKAN on Kubernetes? Check out our [CKAN Helm Chart](https://github.com/keitaroinc/ckan-helm)!
 
