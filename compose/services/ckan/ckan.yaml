@@ -1,6 +1,6 @@
 services:
   ckan:
-      image: ghcr.io/keitaroinc/ckan:2.11.2
+      image: ghcr.io/keitaroinc/ckan:${CKAN_VERSION}
       networks:
         - frontend
         - backend
