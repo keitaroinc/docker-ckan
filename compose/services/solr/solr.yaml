@@ -1,0 +1,23 @@
+---
+services:
+  solr:
+    build:
+      context: ${PWD}/services/solr/image
+      args:
+        CKAN_BRANCH: ckan-${CKAN_VERSION}
+    networks:
+      - backend
+    env_file:
+      - ${PWD}/config/.global-env
+      - ${PWD}/config/solr/.env
+    volumes:
+      - solr_data:/var/solr
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/solr/bin/solr", "status"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+volumes:
+  solr_data:

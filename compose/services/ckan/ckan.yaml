@@ -1,0 +1,24 @@
+---
+services:
+  ckan:
+    image: ghcr.io/keitaroinc/ckan:${CKAN_VERSION}
+    networks:
+      - frontend
+      - backend
+    depends_on:
+      db:
+        condition: service_healthy
+        restart: true
+      solr:
+        condition: service_healthy
+        restart: true
+    ports:
+      - "0.0.0.0:${CKAN_PORT}:5000"
+    env_file:
+      - ${PWD}/config/db/.env
+      - ${PWD}/config/ckan/.env
+    volumes:
+      - ckan_data:/app/data
+
+volumes:
+  ckan_data:

@@ -2,25 +2,33 @@ name: PR Checks
 
 on:
   pull_request:
-    branches: master
-
+    branches: 
+      - master
 
 jobs:
+  lint-ckan-2-11:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Lint CKAN 2.11 Dockerfile 
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: ./images/ckan/2.11/Dockerfile
+
+
   build-ckan-2-11:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v3.10.0
 
       - name: Cache Docker layers
-        uses: actions/cache@v4
+        uses: actions/cache@v4.2.2
         with:
           path: |
             /tmp/.buildx-cache-alpine-2-11
-            /tmp/.buildx-cache-ubuntu-2-11
-            /tmp/.buildx-cache-alpine-2-11-xloader
           key: ${{ runner.os }}-buildx-2-11-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-buildx-2-11
@@ -28,10 +36,10 @@ jobs:
       - name: Get docker tag for Alpine image
         id: alpine
         run: |
-          echo "IMAGE_TAG=$(awk -F '=' '/IMAGE_TAG/{print $2}' ./images/ckan/2.11/Dockerfile)" >> $GITHUB_OUTPUT
+          echo "IMAGE_TAG=$(awk -F '=' '/IMAGE_TAG/{gsub(/"/, "");print $2;exit;}' ./images/ckan/2.11/Dockerfile)" >> $GITHUB_OUTPUT
 
       - name: Build CKAN 2.11 alpine
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6.15.0
         with:
           context: ./images/ckan/2.11
           file: ./images/ckan/2.11/Dockerfile
@@ -40,54 +48,30 @@ jobs:
           cache-from: type=local,src=/tmp/.buildx-cache-alpine-2-11
           cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-alpine-2-11
 
-      - name: Get docker tag for alpine xloader image
-        id: alpine-xloader
-        run: |
-          echo "IMAGE_TAG=$(awk -F '=' '/IMAGE_TAG/{print $2}' ./images/ckan/2.11/Dockerfile.xloader)" >> $GITHUB_OUTPUT
 
-
-      - name: Build CKAN 2.11-xloader alpine
-        uses: docker/build-push-action@v5
+  lint-ckan-2-10:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Lint CKAN 2.10 Dockerfile 
+        uses: hadolint/hadolint-action@v3.1.0
         with:
-          context: ./images/ckan/2.11
-          file: ./images/ckan/2.11/Dockerfile.xloader
-          push: false
-          tags: keitaro/ckan:${{ steps.alpine.outputs.IMAGE_TAG }}
-          cache-from: type=local,src=/tmp/.buildx-cache-alpine-2-11-xloader
-          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-alpine-2-11-xloader
+          dockerfile: ./images/ckan/2.10/Dockerfile
 
-      - name: Get docker tag for Ubuntu image
-        id: ubuntu
-        run: |
-          echo "IMAGE_TAG=$(awk -F '=' '/IMAGE_TAG/{print $2}' ./images/ckan/2.11/Dockerfile.focal)" >> $GITHUB_OUTPUT
-
-      - name: Build CKAN 2.11 ubuntu
-        uses: docker/build-push-action@v5
-        with:
-          context: ./images/ckan/2.11
-          file: ./images/ckan/2.11/Dockerfile.focal
-          push: false
-          tags: keitaro/ckan:${{ steps.ubuntu.outputs.IMAGE_TAG }}
-          cache-from: type=local,src=/tmp/.buildx-cache-ubuntu-2-11
-          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-ubuntu-2-11
-          build-args: |
-           --progress=plain
 
   build-ckan-2-10:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v3.10.0
 
       - name: Cache Docker layers
-        uses: actions/cache@v4
+        uses: actions/cache@v4.2.2
         with:
           path: |
             /tmp/.buildx-cache-alpine-2-10
-            /tmp/.buildx-cache-ubuntu-2-10
-            /tmp/.buildx-cache-alpine-2-10-xloader
           key: ${{ runner.os }}-buildx-2-10-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-buildx-2-10
@@ -95,10 +79,10 @@ jobs:
       - name: Get docker tag for Alpine image
         id: alpine
         run: |
-          echo "IMAGE_TAG=$(awk -F '=' '/IMAGE_TAG/{print $2}' ./images/ckan/2.10/Dockerfile)" >> $GITHUB_OUTPUT
+          echo "IMAGE_TAG=$(awk -F '=' '/IMAGE_TAG/{gsub(/"/, "");print $2;exit;}' ./images/ckan/2.10/Dockerfile)" >> $GITHUB_OUTPUT
 
       - name: Build CKAN 2.10 alpine
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6.15.0
         with:
           context: ./images/ckan/2.10
           file: ./images/ckan/2.10/Dockerfile
@@ -106,148 +90,3 @@ jobs:
           tags: keitaro/ckan:${{ steps.alpine.outputs.IMAGE_TAG }}
           cache-from: type=local,src=/tmp/.buildx-cache-alpine-2-10
           cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-alpine-2-10
-
-      - name: Get docker tag for Alpine xloader image
-        id: alpine-xloader
-        run: |
-          echo "IMAGE_TAG=$(awk -F '=' '/IMAGE_TAG/{print $2}' ./images/ckan/2.10/Dockerfile.xloader)" >> $GITHUB_OUTPUT
-
-      - name: Build CKAN 2.10 alpine xloader
-        uses: docker/build-push-action@v5
-        with:
-          context: ./images/ckan/2.10
-          file: ./images/ckan/2.10/Dockerfile.xloader
-          push: false
-          tags: keitaro/ckan:${{ steps.alpine-xloader.outputs.IMAGE_TAG }}
-          cache-from: type=local,src=/tmp/.buildx-cache-alpine-2-10-xloader
-          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-alpine-2-10-xloader
-
-      - name: Get docker tag for Ubuntu image
-        id: ubuntu
-        run: |
-          echo "IMAGE_TAG=$(awk -F '=' '/IMAGE_TAG/{print $2}' ./images/ckan/2.10/Dockerfile.focal)" >> $GITHUB_OUTPUT
-
-      - name: Build CKAN 2.10 ubuntu
-        uses: docker/build-push-action@v5
-        with:
-          context: ./images/ckan/2.10
-          file: ./images/ckan/2.10/Dockerfile.focal
-          push: false
-          tags: keitaro/ckan:${{ steps.ubuntu.outputs.IMAGE_TAG }}
-          cache-from: type=local,src=/tmp/.buildx-cache-ubuntu-2-10
-          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-ubuntu-2-10
-          build-args: |
-           --progress=plain
-
-
-  build-ckan-2-9:
-    runs-on: ubuntu-20.04
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Cache Docker layers
-        uses: actions/cache@v4
-        with:
-          path: |
-            /tmp/.buildx-cache-alpine-2-9
-            /tmp/.buildx-cache-ubuntu-2-9
-          key: ${{ runner.os }}-buildx-2-9-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-2-9
-
-      - name: Get docker tag for Alpine image
-        id: alpine
-        run: |
-          echo "IMAGE_TAG=$(awk -F '=' '/IMAGE_TAG/{print $2}' ./images/ckan/2.9/Dockerfile)" >> $GITHUB_OUTPUT
-
-      - name: Build CKAN 2.9 alpine
-        uses: docker/build-push-action@v5
-        with:
-          context: ./images/ckan/2.9
-          file: ./images/ckan/2.9/Dockerfile
-          push: false
-          tags: keitaro/ckan:${{ steps.alpine.outputs.IMAGE_TAG }}
-          cache-from: type=local,src=/tmp/.buildx-cache-alpine-2-9
-          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-alpine-2-9
-
-      - name: Get docker tag for Ubuntu image
-        id: ubuntu
-        run: |
-          echo "IMAGE_TAG=$(awk -F '=' '/IMAGE_TAG/{print $2}' ./images/ckan/2.9/Dockerfile.focal)" >> $GITHUB_OUTPUT
-
-      - name: Build CKAN 2.9 ubuntu
-        uses: docker/build-push-action@v5
-        with:
-          context: ./images/ckan/2.9
-          file: ./images/ckan/2.9/Dockerfile.focal
-          push: false
-          tags: keitaro/ckan:${{ steps.ubuntu.outputs.IMAGE_TAG }}
-          cache-from: type=local,src=/tmp/.buildx-cache-ubuntu-2-9
-          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-ubuntu-2-9
-          build-args: |
-           --progress=plain
-
-  build-ckan-datapusher:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Cache Docker layers
-        uses: actions/cache@v4
-        with:
-          path: /tmp/.buildx-cache-datapusher
-          key: ${{ runner.os }}-buildx-datapusher-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-datapusher
-
-      - name: Get docker tag for datapusher image
-        id: datapusher
-        run: |
-          echo "IMAGE_TAG=$(awk -F '=' '/IMAGE_TAG/{print $2}' ./images/datapusher/Dockerfile)" >> $GITHUB_OUTPUT
-
-      - name: Build CKAN datapusher
-        uses: docker/build-push-action@v5
-        with:
-          context: ./images/datapusher
-          file: ./images/datapusher/Dockerfile
-          push: false
-          tags: keitaro/ckandatapusher:${{ steps.datapusher.outputs.IMAGE_TAG }}
-          cache-from: type=local,src=/tmp/.buildx-cache-datapusher
-          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-datapusher
-
-  build-psql-init:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Cache Docker layers
-        uses: actions/cache@v4
-        with:
-          path: /tmp/.buildx-cache-psql-init
-          key: ${{ runner.os }}-buildx-psql-init-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-psql-init
-
-      - name: Get docker tag for psql-init image
-        id: psql-init
-        run: |
-          echo "IMAGE_TAG=$(awk -F '=' '/IMAGE_TAG/{print $2}' ./images/psql-init/Dockerfile)" >> $GITHUB_OUTPUT
-
-      - name: Build psql-init
-        uses: docker/build-push-action@v5
-        with:
-          context: ./images/psql-init
-          file: ./images/psql-init/Dockerfile
-          push: false
-          tags: keitaro/psql-init:${{ steps.psql-init.outputs.IMAGE_TAG }}
-          cache-from: type=local,src=/tmp/.buildx-cache-psql-init
-          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-psql-init

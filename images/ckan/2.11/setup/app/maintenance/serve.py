@@ -32,4 +32,3 @@ def run(server_class=ThreadingHTTPServer, handler_class=SimpleHTTPRequestHandler
 
 if __name__ == "__main__":
     run()
-
