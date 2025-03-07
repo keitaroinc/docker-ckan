@@ -1,6 +1,4 @@
-ARG SOLR_VERSION
-
-FROM solr:${SOLR_VERSION:-9}
+FROM solr:9.8.0-slim
 
 EXPOSE 8983
 

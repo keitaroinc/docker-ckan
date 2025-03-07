@@ -1,0 +1,15 @@
+services:
+  db:
+    build:
+      context: ${PWD}/services/db/image
+    networks:
+      - backend
+    env_file:
+      - ${PWD}/config/db/.env
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "ckan"]
+
+volumes:
+  pg_data:

@@ -1,0 +1,24 @@
+services:
+  ckan-worker-default:
+      image: keitaro/ckan:2.11.2
+      networks:
+        - frontend
+        - backend
+      depends_on:
+        db:
+          condition: service_healthy
+          restart: true
+        solr:
+          condition: service_healthy
+          restart: true
+      env_file:
+        - ${PWD}/config/db/.env
+        - ${PWD}/config/ckan/.env
+      volumes:
+        - ckan_data:/app/data
+      entrypoint: ["ckan", "-c", "/app/production.ini", "jobs", "worker", "default"]
+      healthcheck:
+        disable: true
+
+volumes:
+  ckan_data:

@@ -1,13 +1,39 @@
-# docker-compose build && docker-compose up -d
+name: ckan
+
 include:
-  - path: config/ckan/ckan.yaml
+  - path: services/ckan/ckan.yaml
     env_file: 
       - config/ckan/.env
       - config/.global-env
     project_directory: .
-  - path: config/backend-services/backend-services.yaml
+  - path: services/ckan-workers/ckan-worker-default.yaml
+    env_file:
+      - config/ckan/.env
+      - config/.global-env
+    project_directory: .
+  - path: services/ckan-workers/ckan-worker-bulk.yaml
+    env_file:
+      - config/ckan/.env
+      - config/.global-env
+    project_directory: .
+  - path: services/ckan-workers/ckan-worker-priority.yaml
+    env_file:
+      - config/ckan/.env
+      - config/.global-env
+    project_directory: .
+  - path: services/db/db.yaml
     env_file: 
-      - config/backend-services/.postgres-env
+      - config/db/.env
+      - config/.global-env
+    project_directory: .
+  - path: services/solr/solr.yaml
+    env_file: 
+      - config/solr/.env
+      - config/.global-env
+    project_directory: .
+  - path: services/redis/redis.yaml
+    env_file: 
+      - config/redis/.env
       - config/.global-env
     project_directory: .
 
