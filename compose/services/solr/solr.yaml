@@ -1,3 +1,4 @@
+---
 services:
   solr:
     build:
@@ -12,7 +13,7 @@ services:
     volumes:
       - solr_data:/var/solr
     healthcheck:
-      test: ["CMD-SHELL", "/opt/solr/bin/solr","status"]
+      test: ["CMD-SHELL", "/opt/solr/bin/solr", "status"]
       interval: 5s
       timeout: 5s
       retries: 5

@@ -1,8 +1,9 @@
+---
 name: ckan
 
 include:
   - path: services/ckan/ckan.yaml
-    env_file: 
+    env_file:
       - config/ckan/.env
       - config/.global-env
     project_directory: .
@@ -22,17 +23,17 @@ include:
       - config/.global-env
     project_directory: .
   - path: services/db/db.yaml
-    env_file: 
+    env_file:
       - config/db/.env
       - config/.global-env
     project_directory: .
   - path: services/solr/solr.yaml
-    env_file: 
+    env_file:
       - config/solr/.env
       - config/.global-env
     project_directory: .
   - path: services/redis/redis.yaml
-    env_file: 
+    env_file:
       - config/redis/.env
       - config/.global-env
     project_directory: .
