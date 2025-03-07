@@ -4,7 +4,6 @@ services:
       context: ${PWD}/services/solr/image
       args:
         CKAN_BRANCH: ckan-${CKAN_VERSION}
-        SOLR_VERSION: ${SOLR_VERSION}
     networks:
       - backend
     env_file:
