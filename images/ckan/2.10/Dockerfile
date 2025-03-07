@@ -20,7 +20,8 @@ ENV UV_COMPILE_BYTECODE="1"
 ENV UV_LINK_MODE="copy"
 ENV UV_PYTHON_DOWNLOADS="0"
 
-# Set default shell to ash
+# Set default shell to ash and enable pipefail
+# This is nececary when using pipes in docker so it wont silent fail
 SHELL ["/bin/ash", "-o", "pipefail", "-c"]
 
 # System packages to build CKAN requirements and plugins
@@ -32,7 +33,6 @@ RUN apk add --no-cache \
 # Install uv
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# Set the workdir to src dir
 WORKDIR ${SRC_DIR}/ckan
 
 # Fetch CKAN from github and remove git history
@@ -58,7 +58,8 @@ ENV UV_COMPILE_BYTECODE="1"
 ENV UV_LINK_MODE="copy"
 ENV UV_PYTHON_DOWNLOADS="0"
 
-# Set default shell to ash
+# Set default shell to ash and enable pipefail
+# This is nececary when using pipes in docker so it wont silent fail
 SHELL ["/bin/ash", "-o", "pipefail", "-c"]
 
 # System packages to build CKAN requirements and plugins
@@ -103,7 +104,8 @@ ENV XDG_BIN_HOME="/usr/local/bin"
 ENV XDG_CACHE_HOME="/app/cache"
 ENV UV_PYTHON_DOWNLOADS="0"
 
-# Set default shell to ash
+# Set default shell to ash and enable pipefail
+# This is nececary when using pipes in docker so it wont silent fail
 SHELL ["/bin/ash", "-o", "pipefail", "-c"]
 
 # Install necessary packages to run CKAN
@@ -118,7 +120,6 @@ RUN apk add --no-cache \
 # Install uv
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# Set workdir to APP_DIR
 WORKDIR ${APP_DIR}
 
 # Create a local user and group to run the app
@@ -131,7 +132,6 @@ COPY --from=uwsgibuild /usr/local/bin/uwsgi /usr/local/bin/uwsgi
 COPY --from=ckanbuild --chown=ckan:ckan /app/cache /app/cache
 COPY --from=ckanbuild --chown=ckan:ckan /app/src/ckan ${CKAN_DIR}
 
-# Set the workdir to CKAN
 WORKDIR ${CKAN_DIR}
 
 # Install CKAN
