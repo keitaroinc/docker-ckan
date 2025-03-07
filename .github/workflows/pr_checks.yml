@@ -5,20 +5,13 @@ on:
     branches: 
       - master
 
-env:
-  ACTION_CHECKOUT_VERSION: "v4"
-  ACTION_HADOLINT_VRESION: "v3.1.0"
-  ACTION_SETUP_BUILDX_VERSION: "v3.10.0"
-  ACTIONS_CACHE_VERSION: "v4.2.2"
-  ACTIONS_BUILD_AND_PUSH_VERSION: "v6.15.0"
-
 jobs:
   lint-ckan-2-11:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@ ${{ env.ACTION_CHECKOUT_VERSION }}
+      - uses: actions/checkout@v4
       - name: Lint CKAN 2.11 Dockerfile 
-        uses: hadolint/hadolint-action@ ${{ env.ACTION_HADOLINT_VRESION }}
+        uses: hadolint/hadolint-action@v3.1.0
         with:
           dockerfile: ./images/ckan/2.11/Dockerfile
 
@@ -26,13 +19,13 @@ jobs:
   build-ckan-2-11:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@${{ env.ACTION_CHECKOUT_VERSION }}
+      - uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@${{ env.ACTION_SETUP_BUILDX_VERSION }}
+        uses: docker/setup-buildx-action@v3.10.0
 
       - name: Cache Docker layers
-        uses: actions/cache@${{ env.ACTIONS_CACHE_VERSION }}
+        uses: actions/cache@v4.2.2
         with:
           path: |
             /tmp/.buildx-cache-alpine-2-11
@@ -46,7 +39,7 @@ jobs:
           echo "IMAGE_TAG=$(awk -F '=' '/IMAGE_TAG/{print $2}' ./images/ckan/2.11/Dockerfile)" >> $GITHUB_OUTPUT
 
       - name: Build CKAN 2.11 alpine
-        uses: docker/build-push-action@${{ env.ACTIONS_BUILD_AND_PUSH_VERSION }}
+        uses: docker/build-push-action@v6.15.0
         with:
           context: ./images/ckan/2.11
           file: ./images/ckan/2.11/Dockerfile
@@ -59,9 +52,9 @@ jobs:
   lint-ckan-2-10:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@${{ env.ACTION_CHECKOUT_VERSION }}
+      - uses: actions/checkout@v4
       - name: Lint CKAN 2.10 Dockerfile 
-        uses: hadolint/hadolint-action@${{ env.ACTION_HADOLINT_VRESION }}
+        uses: hadolint/hadolint-action@v3.1.0
         with:
           dockerfile: ./images/ckan/2.10/Dockerfile
 
@@ -69,13 +62,13 @@ jobs:
   build-ckan-2-10:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@${{ env.ACTION_CHECKOUT_VERSION }}
+      - uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@${{ env.ACTION_SETUP_BUILDX_VERSION }}
+        uses: docker/setup-buildx-action@v3.10.0
 
       - name: Cache Docker layers
-        uses: actions/cache@${{ env.ACTIONS_CACHE_VERSION }}
+        uses: actions/cache@v4.2.2
         with:
           path: |
             /tmp/.buildx-cache-alpine-2-10
@@ -89,7 +82,7 @@ jobs:
           echo "IMAGE_TAG=$(awk -F '=' '/IMAGE_TAG/{print $2}' ./images/ckan/2.10/Dockerfile)" >> $GITHUB_OUTPUT
 
       - name: Build CKAN 2.10 alpine
-        uses: docker/build-push-action@${{ env.ACTIONS_BUILD_AND_PUSH_VERSION }}
+        uses: docker/build-push-action@v6.15.0
         with:
           context: ./images/ckan/2.10
           file: ./images/ckan/2.10/Dockerfile

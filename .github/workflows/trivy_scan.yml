@@ -8,21 +8,16 @@ on:
   schedule:
     - cron: '28 3 * * 5'
 
-env:
-  ACTION_CHECKOUT_VERSION: "v4"
-  ACTION_TRIVY_VRESION: "0.29.0"
-  ACTION_UPLOAD_SARIF_VERSION: "v3.28.10"
-
 jobs:
   repo_scan:
     name: repo_scan
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@${{ env.ACTION_CHECKOUT_VERSION }}
+        uses: actions/checkout@v4
 
       - name: Run Trivy vulnerability scanner in repo mode
-        uses: aquasecurity/trivy-action@${{ env.ACTION_TRIVY_VRESION }}
+        uses: aquasecurity/trivy-action@0.29.0
         with:
           scan-type: 'fs'
           ignore-unfixed: true
@@ -31,7 +26,7 @@ jobs:
           severity: 'CRITICAL'
 
       - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@${{ env.ACTION_UPLOAD_SARIF_VERSION }}
+        uses: github/codeql-action/upload-sarif@v3.28.10
         with:
           sarif_file: 'trivy-results.sarif'
 
@@ -42,14 +37,14 @@ jobs:
     steps:
 
       - name: Checkout code
-        uses: actions/checkout@${{ env.ACTION_CHECKOUT_VERSION }}
+        uses: actions/checkout@v4
 
       - name: Build an image from Dockerfile
         run: |
           docker build -t keitaro/ckan/2.11:${{ github.sha }} -f ./images/ckan/2.11/Dockerfile ./images/ckan/2.11/
 
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@${{ env.ACTION_TRIVY_VRESION }}
+        uses: aquasecurity/trivy-action@0.29.0
         with:
           image-ref: 'keitaro/ckan/2.11:${{ github.sha }}'
           format: 'sarif'
@@ -58,7 +53,7 @@ jobs:
           severity: 'CRITICAL'
 
       - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@${{ env.ACTION_UPLOAD_SARIF_VERSION }}
+        uses: github/codeql-action/upload-sarif@v3.28.10
         with:
           sarif_file: 'trivy-results.sarif'
 
@@ -69,14 +64,14 @@ jobs:
     steps:
 
       - name: Checkout code
-        uses: actions/checkout@${{ env.ACTION_CHECKOUT_VERSION }}
+        uses: actions/checkout@v4
 
       - name: Build an image from Dockerfile
         run: |
           docker build -t keitaro/ckan/2.10:${{ github.sha }} -f ./images/ckan/2.10/Dockerfile ./images/ckan/2.10/
 
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@${{ env.ACTION_TRIVY_VRESION }}
+        uses: aquasecurity/trivy-action@0.29.0
         with:
           image-ref: 'keitaro/ckan/2.10:${{ github.sha }}'
           format: 'sarif'
@@ -85,6 +80,6 @@ jobs:
           severity: 'CRITICAL'
 
       - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@${{ env.ACTION_UPLOAD_SARIF_VERSION }}
+        uses: github/codeql-action/upload-sarif@v3.28.10
         with:
           sarif_file: 'trivy-results.sarif'
