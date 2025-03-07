@@ -1,157 +1,139 @@
 ##################
 ### Build CKAN ###
 ##################
-FROM alpine:3.17.2 AS ckanbuild
+FROM python:3.10.16-alpine AS ckanbuild
 
 # Used by Github Actions to tag the image with
-ENV IMAGE_TAG=2.11.2
+ENV IMAGE_TAG="2.11.2"
 
 # Set CKAN version to build
-ENV GIT_URL=https://github.com/ckan/ckan.git
-ENV GIT_BRANCH=ckan-2.11.2
+ENV GIT_URL="https://github.com/ckan/ckan.git"
+ENV GIT_BRANCH="ckan-${IMAGE_TAG}"
 
 # Set src dirs
-ENV SRC_DIR=/srv/app/src
-ENV PIP_SRC=${SRC_DIR}
+ENV SRC_DIR="/app/src"
 
-WORKDIR ${SRC_DIR}
+# Set uv config
+ENV XDG_BIN_HOME="/usr/local/bin"
+ENV XDG_CACHE_HOME="/app/cache"
+ENV UV_COMPILE_BYTECODE="1"
+ENV UV_LINK_MODE="copy"
+ENV UV_PYTHON_DOWNLOADS="0"
 
-# Packages to build CKAN requirements and plugins
+# System packages to build CKAN requirements and plugins
 RUN apk add --no-cache \
-        python3 \
-        python3-dev \
         git \
         curl \
-        postgresql-dev \
-        linux-headers \
-        gcc \
-        make \
-        g++ \
-        autoconf \
-        automake \
-        libtool \
-        patch \
-        musl-dev \
-        pcre-dev \
-        pcre \
-        libffi-dev \
-        libxml2-dev \
-        libxslt-dev
+        postgresql-dev
 
-# Create the src directory
-RUN mkdir -p ${SRC_DIR}
+# Install uv
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# Install pip
-RUN curl -o ${SRC_DIR}/get-pip.py https://bootstrap.pypa.io/get-pip.py && \
-    python ${SRC_DIR}/get-pip.py
+# Set the workdir to src dir
+WORKDIR ${SRC_DIR}/ckan
 
-# Downgrade setuptools so that CKAN requirements can be built
-RUN pip install setuptools==44.1.0
+# Fetch CKAN from github and remove git history
+RUN git clone --depth=1 --branch ${GIT_BRANCH} ${GIT_URL} . && \
+    rm -rf ${SRC_DIR}/.git
 
-# Fetch and build CKAN and requirements
-RUN pip install -e git+${GIT_URL}@${GIT_BRANCH}#egg=ckan
-# Copy patches and apply patches script
-COPY ./patches ${SRC_DIR}/patches
-COPY ./scripts/apply_ckan_patches.sh ${SRC_DIR}/apply_ckan_patches.sh
-# Apply patches
-# RUN ${SRC_DIR}/apply_ckan_patches.sh
-RUN rm -rf /srv/app/src/ckan/.git
-RUN pip wheel --wheel-dir=/wheels -r ckan/requirements.txt
-RUN pip wheel --wheel-dir=/wheels uWSGI==2.0.20 gevent==22.10.2 greenlet==2.0.2
+# Build wheels for CKAN requirements
+RUN uv pip install --system -r requirements.txt
 
 
-###########################
-### Default-Extensions ####
-###########################
-FROM alpine:3.17.2 AS extbuild
+###################
+### Build uWSGI ###
+###################
+FROM python:3.10.16-alpine AS uwsgibuild
 
-# Set src dirs
-ENV SRC_DIR=/srv/app/src
-ENV PIP_SRC=${SRC_DIR}
+# Set uWSGI version to build
+ENV UWSGI_VERSION=2.0.28
 
-# List of default extensions
-ENV DEFAULT_EXTENSIONS envvars
+# Set uv config
+ENV XDG_BIN_HOME="/usr/local/bin"
+ENV XDG_CACHE_HOME="/app/cache"
+ENV UV_COMPILE_BYTECODE="1"
+ENV UV_LINK_MODE="copy"
+ENV UV_PYTHON_DOWNLOADS="0"
 
-# Locations and tags, please use specific tags or revisions
-ENV ENVVARS_GIT_URL=https://github.com/okfn/ckanext-envvars
-ENV ENVVARS_GIT_BRANCH=v0.0.6
-
+# System packages to build CKAN requirements and plugins
 RUN apk add --no-cache \
-        python3 \
-        python3-dev \
-        git \
-        curl 
+        curl \
+        linux-headers \
+        musl-dev \
+        gcc
 
-# Create the src directory
-RUN mkdir -p ${SRC_DIR}
+# Install uv
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# Install pip
-RUN curl -o ${SRC_DIR}/get-pip.py https://bootstrap.pypa.io/get-pip.py && \
-    python ${SRC_DIR}/get-pip.py
+# Compile uWSGI
+RUN uv pip install --system uwsgi==${UWSGI_VERSION}
 
-# Fetch and build the default CKAN extensions
-RUN pip wheel --wheel-dir=/wheels git+${ENVVARS_GIT_URL}@${ENVVARS_GIT_BRANCH}#egg=ckanext-envvars
 
 ############
 ### MAIN ###
 ############
-FROM alpine:3.17.2
+FROM python:3.10.16-alpine
 
 LABEL maintainer="Keitaro Inc <info@keitaro.com>"
-LABEL org.opencontainers.image.source https://github.com/keitaroinc/docker-ckan
+LABEL org.opencontainers.image.source="https://github.com/keitaroinc/docker-ckan"
 
-ENV APP_DIR=/srv/app
-ENV SRC_DIR=/srv/app/src
-ENV CKAN_DIR=${SRC_DIR}/ckan
-ENV DATA_DIR=/srv/app/data
-ENV PIP_SRC=${SRC_DIR}
-ENV CKAN_SITE_URL=http://localhost:5000
-ENV CKAN__PLUGINS envvars activity image_view text_view datatables_view datastore datapusher
+# Default CKAN Extensions
+ENV ENVVARS_GIT_URL="https://github.com/okfn/ckanext-envvars"
+ENV ENVVARS_GIT_VERSION="v0.0.6"
+ENV XLOADER_GIT_URL="https://github.com/ckan/ckanext-xloader.git"
+ENV XLOADER_GIT_VERSION="2.0.1"
+ENV XLOADER_REQUIREMENTS_URL="https://raw.githubusercontent.com/ckan/ckanext-xloader/refs/tags/${XLOADER_GIT_VERSION}/requirements.txt"
+
+# CKAN env
+ENV APP_DIR="/app"
+ENV SRC_DIR="/app/src"
+ENV CKAN_DIR="${SRC_DIR}/ckan"
+ENV DATA_DIR="/app/data"
+ENV CKAN_SITE_URL="http://localhost:5000"
+ENV CKAN__PLUGINS="envvars activity image_view text_view datatables_view datastore xloader"
+
+# Set uv config
+ENV XDG_BIN_HOME="/usr/local/bin"
+ENV XDG_CACHE_HOME="/app/cache"
+ENV UV_PYTHON_DOWNLOADS="0"
 
 # Install necessary packages to run CKAN
 RUN apk add --no-cache \
-        python3 \
         bash \
         git \
-        gettext \
         curl \
-        postgresql-client \
+        # Required for CKAN
         libmagic \
-        pcre \
-        libxslt \
-        libxml2 \
-        tzdata \
-        apache2-utils && \
-    # Create SRC_DIR
-    mkdir -p ${SRC_DIR}
+        postgresql-client
 
+# Install uv
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# Install pip
-RUN curl -o ${SRC_DIR}/get-pip.py https://bootstrap.pypa.io/get-pip.py && \
-    python ${SRC_DIR}/get-pip.py
-
-# Get artifacts from build stages
-COPY --from=ckanbuild /wheels /srv/app/wheels
-COPY --from=extbuild /wheels /srv/app/ext_wheels
-COPY --from=ckanbuild /srv/app/src/ckan ${CKAN_DIR}
-
-# Additional install steps for build stages artifacts
-RUN pip install --no-index --find-links=/srv/app/wheels uWSGI==2.0.20 gevent==22.10.2
+# Set workdir to APP_DIR
+WORKDIR ${APP_DIR}
 
 # Create a local user and group to run the app
 RUN addgroup -g 92 -S ckan && \
-    adduser -u 92 -h /srv/app -H -D -S -G ckan ckan
+    adduser -u 92 -h /app -H -D -S -G ckan ckan && \
+    chown -R ckan:ckan /app
 
+# Get artifacts from build stages
+COPY --from=uwsgibuild /usr/local/bin/uwsgi /usr/local/bin/uwsgi
+COPY --from=ckanbuild --chown=ckan:ckan /app/cache /app/cache
+COPY --from=ckanbuild --chown=ckan:ckan /app/src/ckan ${CKAN_DIR}
+
+# Set the workdir to CKAN
 WORKDIR ${CKAN_DIR}
 
 # Install CKAN
-RUN pip install -e /srv/app/src/ckan && \
-    # cp who.ini ${APP_DIR} removed this because there was not in 2.11.0
-    pip install --no-index --find-links=/srv/app/wheels -r requirements.txt && \
-    # Install default CKAN extensions
-    pip install --no-index --find-links=/srv/app/ext_wheels ckanext-envvars && \
+RUN uv pip sync --system requirements.txt && \
+    uv pip install --system -e ${CKAN_DIR} && \
+    # Install necessary CKAN extensions
+    uv pip install --system git+${ENVVARS_GIT_URL}@${ENVVARS_GIT_VERSION} && \
+    uv pip install --system git+${XLOADER_GIT_URL}@${XLOADER_GIT_VERSION} && \
+    uv pip install --system -r ${XLOADER_REQUIREMENTS_URL} && \
+    uv pip install --system -U requests[security] && \
     # Create and update CKAN config
-    # Set timezone
     echo "UTC" >  /etc/timezone && \
     # Generate CKAN config
     ckan generate config ${APP_DIR}/production.ini && \
@@ -164,14 +146,12 @@ RUN pip install -e /srv/app/src/ckan && \
     ckan config-tool ${APP_DIR}/production.ini "ckan.webassets.path = ${DATA_DIR}/webassets" && \
     # Set the default level for extensions to INFO
     ckan config-tool ${APP_DIR}/production.ini -s logger_ckanext -e level=INFO && \
-    # Change ownership to app user
-    chown -R ckan:ckan /srv/app
-
-# Remove wheels
-RUN rm -rf /srv/app/wheels /srv/app/ext_wheels
+    chown -R ckan:ckan ${APP_DIR} && \
+    # Remove uv cache
+    rm -rf ${XDG_CACHE_HOME}
 
 # Copy necessary scripts
-COPY setup/app ${APP_DIR}
+COPY --chown=ckan:ckan setup/app ${APP_DIR}
 
 WORKDIR ${APP_DIR}
 
@@ -187,4 +167,8 @@ HEALTHCHECK --interval=10s --timeout=5s --retries=5 CMD curl --fail http://local
 
 USER ckan
 
-CMD ["/srv/app/start_ckan.sh"]
+# Startup options for uwsgi, set UWSGI_OPTS env variable on runtime to override
+ENV UWSGI_PROC_NU="2"
+ENV UWSGI_OPTS="--socket /tmp/uwsgi.sock --uid ckan --gid ckan --http :5000 --master --enable-threads --wsgi-file $APP_DIR/wsgi.py --module wsgi:application --lazy-apps -p ${UWSGI_PROC_NU} -L --vacuum --harakiri 50 --callable application"
+
+CMD ["/app/start_ckan.sh"]
