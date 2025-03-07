@@ -1,6 +1,6 @@
 services:
   ckan-worker-bulk:
-      image: keitaro/ckan:2.11.2
+      image: ghcr.io/keitaroinc/ckan:2.11.2
       networks:
         - frontend
         - backend
