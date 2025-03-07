@@ -16,9 +16,9 @@ jobs:
   lint-ckan-2-11:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@${{ env.ACTION_CHECKOUT_VERSION }}
+      - uses: actions/checkout@ ${{ env.ACTION_CHECKOUT_VERSION }}
       - name: Lint CKAN 2.11 Dockerfile 
-        uses: hadolint/hadolint-action@${{ env.ACTION_HADOLINT_VRESION }}
+        uses: hadolint/hadolint-action@ ${{ env.ACTION_HADOLINT_VRESION }}
         with:
           dockerfile: ./images/ckan/2.11/Dockerfile
 
