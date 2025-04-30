@@ -4,7 +4,7 @@
 FROM python:3.10.16-alpine AS ckanbuild
 
 # Used by Github Actions to tag the image with
-ENV IMAGE_TAG="2.11.2"
+ENV IMAGE_TAG="2.11.3"
 
 # Set CKAN version to build
 ENV GIT_URL="https://github.com/ckan/ckan.git"
