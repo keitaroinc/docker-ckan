@@ -27,7 +27,7 @@ SHELL ["/bin/ash", "-o", "pipefail", "-c"]
 # System packages to build CKAN requirements and plugins
 RUN apk add --no-cache \
         git=2.47.2-r0 \
-        curl=8.12.1-r0 \
+        curl \
         postgresql17-dev=17.4-r0
 
 # Install uv
@@ -64,7 +64,7 @@ SHELL ["/bin/ash", "-o", "pipefail", "-c"]
 
 # System packages to build CKAN requirements and plugins
 RUN apk add --no-cache \
-        curl=8.12.1-r0 \
+        curl \
         linux-headers=6.6-r1 \
         musl-dev=1.2.5-r9 \
         gcc=14.2.0-r4
@@ -112,7 +112,7 @@ SHELL ["/bin/ash", "-o", "pipefail", "-c"]
 RUN apk add --no-cache \
         bash=5.2.37-r0 \
         git=2.47.2-r0 \
-        curl=8.12.1-r0 \
+        curl \
         # Required for CKAN
         libmagic=5.46-r2 \
         postgresql17-client=17.4-r0
