@@ -4,7 +4,7 @@
 FROM python:3.10.16-alpine AS ckanbuild
 
 # Used by Github Actions to tag the image with
-ENV IMAGE_TAG="2.11.2"
+ENV IMAGE_TAG="2.11.3"
 
 # Set CKAN version to build
 ENV GIT_URL="https://github.com/ckan/ckan.git"
@@ -27,7 +27,7 @@ SHELL ["/bin/ash", "-o", "pipefail", "-c"]
 # System packages to build CKAN requirements and plugins
 RUN apk add --no-cache \
         git=2.47.2-r0 \
-        curl=8.12.1-r0 \
+        curl=8.12.1-r1 \
         postgresql17-dev=17.4-r0
 
 # Install uv
@@ -64,7 +64,7 @@ SHELL ["/bin/ash", "-o", "pipefail", "-c"]
 
 # System packages to build CKAN requirements and plugins
 RUN apk add --no-cache \
-        curl=8.12.1-r0 \
+        curl=8.12.1-r1 \
         linux-headers=6.6-r1 \
         musl-dev=1.2.5-r9 \
         gcc=14.2.0-r4
@@ -112,7 +112,7 @@ SHELL ["/bin/ash", "-o", "pipefail", "-c"]
 RUN apk add --no-cache \
         bash=5.2.37-r0 \
         git=2.47.2-r0 \
-        curl=8.12.1-r0 \
+        curl=8.12.1-r1 \
         # Required for CKAN
         libmagic=5.46-r2 \
         postgresql17-client=17.4-r0
