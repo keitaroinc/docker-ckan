@@ -77,6 +77,7 @@ def check_solr_connection(retry=None):
 
     try:
         if not username:
+            print(f"[prerun] No username for solr, using unauthenticated connection: {search_url}")
             connection = urllib.request.urlopen(search_url)
         else:
             request = urllib.request.Request(search_url)
@@ -86,6 +87,7 @@ def check_solr_connection(retry=None):
             request.add_header(
                 "Authorization", "Basic %s" % base64string.decode("utf-8")
             )
+            print(f"[prerun] Using authenticated connection: {search_url}, user: {username}, password: {password}")
             connection = urllib.request.urlopen(request)
     except urllib.error.URLError as e:
         print("[prerun] Unable to connect to solr...try again in a while.")
@@ -153,9 +155,8 @@ def init_datastore():
             datastore_perms_command, stdout=subprocess.PIPE
         )
 
-        perms_sql = datastore_perms.stdout.read()
-        perms_sql = perms_sql.decode("utf-8")
-        perms_sql = perms_sql.replace("@" + db_host, "")
+        raw_perms_sql = datastore_perms.stdout.read().decode("utf-8") # type: ignore
+        perms_sql = raw_perms_sql.replace(f"@{db_host}", "")
         # Remove internal pg command as psycopg2 does not like it
         perms_sql = re.sub('\\\\connect "(.*)"', "", perms_sql)
         cursor.execute(perms_sql)
@@ -165,10 +166,10 @@ def init_datastore():
         connection.commit()
 
         print("[prerun] Initializing datastore db - end")
-        print((datastore_perms.stdout.read()))
+        print(raw_perms_sql)
     except psycopg2.Error as e:
         print("[prerun] Could not initialize datastore")
-        print(e.decode("utf-8"))
+        print(str(e))
 
     except subprocess.CalledProcessError as e:
         if "OperationalError" in str(e.output):

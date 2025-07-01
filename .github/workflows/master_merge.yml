@@ -48,55 +48,7 @@ jobs:
           file: ./images/ckan/2.11/Dockerfile
           push: true
           tags: |
-            keitaro/ckan:${{ steps.alpine.outputs.IMAGE_TAG }}
-            ghcr.io/keitaroinc/ckan:${{ steps.alpine.outputs.IMAGE_TAG }}
+            ghcr.io/sunstoneinstitute/ckan:${{ steps.alpine.outputs.IMAGE_TAG }}
           cache-from: type=local,src=/tmp/.buildx-cache-alpine-2-11
           cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-alpine-2-11
 
-
-  build-and-push-ckan-2-10:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3.10.0
-
-      - name: Login to DockerHub
-        uses: docker/login-action@v3.3.0
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
-
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3.3.0
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.CR_PAT }}
-
-      - name: Cache Docker layers
-        uses: actions/cache@v4.2.2
-        with:
-          path: |
-            /tmp/.buildx-cache-alpine-2-10
-          key: ${{ runner.os }}-buildx-2-10-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-2-10
-
-      - name: Get docker tag for Alpine image
-        id: alpine
-        run: |
-          echo "IMAGE_TAG=$(awk -F '=' '/IMAGE_TAG/{gsub(/"/, "");print $2;exit;}' ./images/ckan/2.10/Dockerfile)" >> $GITHUB_OUTPUT
-
-      - name: Build and push CKAN 2.10 alpine
-        uses: docker/build-push-action@v6.15.0
-        with:
-          context: ./images/ckan/2.10
-          file: ./images/ckan/2.10/Dockerfile
-          push: true
-          tags: |
-            keitaro/ckan:${{ steps.alpine.outputs.IMAGE_TAG }}
-            ghcr.io/keitaroinc/ckan:${{ steps.alpine.outputs.IMAGE_TAG }}
-          cache-from: type=local,src=/tmp/.buildx-cache-alpine-2-10
-          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-alpine-2-10

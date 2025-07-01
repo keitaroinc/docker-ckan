@@ -28,7 +28,7 @@ SHELL ["/bin/ash", "-o", "pipefail", "-c"]
 RUN apk add --no-cache \
         git=2.47.2-r0 \
         curl=8.12.1-r1 \
-        postgresql17-dev=17.4-r0
+        postgresql17-dev=17.5-r0
 
 # Install uv
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -81,8 +81,8 @@ RUN uv pip install --system uwsgi==${UWSGI_VERSION}
 ############
 FROM python:3.10.16-alpine
 
-LABEL maintainer="Keitaro Inc <info@keitaro.com>"
-LABEL org.opencontainers.image.source="https://github.com/keitaroinc/docker-ckan"
+LABEL maintainer="Stig Bakken <stig@sunstoneinstitute.ai>"
+LABEL org.opencontainers.image.source="https://github.com/sunstoneinstitute/docker-ckan"
 
 # Default CKAN Extensions
 ENV ENVVARS_GIT_URL="https://github.com/okfn/ckanext-envvars"
@@ -115,7 +115,7 @@ RUN apk add --no-cache \
         curl=8.12.1-r1 \
         # Required for CKAN
         libmagic=5.46-r2 \
-        postgresql17-client=17.4-r0
+        postgresql17-client=17.5-r0
 
 # Install uv
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
