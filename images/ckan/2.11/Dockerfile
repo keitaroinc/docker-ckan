@@ -1,7 +1,7 @@
 ##################
 ### Build CKAN ###
 ##################
-FROM python:3.10.16-alpine AS ckanbuild
+FROM python:3.10.18-alpine AS ckanbuild
 
 # Used by Github Actions to tag the image with
 ENV IMAGE_TAG="2.11.3"
@@ -26,9 +26,9 @@ SHELL ["/bin/ash", "-o", "pipefail", "-c"]
 
 # System packages to build CKAN requirements and plugins
 RUN apk add --no-cache \
-        git=2.47.2-r0 \
-        curl=8.12.1-r1 \
-        postgresql17-dev=17.4-r0
+        git=2.49.0-r0 \
+        curl=8.14.1-r1 \
+        postgresql17-dev=17.5-r0
 
 # Install uv
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -46,7 +46,7 @@ RUN uv pip install --system -r requirements.txt
 ###################
 ### Build uWSGI ###
 ###################
-FROM python:3.10.16-alpine AS uwsgibuild
+FROM python:3.10.18-alpine AS uwsgibuild
 
 # Set uWSGI version to build
 ENV UWSGI_VERSION=2.0.28
@@ -64,10 +64,10 @@ SHELL ["/bin/ash", "-o", "pipefail", "-c"]
 
 # System packages to build CKAN requirements and plugins
 RUN apk add --no-cache \
-        curl=8.12.1-r1 \
-        linux-headers=6.6-r1 \
-        musl-dev=1.2.5-r9 \
-        gcc=14.2.0-r4
+        curl=8.14.1-r1 \
+        linux-headers=6.14.2-r0 \
+        musl-dev=1.2.5-r10 \
+        gcc=14.2.0-r6
 
 # Install uv
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -79,7 +79,7 @@ RUN uv pip install --system uwsgi==${UWSGI_VERSION}
 ############
 ### MAIN ###
 ############
-FROM python:3.10.16-alpine
+FROM python:3.10.18-alpine
 
 LABEL maintainer="Keitaro Inc <info@keitaro.com>"
 LABEL org.opencontainers.image.source="https://github.com/keitaroinc/docker-ckan"
@@ -111,11 +111,11 @@ SHELL ["/bin/ash", "-o", "pipefail", "-c"]
 # Install necessary packages to run CKAN
 RUN apk add --no-cache \
         bash=5.2.37-r0 \
-        git=2.47.2-r0 \
-        curl=8.12.1-r1 \
+        git=2.49.0-r0 \
+        curl=8.14.1-r1 \
         # Required for CKAN
         libmagic=5.46-r2 \
-        postgresql17-client=17.4-r0
+        postgresql17-client=17.5-r0
 
 # Install uv
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
