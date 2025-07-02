@@ -5,6 +5,7 @@ ARG BASE_IMAGE=python:3.10.18-alpine
 ##################
 ### Build CKAN ###
 ##################
+# hadolint ignore=DL3006
 FROM ${BASE_IMAGE} AS ckanbuild
 
 # Used by Github Actions to tag the image with
@@ -50,6 +51,7 @@ RUN uv pip install --system -r requirements.txt
 ###################
 ### Build uWSGI ###
 ###################
+# hadolint ignore=DL3006
 FROM ${BASE_IMAGE} AS uwsgibuild
 
 # Set uWSGI version to build
@@ -83,6 +85,7 @@ RUN uv pip install --system uwsgi==${UWSGI_VERSION}
 ############
 ### MAIN ###
 ############
+# hadolint ignore=DL3006
 FROM ${BASE_IMAGE}
 
 LABEL maintainer="Keitaro Inc <info@keitaro.com>"
