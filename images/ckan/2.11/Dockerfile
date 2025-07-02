@@ -1,7 +1,10 @@
+# Set a default docker base image to pass to all stages
+ARG BASE_IMAGE=python:3.10.18-alpine
+
 ##################
 ### Build CKAN ###
 ##################
-FROM python:3.10.18-alpine AS ckanbuild
+FROM ${BASE_IMAGE} AS ckanbuild
 
 # Used by Github Actions to tag the image with
 ENV IMAGE_TAG="2.11.3"
@@ -46,7 +49,7 @@ RUN uv pip install --system -r requirements.txt
 ###################
 ### Build uWSGI ###
 ###################
-FROM python:3.10.18-alpine AS uwsgibuild
+FROM ${BASE_IMAGE} AS uwsgibuild
 
 # Set uWSGI version to build
 ENV UWSGI_VERSION=2.0.28
@@ -79,7 +82,7 @@ RUN uv pip install --system uwsgi==${UWSGI_VERSION}
 ############
 ### MAIN ###
 ############
-FROM python:3.10.18-alpine
+FROM ${BASE_IMAGE}
 
 LABEL maintainer="Keitaro Inc <info@keitaro.com>"
 LABEL org.opencontainers.image.source="https://github.com/keitaroinc/docker-ckan"
