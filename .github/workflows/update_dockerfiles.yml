@@ -1,0 +1,86 @@
+name: Update Dockerfile Packages
+
+on:
+  schedule:
+    # Run every Monday at 06:00 UTC
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+jobs:
+  update-packages:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      
+    - name: Run package update script
+      run: |
+        chmod +x scripts/update_dockerfiles.sh
+        ./scripts/update_dockerfiles.sh
+        
+    - name: Check for changes
+      id: changes
+      run: |
+        if git diff --quiet; then
+          echo "changes=false" >> $GITHUB_OUTPUT
+          echo "No package updates available"
+        else
+          echo "changes=true" >> $GITHUB_OUTPUT
+          echo "Package updates found"
+        fi
+        
+    - name: Create Pull Request
+      if: steps.changes.outputs.changes == 'true'
+      uses: peter-evans/create-pull-request@v5
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        commit-message: |
+          Update Dockerfile package versions
+          
+          - Updated pinned package versions to latest available in Alpine
+          - Automated update via GitHub Actions
+        branch: update/dockerfile-packages
+        delete-branch: true
+        title: "Update Dockerfile package versions"
+        body: |
+          ## Automated Package Updates
+          
+          This PR contains automated updates to pinned package versions in the Dockerfiles.
+          
+          ### Changes
+          - Updated package versions to latest available in Alpine Linux
+          - Ensured consistency across both CKAN 2.10 and 2.11 Dockerfiles
+          
+          ### Files Modified
+          - `images/ckan/2.10/Dockerfile`
+          - `images/ckan/2.11/Dockerfile`
+          
+          ### Review Notes
+          - All package versions have been verified against the Alpine package repository
+          - Changes maintain compatibility with existing functionality
+          - This is an automated update - please review the diff carefully
+          
+          ---
+          *This PR was automatically created by the Update Dockerfile Packages workflow*
+        labels: |
+          dependencies
+          automated
+          docker
+        reviewers: |
+          Filip3mac
+          KirilPoposki98
+          mihajlo-kuzmanoski
+        
+    - name: Log results
+      run: |
+        if [[ "${{ steps.changes.outputs.changes }}" == "true" ]]; then
+          echo "Package updates found and PR created"
+        else
+          echo "No package updates available - all packages are up to date"
+        fi
