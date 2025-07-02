@@ -19,9 +19,6 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
       
-    - name: Pull latest base image
-      run: docker pull python:3.10.18-alpine
-      
     - name: Run package update script
       run: |
         chmod +x scripts/update_dockerfiles.sh
