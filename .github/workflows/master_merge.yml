@@ -13,11 +13,11 @@ jobs:
 
   #  Build and push an image for each version found
   build-and-push:
-    needs: generate-matrix
+    needs: matrix_generator
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        version: ${{ fromJSON(needs.generate-matrix.outputs.versions) }}
+        version: ${{ fromJSON(needs.matrix_generator.outputs.versions) }}
     steps:
       - uses: actions/checkout@v4
 
