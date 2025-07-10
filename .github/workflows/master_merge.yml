@@ -6,10 +6,23 @@ on:
       - master
 
 jobs:
-  build-and-push-ckan-2-11:
+  # Get the list of CKAN image versions
+  matrix_generator:
+    name: CKAN Image Matrix
+    uses: ./.github/workflows/ckan_image_matrix.yml
+
+  #  Build and push an image for each version found
+  build-and-push:
+    needs: matrix_generator
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        version: ${{ fromJSON(needs.matrix_generator.outputs.versions) }}
     steps:
       - uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3.6.0
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3.10.0
@@ -27,76 +40,22 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.CR_PAT }}
 
-      - name: Cache Docker layers
-        uses: actions/cache@v4.2.2
-        with:
-          path: |
-            /tmp/.buildx-cache-alpine-2-11
-          key: ${{ runner.os }}-buildx-2-11-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-2-11
-
-      - name: Get docker tag for Alpine image
+      - name: Get docker tag for ${{ matrix.version }} image
         id: alpine
         run: |
-          echo "IMAGE_TAG=$(awk -F '=' '/IMAGE_TAG/{gsub(/"/, "");print $2;exit;}' ./images/ckan/2.11/Dockerfile)" >> $GITHUB_OUTPUT
+          DOCKERFILE_PATH="./images/ckan/${{ matrix.version }}/Dockerfile"
+          IMAGE_TAG=$(awk -F '=' '/IMAGE_TAG/{gsub(/"/, "");print $2;exit;}' "${DOCKERFILE_PATH}")
+          echo "IMAGE_TAG=${IMAGE_TAG}" >> $GITHUB_OUTPUT
 
-      - name: Build and push CKAN 2.11 alpine
+      - name: Build and push CKAN ${{ matrix.version }}
         uses: docker/build-push-action@v6.15.0
         with:
-          context: ./images/ckan/2.11
-          file: ./images/ckan/2.11/Dockerfile
+          context: ./images/ckan/${{ matrix.version }}
+          file: ./images/ckan/${{ matrix.version }}/Dockerfile
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: |
             keitaro/ckan:${{ steps.alpine.outputs.IMAGE_TAG }}
             ghcr.io/keitaroinc/ckan:${{ steps.alpine.outputs.IMAGE_TAG }}
-          cache-from: type=local,src=/tmp/.buildx-cache-alpine-2-11
-          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-alpine-2-11
-
-
-  build-and-push-ckan-2-10:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3.10.0
-
-      - name: Login to DockerHub
-        uses: docker/login-action@v3.3.0
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
-
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3.3.0
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.CR_PAT }}
-
-      - name: Cache Docker layers
-        uses: actions/cache@v4.2.2
-        with:
-          path: |
-            /tmp/.buildx-cache-alpine-2-10
-          key: ${{ runner.os }}-buildx-2-10-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-2-10
-
-      - name: Get docker tag for Alpine image
-        id: alpine
-        run: |
-          echo "IMAGE_TAG=$(awk -F '=' '/IMAGE_TAG/{gsub(/"/, "");print $2;exit;}' ./images/ckan/2.10/Dockerfile)" >> $GITHUB_OUTPUT
-
-      - name: Build and push CKAN 2.10 alpine
-        uses: docker/build-push-action@v6.15.0
-        with:
-          context: ./images/ckan/2.10
-          file: ./images/ckan/2.10/Dockerfile
-          push: true
-          tags: |
-            keitaro/ckan:${{ steps.alpine.outputs.IMAGE_TAG }}
-            ghcr.io/keitaroinc/ckan:${{ steps.alpine.outputs.IMAGE_TAG }}
-          cache-from: type=local,src=/tmp/.buildx-cache-alpine-2-10
-          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-alpine-2-10
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

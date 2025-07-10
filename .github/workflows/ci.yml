@@ -1,0 +1,96 @@
+name: CKAN Docker Images CI
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+  schedule:
+    - cron: '28 3 * * 5'
+
+# Concurrency setting to cancel old runs on PRs when new commits are pushed
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  # Get the list of CKAN image versions
+  matrix_generator:
+    name: CKAN Image Matrix
+    uses: ./.github/workflows/ckan_image_matrix.yml
+
+  # Lint the Dockerfiles (only runs on Pull Requests)
+  lint:
+    name: Lint Dockerfiles
+    if: github.event_name == 'pull_request'
+    needs: matrix_generator
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        version: ${{ fromJSON(needs.matrix_generator.outputs.versions) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Lint CKAN ${{ matrix.version }}
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: ./images/ckan/${{ matrix.version }}/Dockerfile
+
+  # Build the images (only runs on Pull Requests)
+  build:
+    name: Build Images
+    if: github.event_name == 'pull_request'
+    needs: matrix_generator
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        version: ${{ fromJSON(needs.matrix_generator.outputs.versions) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build image ${{ matrix.version }}
+        uses: docker/build-push-action@v6
+        with:
+          context: ./images/ckan/${{ matrix.version }}
+          platforms: linux/amd64,linux/arm64
+          push: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # Scan for vulnerabilities (runs on all triggers)
+  security_scan:
+    name: Security Scan
+    needs: matrix_generator
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    strategy:
+      matrix:
+        version: ${{ fromJSON(needs.matrix_generator.outputs.versions) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build image for CKAN ${{ matrix.version }}
+        run: docker build -t internal/ckan/${{ matrix.version }}:${{ github.sha }} ./images/ckan/${{ matrix.version }}/
+
+      - name: Run Trivy on image ${{ matrix.version }}
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          image-ref: 'internal/ckan/${{ matrix.version }}:${{ github.sha }}'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          ignore-unfixed: true
+          severity: 'CRITICAL,HIGH'
+
+      - name: Upload Trivy scan results
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-results.sarif'
+          category: trivy-image-${{ matrix.version }}

@@ -31,7 +31,7 @@ SHELL ["/bin/ash", "-o", "pipefail", "-c"]
 
 # System packages to build CKAN requirements and plugins
 RUN apk add --no-cache \
-        git=2.49.0-r0 \
+        git=2.49.1-r0 \
         curl=8.14.1-r1 \
         postgresql17-dev=17.5-r0
 
@@ -118,7 +118,7 @@ SHELL ["/bin/ash", "-o", "pipefail", "-c"]
 # Install necessary packages to run CKAN
 RUN apk add --no-cache \
         bash=5.2.37-r0 \
-        git=2.49.0-r0 \
+        git=2.49.1-r0 \
         curl=8.14.1-r1 \
         # Required for CKAN
         libmagic=5.46-r2 \
@@ -148,7 +148,7 @@ RUN uv pip sync --system requirements.txt && \
     uv pip install --system git+${ENVVARS_GIT_URL}@${ENVVARS_GIT_VERSION} && \
     uv pip install --system git+${XLOADER_GIT_URL}@${XLOADER_GIT_VERSION} && \
     uv pip install --system -r ${XLOADER_REQUIREMENTS_URL} && \
-    uv pip install --system -U requests[security] && \
+    uv pip install --system requests[security] && \
     # Create and update CKAN config
     echo "UTC" >  /etc/timezone && \
     # Generate CKAN config

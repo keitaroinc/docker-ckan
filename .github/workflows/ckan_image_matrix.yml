@@ -1,0 +1,30 @@
+# This workflow is not triggered directly. It's called by other workflows.
+# Its job is to find all CKAN version directories and return them as a JSON array.
+
+name: Generate CKAN Images Matrix
+
+on:
+  workflow_call:
+    outputs:
+      versions:
+        description: "A JSON array string of CKAN image version directories"
+        value: ${{ jobs.generate.outputs.versions }}
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    outputs:
+      versions: ${{ steps.set-matrix.outputs.versions }}
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v4
+
+      - name: Find CKAN Version Directories
+        id: set-matrix
+        run: |
+          VERSIONS=()
+          for d in images/ckan/*/; do
+            VERSIONS+=("$(basename "$d")")
+          done
+          JSON_OUTPUT=$(printf '"%s",' "${VERSIONS[@]}")
+          echo "versions=[${JSON_OUTPUT%,}]" >> $GITHUB_OUTPUT
