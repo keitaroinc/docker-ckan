@@ -147,7 +147,7 @@ RUN uv pip sync --system requirements.txt && \
     uv pip install --system git+${ENVVARS_GIT_URL}@${ENVVARS_GIT_VERSION} && \
     uv pip install --system git+${XLOADER_GIT_URL}@${XLOADER_GIT_VERSION} && \
     uv pip install --system -r ${XLOADER_REQUIREMENTS_URL} && \
-    uv pip install --system -U requests[security] && \
+    uv pip install --system requests[security] && \
     # Create and update CKAN config
     echo "UTC" >  /etc/timezone && \
     # Generate CKAN config
