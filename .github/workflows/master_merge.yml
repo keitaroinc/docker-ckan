@@ -6,24 +6,10 @@ on:
       - master
 
 jobs:
-  # Find the version directories to generate the matrix for the scan job
-  generate-matrix:
-    runs-on: ubuntu-latest
-    outputs:
-      versions: ${{ steps.set-matrix.outputs.versions }}
-    steps:
-      - uses: actions/checkout@v4
-      - name: Find CKAN Version Directories
-        id: set-matrix
-        run: |
-          VERSIONS=()
-          for d in images/ckan/*/; do
-            # Add each directory's base name (e.g., "2.10") to a bash array
-            VERSIONS+=("$(basename "$d")")
-          done
-          # Properly format the bash array into a JSON array string
-          JSON_OUTPUT=$(printf '"%s",' "${VERSIONS[@]}")
-          echo "versions=[${JSON_OUTPUT%,}]" >> $GITHUB_OUTPUT
+  # Get the list of CKAN image versions
+  matrix_generator:
+    name: CKAN Image Matrix
+    uses: ./.github/workflows/ckan_image_matrix.yml
 
   #  Build and push an image for each version found
   build-and-push:
