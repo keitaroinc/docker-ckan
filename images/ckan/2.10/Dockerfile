@@ -31,7 +31,7 @@ SHELL ["/bin/ash", "-o", "pipefail", "-c"]
 
 # System packages to build CKAN requirements and plugins
 RUN apk add --no-cache \
-        git=2.49.0-r0 \
+        git=2.49.1-r0 \
         curl=8.14.1-r1 \
         postgresql17-dev=17.5-r0
 
@@ -118,7 +118,7 @@ SHELL ["/bin/ash", "-o", "pipefail", "-c"]
 # Install necessary packages to run CKAN
 RUN apk add --no-cache \
         bash=5.2.37-r0 \
-        git=2.49.0-r0 \
+        git=2.49.1-r0 \
         curl=8.14.1-r1 \
         # Required for CKAN
         libmagic=5.46-r2 \
