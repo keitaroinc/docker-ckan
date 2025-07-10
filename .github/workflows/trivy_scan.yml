@@ -1,85 +1,81 @@
 name: Repo Scan
+
 on:
   push:
     branches: [ "master" ]
   pull_request:
-    # The branches below must be a subset of the branches above
     branches: [ "master" ]
   schedule:
     - cron: '28 3 * * 5'
 
 jobs:
-  repo_scan:
-    name: repo_scan
+  # Find the version directories to generate the matrix for the scan job
+  generate-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      versions: ${{ steps.set-matrix.outputs.versions }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Find CKAN Version Directories
+        id: set-matrix
+        run: |
+          VERSIONS=$(ls -d images/ckan/*/ | xargs -n 1 basename | jq -sc .)
+          echo "versions=${VERSIONS}" >> $GITHUB_OUTPUT
+
+  filesystem_scan:
+    name: Filesystem Scan
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Run Trivy vulnerability scanner in repo mode
+      - name: Run Trivy vulnerability scanner on repo
         uses: aquasecurity/trivy-action@0.29.0
         with:
           scan-type: 'fs'
           ignore-unfixed: true
           format: 'sarif'
-          output: 'trivy-results.sarif'
+          output: 'trivy-fs-results.sarif'
           severity: 'CRITICAL'
 
       - name: Upload Trivy scan results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v3.28.10
         with:
-          sarif_file: 'trivy-results.sarif'
+          sarif_file: 'trivy-fs-results.sarif'
+          # Use a category to distinguish this scan from the image scans
+          category: trivy-filesystem
 
-
-  scan_2_11:
-    name: scan_2_11
+  # Scan Docker image for each version found
+  image_scan:
+    name: Image Scan (${{ matrix.version }})
+    needs: generate-matrix
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        version: ${{ fromJSON(needs.generate-matrix.outputs.versions) }}
     steps:
-
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Build an image from Dockerfile
+      - name: Build image for CKAN ${{ matrix.version }}
         run: |
-          docker build -t keitaro/ckan/2.11:${{ github.sha }} -f ./images/ckan/2.11/Dockerfile ./images/ckan/2.11/
+          docker build \
+            -t keitaro/ckan/${{ matrix.version }}:${{ github.sha }} \
+            -f ./images/ckan/${{ matrix.version }}/Dockerfile \
+            ./images/ckan/${{ matrix.version }}/
 
-      - name: Run Trivy vulnerability scanner
+      - name: Run Trivy vulnerability scanner on image
         uses: aquasecurity/trivy-action@0.29.0
         with:
-          image-ref: 'keitaro/ckan/2.11:${{ github.sha }}'
+          image-ref: 'keitaro/ckan/${{ matrix.version }}:${{ github.sha }}'
           format: 'sarif'
-          output: 'trivy-results.sarif'
+          output: 'trivy-image-results-${{ matrix.version }}.sarif'
           ignore-unfixed: true
           severity: 'CRITICAL'
 
       - name: Upload Trivy scan results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v3.28.10
         with:
-          sarif_file: 'trivy-results.sarif'
-
-
-  scan_2_10:
-    name: scan_2_10
-    runs-on: ubuntu-latest
-    steps:
-
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Build an image from Dockerfile
-        run: |
-          docker build -t keitaro/ckan/2.10:${{ github.sha }} -f ./images/ckan/2.10/Dockerfile ./images/ckan/2.10/
-
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@0.29.0
-        with:
-          image-ref: 'keitaro/ckan/2.10:${{ github.sha }}'
-          format: 'sarif'
-          output: 'trivy-results.sarif'
-          ignore-unfixed: true
-          severity: 'CRITICAL'
-
-      - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v3.28.10
-        with:
-          sarif_file: 'trivy-results.sarif'
+          sarif_file: 'trivy-image-results-${{ matrix.version }}.sarif'
+          # Category distinguishes this version's scan from others in the Security tab
+          category: trivy-image-${{ matrix.version }}
