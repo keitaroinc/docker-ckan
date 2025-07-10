@@ -6,7 +6,7 @@ on:
       - master
 
 jobs:
-  # Find all versions based on directories in images/ckan and create a matrix
+  # Find the version directories to generate the matrix for the scan job
   generate-matrix:
     runs-on: ubuntu-latest
     outputs:
@@ -16,10 +16,14 @@ jobs:
       - name: Find CKAN Version Directories
         id: set-matrix
         run: |
-          # Finds all directories in images/ckan/, gets their base names (e.g., "2.10"),
-          # and formats them into a JSON array string like ["2.10", "2.11"]
-          VERSIONS=$(ls -d images/ckan/*/ | xargs -n 1 basename | jq -sc .)
-          echo "versions=${VERSIONS}" >> $GITHUB_OUTPUT
+          VERSIONS=()
+          for d in images/ckan/*/; do
+            # Add each directory's base name (e.g., "2.10") to a bash array
+            VERSIONS+=("$(basename "$d")")
+          done
+          # Properly format the bash array into a JSON array string
+          JSON_OUTPUT=$(printf '"%s",' "${VERSIONS[@]}")
+          echo "versions=[${JSON_OUTPUT%,}]" >> $GITHUB_OUTPUT
 
   #  Build and push an image for each version found
   build-and-push:
