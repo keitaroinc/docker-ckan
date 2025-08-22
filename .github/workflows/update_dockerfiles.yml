@@ -74,7 +74,6 @@ jobs:
           docker
         reviewers: |
           Filip3mac
-          KirilPoposki98
           mihajlo-kuzmanoski
         
     - name: Log results
