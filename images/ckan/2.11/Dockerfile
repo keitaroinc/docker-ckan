@@ -32,7 +32,7 @@ SHELL ["/bin/ash", "-o", "pipefail", "-c"]
 RUN apk add --no-cache \
         git=2.49.1-r0 \
         curl=8.14.1-r1 \
-        postgresql17-dev=17.5-r0
+        postgresql17-dev=17.6-r0
 
 # Install uv
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -121,7 +121,7 @@ RUN apk add --no-cache \
         curl=8.14.1-r1 \
         # Required for CKAN
         libmagic=5.46-r2 \
-        postgresql17-client=17.5-r0
+        postgresql17-client=17.6-r0
 
 # Install uv
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
