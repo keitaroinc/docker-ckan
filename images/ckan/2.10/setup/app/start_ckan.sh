@@ -53,8 +53,8 @@ python prerun.py || {
 # Check if xloader api token is set
 if ! grep -q ckanext.xloader.api_token $APP_DIR/production.ini; then
 	# Generate API key for sysadmin user
-	echo "Generating an API key for sysadmin user to use for xloader..."
-	SYSADMIN_XLOADER_API_TOKEN=$(ckan -c $APP_DIR/production.ini user token add sysadmin xloader -q)
+	echo "Generating an API key for sysadmin user $CKAN_SYSADMIN_NAME to use for xloader..."
+	SYSADMIN_XLOADER_API_TOKEN=$(ckan -c $APP_DIR/production.ini user token add $CKAN_SYSADMIN_NAME xloader -q)
 	ckan config-tool $APP_DIR/production.ini "ckanext.xloader.api_token=$SYSADMIN_XLOADER_API_TOKEN"
 fi
 
