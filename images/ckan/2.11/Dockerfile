@@ -94,7 +94,7 @@ LABEL org.opencontainers.image.source="https://github.com/keitaroinc/docker-ckan
 ENV ENVVARS_GIT_URL="https://github.com/okfn/ckanext-envvars"
 ENV ENVVARS_GIT_VERSION="v0.0.6"
 ENV XLOADER_GIT_URL="https://github.com/ckan/ckanext-xloader.git"
-ENV XLOADER_GIT_VERSION="2.0.1"
+ENV XLOADER_GIT_VERSION="2.2.0"
 ENV XLOADER_REQUIREMENTS_URL="https://raw.githubusercontent.com/ckan/ckanext-xloader/refs/tags/${XLOADER_GIT_VERSION}/requirements.txt"
 
 # CKAN env
