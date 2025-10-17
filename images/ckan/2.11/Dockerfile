@@ -8,7 +8,7 @@ ARG BASE_IMAGE=python:3.10.18-alpine
 FROM ${BASE_IMAGE} AS ckanbuild
 
 # Used by Github Actions to tag the image with
-ENV IMAGE_TAG="2.11.3"
+ENV IMAGE_TAG="2.11.4"
 
 # Set CKAN version to build
 ENV GIT_URL="https://github.com/ckan/ckan.git"
