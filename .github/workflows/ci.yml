@@ -80,7 +80,7 @@ jobs:
         run: docker build -t internal/ckan/${{ matrix.version }}:${{ github.sha }} ./images/ckan/${{ matrix.version }}/
 
       - name: Run Trivy on image ${{ matrix.version }}
-        uses: aquasecurity/trivy-action@0.24.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: 'internal/ckan/${{ matrix.version }}:${{ github.sha }}'
           format: 'sarif'
