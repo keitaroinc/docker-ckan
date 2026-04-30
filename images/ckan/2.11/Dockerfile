@@ -142,7 +142,7 @@ WORKDIR ${CKAN_DIR}
 
 # Install CKAN
 RUN uv pip sync --system requirements.txt && \
-    uv pip install --system -e ${CKAN_DIR} && \
+    uv pip install --system ${CKAN_DIR} && \
     # Install necessary CKAN extensions
     uv pip install --system git+${ENVVARS_GIT_URL}@${ENVVARS_GIT_VERSION} && \
     uv pip install --system git+${XLOADER_GIT_URL}@${XLOADER_GIT_VERSION} && \
