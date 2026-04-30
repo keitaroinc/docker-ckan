@@ -9,7 +9,7 @@ ARG BASE_IMAGE=python:3.10.18-alpine
 FROM ${BASE_IMAGE} AS ckanbuild
 
 # Used by Github Actions to tag the image with
-ENV IMAGE_TAG="2.10.9"
+ENV IMAGE_TAG="2.10.10"
 
 # Set CKAN version to build
 ENV GIT_URL="https://github.com/ckan/ckan.git"
@@ -33,7 +33,7 @@ SHELL ["/bin/ash", "-o", "pipefail", "-c"]
 RUN apk add --no-cache \
         git=2.49.1-r0 \
         curl=8.14.1-r2 \
-        postgresql17-dev=17.7-r0
+        postgresql17-dev=17.9-r0
 
 # Install uv
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -72,7 +72,7 @@ SHELL ["/bin/ash", "-o", "pipefail", "-c"]
 RUN apk add --no-cache \
         curl=8.14.1-r2 \
         linux-headers=6.14.2-r0 \
-        musl-dev=1.2.5-r10 \
+        musl-dev=1.2.5-r12 \
         gcc=14.2.0-r6
 
 # Install uv
@@ -122,7 +122,7 @@ RUN apk add --no-cache \
         curl=8.14.1-r2 \
         # Required for CKAN
         libmagic=5.46-r2 \
-        postgresql17-client=17.7-r0
+        postgresql17-client=17.9-r0
 
 # Install uv
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
