@@ -4,7 +4,7 @@
 Docker images and docker-compose setup for running CKAN (open data portal) on Alpine Linux. Images are published to Docker Hub (`keitaro/ckan`) and GitHub Container Registry (`ghcr.io/keitaroinc/ckan`).
 
 ## Structure
-- `images/ckan/<version>/` — multi-stage Dockerfiles for each supported CKAN version (2.10, 2.11); each directory also contains a `setup/` folder with runtime scripts
+- `images/ckan/<version>/` — multi-stage Dockerfiles for each supported CKAN version (2.10, 2.11, 2.12); each directory also contains a `setup/` folder with runtime scripts
 - `compose/` — docker-compose setup for local/production deployments
 - `compose/docker-compose.yml` — top-level compose file that includes per-service YAML files
 - `compose/services/` — per-service compose definitions: `ckan`, `ckan-workers` (default/bulk/priority), `db`, `solr`, `redis`
@@ -15,7 +15,7 @@ Docker images and docker-compose setup for running CKAN (open data portal) on Al
 ## Making Changes
 Build a specific version image:
 ```sh
-docker build --tag ghcr.io/keitaroinc/ckan:2.11.2 images/ckan/2.11
+docker build --tag ghcr.io/keitaroinc/ckan:2.12.0 images/ckan/2.12
 ```
 
 Run the full stack locally:

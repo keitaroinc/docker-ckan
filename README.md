@@ -36,7 +36,7 @@ The docker images contain `uv` and we recommend using when extending the images 
 ############
 ### MAIN ###
 ############
-FROM ghcr.io/keitaroinc/ckan:2.11.2
+FROM ghcr.io/keitaroinc/ckan:2.12.0
 
 # CKAN extension source code URLs
 ENV ACME_GIT_URL="https://github.com/myghorg/ckanext-acme.git"
@@ -76,9 +76,9 @@ You can add scripts to CKAN custom images and copy them to the *docker-afterinit
 ## Build
 To build a CKAN image run:
 ```sh 
-docker build --tag ghcr.io/keitaroinc/ckan:2.11.2 images/ckan/2.11
+docker build --tag ghcr.io/keitaroinc/ckan:2.12.0 images/ckan/2.12
 ``` 
-The –-tag ghcr.io/keitaroinc/ckan:2.11.2 flag sets the image name to ghcr.io/keitaroinc/ckan:2.11.2 and 'images/ckan/2.11'  at the end tells docker build to use the context into the specified directory where the Dockerfile and related contents are.
+The –-tag ghcr.io/keitaroinc/ckan:2.12.0 flag sets the image name to ghcr.io/keitaroinc/ckan:2.12.0 and 'images/ckan/2.12'  at the end tells docker build to use the context into the specified directory where the Dockerfile and related contents are.
 
   [License]: https://img.shields.io/badge/license-Apache--2.0-blue.svg?style=flat
   [1]: https://opensource.org/licenses/Apache-2.0
