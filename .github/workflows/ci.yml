@@ -103,6 +103,8 @@ jobs:
     needs: matrix_generator
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    permissions:
+      contents: read
     strategy:
       fail-fast: false
       matrix:
@@ -162,6 +164,15 @@ jobs:
           echo "CKAN did not become healthy in time. Recent CKAN logs:"
           docker compose logs ckan --tail=200
           exit 1
+
+      - name: Dump stack state on failure
+        if: failure()
+        working-directory: compose
+        env:
+          CKAN_VERSION: ${{ steps.ver.outputs.image_tag }}
+        run: |
+          docker compose ps -a
+          docker compose logs --tail=200
 
       - name: Teardown
         if: always()
