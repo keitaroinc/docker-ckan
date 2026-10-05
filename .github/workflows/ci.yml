@@ -93,3 +93,70 @@ jobs:
         with:
           sarif_file: 'trivy-results.sarif'
           category: trivy-image-${{ matrix.version }}
+
+
+  # Boot each built image against the repo's own stack and verify CKAN serves traffic
+  smoke_test:
+    name: Smoke Test
+    if: github.event_name == 'pull_request'
+    needs: matrix_generator
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        version: ${{ fromJSON(needs.matrix_generator.outputs.versions) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve full CKAN version
+        id: ver
+        run: |
+          IMAGE_TAG=$(grep -oP 'ENV IMAGE_TAG="\K[^"]+' images/ckan/${{ matrix.version }}/Dockerfile)
+          echo "image_tag=${IMAGE_TAG}" >> "$GITHUB_OUTPUT"
+
+      - name: Build CKAN ${{ matrix.version }} image (tagged so compose uses it)
+        run: |
+          docker build \
+            -t ghcr.io/keitaroinc/ckan:${{ steps.ver.outputs.image_tag }} \
+            ./images/ckan/${{ matrix.version }}/
+
+      - name: Check compose resolves the image we just built
+        working-directory: compose
+        env:
+          CKAN_VERSION: ${{ steps.ver.outputs.image_tag }}
+        run: |
+          # config/.global-env pins CKAN_VERSION=2.12.0; fail loudly if the override ever
+          # stops winning, instead of silently testing (or pulling) the wrong image.
+          docker compose config | grep "image: ghcr.io/keitaroinc/ckan" | sort -u
+          docker compose config | grep -q "image: ghcr.io/keitaroinc/ckan:${CKAN_VERSION}"
+
+      - name: Start the stack
+        working-directory: compose
+        env:
+          CKAN_VERSION: ${{ steps.ver.outputs.image_tag }}
+        run: docker compose up -d --build
+
+      - name: Wait for CKAN health
+        working-directory: compose
+        env:
+          CKAN_VERSION: ${{ steps.ver.outputs.image_tag }}
+        run: |
+          echo "Waiting for CKAN to become healthy..."
+          for i in $(seq 1 30); do
+            if curl -fsS http://localhost:5000/api/3/action/status_show >/dev/null 2>&1; then
+              echo "CKAN is up:"
+              curl -s http://localhost:5000/api/3/action/status_show
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "CKAN did not become healthy in time. Recent logs:"
+          docker compose logs --tail=120
+          exit 1
+
+      - name: Teardown
+        if: always()
+        working-directory: compose
+        env:
+          CKAN_VERSION: ${{ steps.ver.outputs.image_tag }}
+        run: docker compose down -v || true
