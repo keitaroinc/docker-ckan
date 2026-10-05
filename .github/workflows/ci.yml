@@ -95,18 +95,23 @@ jobs:
           category: trivy-image-${{ matrix.version }}
 
 
-  # Boot each built image against the repo's own stack and verify CKAN serves traffic
+  # Boot each built image against the repo's own stack and verify CKAN serves traffic.
+  # amd64-only runtime check (arm64 under emulation would be too slow); the build job covers both arches.
   smoke_test:
     name: Smoke Test
     if: github.event_name == 'pull_request'
     needs: matrix_generator
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
         version: ${{ fromJSON(needs.matrix_generator.outputs.versions) }}
     steps:
       - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
       - name: Resolve full CKAN version
         id: ver
@@ -115,10 +120,13 @@ jobs:
           echo "image_tag=${IMAGE_TAG}" >> "$GITHUB_OUTPUT"
 
       - name: Build CKAN ${{ matrix.version }} image (tagged so compose uses it)
-        run: |
-          docker build \
-            -t ghcr.io/keitaroinc/ckan:${{ steps.ver.outputs.image_tag }} \
-            ./images/ckan/${{ matrix.version }}/
+        uses: docker/build-push-action@v6
+        with:
+          context: ./images/ckan/${{ matrix.version }}
+          load: true
+          push: false
+          tags: ghcr.io/keitaroinc/ckan:${{ steps.ver.outputs.image_tag }}
+          cache-from: type=gha
 
       - name: Check compose resolves the image we just built
         working-directory: compose
@@ -127,8 +135,9 @@ jobs:
         run: |
           # config/.global-env pins CKAN_VERSION=2.12.0; fail loudly if the override ever
           # stops winning, instead of silently testing (or pulling) the wrong image.
-          docker compose config | grep "image: ghcr.io/keitaroinc/ckan" | sort -u
-          docker compose config | grep -q "image: ghcr.io/keitaroinc/ckan:${CKAN_VERSION}"
+          config=$(docker compose config)
+          echo "$config" | grep "image: ghcr.io/keitaroinc/ckan" | sort -u
+          echo "$config" | grep -q "image: ghcr.io/keitaroinc/ckan:${CKAN_VERSION}"
 
       - name: Start the stack
         working-directory: compose
@@ -150,8 +159,8 @@ jobs:
             fi
             sleep 10
           done
-          echo "CKAN did not become healthy in time. Recent logs:"
-          docker compose logs --tail=120
+          echo "CKAN did not become healthy in time. Recent CKAN logs:"
+          docker compose logs ckan --tail=200
           exit 1
 
       - name: Teardown
