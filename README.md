@@ -80,6 +80,22 @@ docker build --tag ghcr.io/keitaroinc/ckan:2.12.0 images/ckan/2.12
 ``` 
 The –-tag ghcr.io/keitaroinc/ckan:2.12.0 flag sets the image name to ghcr.io/keitaroinc/ckan:2.12.0 and 'images/ckan/2.12'  at the end tells docker build to use the context into the specified directory where the Dockerfile and related contents are.
 
+## Verifying image integrity
+Images published from `master` are signed with [cosign](https://github.com/sigstore/cosign) (keyless, via GitHub OIDC) and ship with an SBOM and SLSA build provenance. Images pushed before signing was introduced are not signed.
+
+Verify the signature (the same command works for `keitaro/ckan` on Docker Hub):
+```sh
+cosign verify ghcr.io/keitaroinc/ckan:2.12.0 \
+  --certificate-identity https://github.com/keitaroinc/docker-ckan/.github/workflows/master_merge.yml@refs/heads/master \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com
+```
+
+Inspect the SBOM and provenance attached to an image:
+```sh
+docker buildx imagetools inspect ghcr.io/keitaroinc/ckan:2.12.0 --format '{{ json .SBOM }}'
+docker buildx imagetools inspect ghcr.io/keitaroinc/ckan:2.12.0 --format '{{ json .Provenance }}'
+```
+
   [License]: https://img.shields.io/badge/license-Apache--2.0-blue.svg?style=flat
   [1]: https://opensource.org/licenses/Apache-2.0
   [Docker Pulls]: https://img.shields.io/docker/pulls/keitaro/ckan.svg?style=flat
