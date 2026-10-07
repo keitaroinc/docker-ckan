@@ -15,6 +15,9 @@ jobs:
   build-and-push:
     needs: matrix_generator
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # keyless cosign signing via GitHub OIDC
     strategy:
       matrix:
         version: ${{ fromJSON(needs.matrix_generator.outputs.versions) }}
@@ -48,14 +51,27 @@ jobs:
           echo "IMAGE_TAG=${IMAGE_TAG}" >> $GITHUB_OUTPUT
 
       - name: Build and push CKAN ${{ matrix.version }}
+        id: build
         uses: docker/build-push-action@v6.15.0
         with:
           context: ./images/ckan/${{ matrix.version }}
           file: ./images/ckan/${{ matrix.version }}/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
+          sbom: true
+          provenance: mode=max
           tags: |
             keitaro/ckan:${{ steps.alpine.outputs.IMAGE_TAG }}
             ghcr.io/keitaroinc/ckan:${{ steps.alpine.outputs.IMAGE_TAG }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3.7.0
+
+      - name: Sign images (keyless)
+        env:
+          DIGEST: ${{ steps.build.outputs.digest }}
+        run: |
+          cosign sign --yes "ghcr.io/keitaroinc/ckan@${DIGEST}"
+          cosign sign --yes "keitaro/ckan@${DIGEST}"
