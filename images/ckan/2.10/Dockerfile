@@ -72,7 +72,7 @@ SHELL ["/bin/ash", "-o", "pipefail", "-c"]
 RUN apk add --no-cache \
         curl=8.14.1-r4 \
         linux-headers=6.14.2-r0 \
-        musl-dev=1.2.5-r12 \
+        musl-dev=1.2.5-r13 \
         gcc=14.2.0-r6
 
 # Install uv
